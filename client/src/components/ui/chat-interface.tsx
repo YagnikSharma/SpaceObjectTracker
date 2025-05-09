@@ -91,8 +91,8 @@ export function ChatInterface({ messages, isLoading, detectedObjects, onSendMess
               </h3>
               <p className="text-blue-200/60 text-sm max-w-md">
                 {fullView 
-                  ? "Hello! I'm Astroscan, your AI assistant for space station analysis. Upload an image, and I'll help you detect flaws and spot what needs fixing — fast and smart."
-                  : "Hello! I'm Astroscan, your AI assistant for space station analysis. Upload an image, and I'll help you detect flaws and spot what needs fixing — fast and smart."
+                  ? "Greetings, astronaut! I'm ASTROSCAN, your advanced AI assistant for space station monitoring. I can identify critical tools, gauges, and structural elements, helping you maintain safety protocols. Upload an image for analysis, and I'll provide detailed technical solutions for any issues detected."
+                  : "Greetings, astronaut! I'm ASTROSCAN, your advanced AI assistant for space station monitoring. I can identify critical tools, gauges, and structural elements, helping you maintain safety protocols. Upload an image for analysis, and I'll provide detailed technical solutions for any issues detected."
                 }
               </p>
             </div>
