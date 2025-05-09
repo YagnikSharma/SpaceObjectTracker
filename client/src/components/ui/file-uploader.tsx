@@ -154,7 +154,7 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
             <TabsList className="grid grid-cols-2 bg-[#2a3348]/50 rounded-lg p-1 backdrop-blur-sm">
               <TabsTrigger
                 value="upload"
-                className="rounded-md data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-amber-600 data-[state=active]:text-white text-blue-300 flex items-center space-x-1"
+                className="rounded-md data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-blue-300 flex items-center space-x-1"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -164,7 +164,7 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
               <TabsTrigger
                 value="camera"
                 disabled={!isCameraSupported()}
-                className="rounded-md data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-amber-600 data-[state=active]:text-white text-blue-300 flex items-center space-x-1"
+                className="rounded-md data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white text-blue-300 flex items-center space-x-1"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -200,9 +200,9 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
                 <p className="text-blue-200/50 text-sm mb-6">Supports: JPG, PNG, TIFF (max 10MB)</p>
                 
                 <button 
-                  className="px-6 py-2 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-lg text-white font-medium 
-                          shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all
-                          hover:from-yellow-400 hover:to-amber-500"
+                  className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white font-medium 
+                          shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all
+                          hover:from-blue-400 hover:to-purple-500"
                 >
                   Select Image File
                 </button>
@@ -285,9 +285,9 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
                 </button>
               )}
               {isLoading ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-yellow-500/30 rounded-lg">
-                  <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-yellow-300">Processing with YOLO...</span>
+                <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/30 rounded-lg">
+                  <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-blue-300">Processing with YOLO...</span>
                 </div>
               ) : (
                 <button 
@@ -296,9 +296,9 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
                     onProcessImage();
                   }} 
                   disabled={isLoading}
-                  className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-lg text-white font-medium 
-                         shadow-lg shadow-yellow-500/10 hover:shadow-yellow-500/30 transition-all
-                         hover:from-yellow-400 hover:to-amber-500 flex items-center"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white font-medium 
+                         shadow-lg shadow-blue-500/10 hover:shadow-blue-500/30 transition-all
+                         hover:from-blue-400 hover:to-purple-500 flex items-center"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
