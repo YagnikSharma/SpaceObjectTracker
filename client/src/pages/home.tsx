@@ -69,7 +69,7 @@ export default function Home() {
   }, [toast]);
 
   return (
-    <div className="min-h-screen bg-[#0a0e17] flex flex-col text-white relative overflow-hidden">
+    <div className="min-h-screen bg-background flex flex-col text-foreground relative overflow-hidden">
       {/* Video Background */}
       <div className="fixed inset-0 z-0 opacity-20 pointer-events-none overflow-hidden">
         <ReactPlayer 
@@ -107,7 +107,7 @@ export default function Home() {
       </motion.div>
 
       {/* Header with glass effect */}
-      <header className="relative z-10 bg-[#1a1f2c]/70 backdrop-blur-md border-b border-[#2a3348] shadow-lg">
+      <header className="relative z-10 bg-card/70 backdrop-blur-md border-b border-border shadow-lg">
         <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {/* Logo and Title */}
@@ -148,7 +148,7 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Status and Mobile Menu Button */}
+            {/* Status, Theme Toggle, and Mobile Menu Button */}
             <div className="flex items-center space-x-3">
               <span className={`text-xs px-2.5 py-1 rounded-full flex items-center ${
                 isApiConnected ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
@@ -158,9 +158,14 @@ export default function Home() {
                 {isApiConnected ? 'System Online' : 'System Offline'}
               </span>
               
+              {/* Theme Toggle */}
+              <div className="bg-card/80 p-1.5 rounded-lg border border-border">
+                <ThemeToggle />
+              </div>
+              
               {/* Mobile menu button */}
               <button 
-                className="md:hidden bg-[#2a3348]/70 p-2 rounded-lg hover:bg-[#3a4358]/70 transition-colors"
+                className="md:hidden bg-card/80 p-2 rounded-lg hover:bg-muted/90 transition-colors border border-border"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -358,7 +363,7 @@ export default function Home() {
       </main>
 
       {/* Footer with glass effect */}
-      <footer className="relative z-10 bg-[#1a1f2c]/70 backdrop-blur-md border-t border-[#2a3348] py-4 px-4 sm:px-6 lg:px-8">
+      <footer className="relative z-10 bg-card/70 backdrop-blur-md border-t border-border py-4 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
           <div className="text-sm text-blue-300/70 mb-4 sm:mb-0 flex items-center">
             <span className="mr-2">🚀</span>
