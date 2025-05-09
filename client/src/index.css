@@ -38,30 +38,37 @@
   /* Light mode - Black/White theme with yellow highlights */
   --background: 0 0% 100%;
   --foreground: 0 0% 0%;
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 40%;
+  --muted: 45 30% 96%;
+  --muted-foreground: 45 10% 40%;
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 0%;
   --card: 0 0% 100%;
   --card-foreground: 0 0% 0%;
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
+  --border: 45 100% 90%;
+  --input: 45 30% 95%;
   
-  /* Yellow primary highlight color */
+  /* Yellow primary highlight color - Increased saturation for better visibility */
   --primary: 45 100% 50%;
   --primary-foreground: 0 0% 0%;
   
-  /* Secondary colors */
-  --secondary: 0 0% 96%;
-  --secondary-foreground: 0 0% 0%;
+  /* Secondary colors with yellow tint */
+  --secondary: 45 30% 96%;
+  --secondary-foreground: 45 10% 10%;
   --accent: 45 100% 96%;
-  --accent-foreground: 0 0% 0%;
+  --accent-foreground: 45 100% 20%;
   
-  /* Other UI elements */
+  /* Other UI elements with yellow theme */
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
   --ring: 45 100% 50%;
   --radius: 0.5rem;
+  
+  /* Custom light mode yellow theme colors */
+  --yellow-highlight: 45 100% 50%;
+  --yellow-subtle: 45 80% 90%;
+  --yellow-border: 45 80% 80%;
+  --yellow-text: 45 100% 30%;
+  --yellow-dark: 45 100% 40%;
 }
 
 @layer base {
@@ -110,7 +117,8 @@
   margin-bottom: 0.25rem;
 }
 
-.space-station-response h2 {
+/* Dark mode headings */
+.dark .space-station-response h2 {
   margin-top: 1.25rem;
   margin-bottom: 0.75rem;
   font-size: 1.25rem;
@@ -118,7 +126,7 @@
   color: rgba(147, 197, 253, 1); /* blue-300 */
 }
 
-.space-station-response h3 {
+.dark .space-station-response h3 {
   margin-top: 1rem;
   margin-bottom: 0.5rem;
   font-size: 1.125rem;
@@ -126,37 +134,91 @@
   color: rgba(147, 197, 253, 0.9); /* blue-300 with opacity */
 }
 
-.space-station-response p {
-  margin-bottom: 0.75rem;
-}
-
-.space-station-response a {
+.dark .space-station-response a {
   color: rgba(96, 165, 250, 1); /* blue-400 */
   text-decoration: underline;
   transition: color 0.15s ease;
 }
 
-.space-station-response a:hover {
+.dark .space-station-response a:hover {
   color: rgba(59, 130, 246, 1); /* blue-500 */
 }
 
-/* Blinking emergency alerts for chat */
-@keyframes emergency-blink {
+/* Light mode headings with yellow theme */
+:root:not(.dark) .space-station-response h2 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: hsl(45 100% 40%); /* yellow theme */
+}
+
+:root:not(.dark) .space-station-response h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: hsl(45 80% 45%); /* yellow theme with opacity */
+}
+
+.space-station-response p {
+  margin-bottom: 0.75rem;
+}
+
+:root:not(.dark) .space-station-response a {
+  color: hsl(45 100% 35%); /* yellow-dark */
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+
+:root:not(.dark) .space-station-response a:hover {
+  color: hsl(45 100% 30%); /* darker yellow */
+}
+
+/* Blinking emergency alerts for chat - Dark Theme */
+@keyframes emergency-blink-dark {
   0%, 100% { background-color: rgba(239, 68, 68, 0.1); } /* red-500 with low opacity */
   50% { background-color: rgba(239, 68, 68, 0.25); } /* red-500 with higher opacity */
 }
 
-.emergency-alert {
-  animation: emergency-blink 2s infinite;
+/* Blinking emergency alerts for chat - Light Theme */
+@keyframes emergency-blink-light {
+  0%, 100% { background-color: rgba(220, 38, 38, 0.05); } /* red-600 with very low opacity */
+  50% { background-color: rgba(220, 38, 38, 0.15); } /* red-600 with low opacity */
+}
+
+/* Dark mode emergency alert */
+.dark .emergency-alert {
+  animation: emergency-blink-dark 2s infinite;
   padding: 0.5rem;
   border-radius: 0.375rem;
   margin: 0.75rem 0;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-/* Tech specs for chat */
-.tech-specs {
+/* Light mode emergency alert */
+:root:not(.dark) .emergency-alert {
+  animation: emergency-blink-light 2s infinite;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  margin: 0.75rem 0;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: hsl(0, 75%, 40%);
+}
+
+/* Dark mode tech specs */
+.dark .tech-specs {
   background-color: rgba(30, 58, 138, 0.15); /* blue-900 with very low opacity */
   border-left: 3px solid rgba(96, 165, 250, 0.5); /* blue-400 with opacity */
+  padding: 0.5rem 0.75rem;
+  margin: 0.75rem 0;
+  border-radius: 0 0.375rem 0.375rem 0;
+}
+
+/* Light mode tech specs with yellow theme */
+:root:not(.dark) .tech-specs {
+  background-color: hsla(45, 100%, 50%, 0.1); /* yellow with low opacity */
+  border-left: 3px solid hsla(45, 100%, 45%, 0.5); /* darker yellow with opacity */
   padding: 0.5rem 0.75rem;
   margin: 0.75rem 0;
   border-radius: 0 0.375rem 0.375rem 0;

@@ -14,11 +14,11 @@ import { Link, useLocation } from "wouter";
 
 // Navigation links
 const NAV_LINKS = [
-  { name: "Home", href: "/", icon: "🏠" },
+  { name: "Home", href: "/", icon: "🚀" },
   { name: "Mission Control", href: "/mission-control", icon: "🛰️" },
-  { name: "Image Generator", href: "/image-generator", icon: "🖼️" },
-  { name: "Galactic Map", href: "/galactic-map", icon: "🌌" },
-  { name: "Stellar Archives", href: "/archives", icon: "📚" }
+  { name: "Image Generator", href: "/image-generator", icon: "📷" },
+  { name: "Galactic Map", href: "/galactic-map", icon: "🪐" },
+  { name: "Stellar Archives", href: "/archives", icon: "🔭" }
 ];
 
 export default function Home() {
@@ -117,16 +117,16 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shadow-lg">
+              <div className="bg-gradient-to-r dark:from-blue-500 dark:to-purple-600 from-yellow-400 to-yellow-600 p-2 rounded-lg shadow-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
                   Syndetect
                 </h1>
-                <p className="text-xs text-blue-300/80">Space Station Monitoring System</p>
+                <p className="text-xs dark:text-blue-300/80 text-yellow-700/90">Space Station Monitoring System</p>
               </div>
             </motion.div>
 
@@ -159,7 +159,7 @@ export default function Home() {
               </span>
               
               {/* Theme Toggle */}
-              <div className="bg-blue-500/30 dark:bg-blue-500/30 light:bg-yellow-500/30 p-1.5 rounded-lg border border-blue-400/50 dark:border-blue-400/50 light:border-yellow-400/50">
+              <div className="dark:bg-blue-500/30 bg-yellow-500/30 p-1.5 rounded-lg border dark:border-blue-400/50 border-yellow-500/50">
                 <button
                   onClick={() => {
                     const html = document.documentElement;
@@ -174,7 +174,7 @@ export default function Home() {
                       localStorage.setItem('syndetect-theme', 'dark');
                     }
                   }}
-                  className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-600/20 dark:hover:bg-blue-600/20 light:hover:bg-yellow-600/20"
+                  className="flex items-center justify-center w-8 h-8 rounded-md dark:hover:bg-blue-600/20 hover:bg-yellow-600/20 dark:text-white text-yellow-800"
                   aria-label="Toggle theme"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden dark:block">
@@ -404,16 +404,16 @@ export default function Home() {
           </div>
           <div className="flex items-center space-x-6">
             <Link href="/mission-control" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center">
-              <span className="mr-1">👨‍🚀</span> Mission Control
+              <span className="mr-1">🛰️</span> Mission Control
             </Link>
             <Link href="/image-generator" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center">
-              <span className="mr-1">🖼️</span> Image Generator
+              <span className="mr-1">📷</span> Image Generator
             </Link>
             <Link href="/galactic-map" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center">
-              <span className="mr-1">🌌</span> Galactic Map
+              <span className="mr-1">🪐</span> Galactic Map
             </Link>
             <Link href="/archives" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center">
-              <span className="mr-1">📚</span> Stellar Archives
+              <span className="mr-1">🔭</span> Stellar Archives
             </Link>
           </div>
         </div>
