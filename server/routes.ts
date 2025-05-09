@@ -185,6 +185,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Mission control endpoint to get detection history
+  app.get("/api/mission-control/history", async (req: Request, res: Response) => {
+    try {
+      // Get optional limit parameter
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      
+      // Retrieve detection history from database
+      const detections = await storage.listDetections(limit);
+      
+      // Transform data for front-end consumption
+      const formattedData = detections.map(detection => {
+        const objects = detection.objects as DetectedObject[];
+        
+        // Get summary statistics
+        const totalObjects = objects.length;
+        
+        // Calculate counts by category
+        const categoryCounts: Record<string, number> = {};
+        objects.forEach(obj => {
+          const category = obj.context || "Uncategorized";
+          categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+        });
+        
+        // Calculate average confidence
+        const averageConfidence = objects.length > 0
+          ? objects.reduce((sum, obj) => sum + obj.confidence, 0) / objects.length
+          : 0;
+        
+        // Find critical issues
+        const issues = objects
+          .filter(obj => obj.issue)
+          .map(obj => ({
+            component: obj.label,
+            issue: obj.issue,
+            confidence: obj.confidence
+          }));
+        
+        return {
+          id: detection.id,
+          timestamp: detection.createdAt,
+          imageUrl: detection.imageUrl,
+          totalObjects,
+          categories: categoryCounts,
+          averageConfidence,
+          issues,
+          highestConfidenceObject: objects.length > 0 
+            ? objects.reduce((prev, current) => 
+                current.confidence > prev.confidence ? current : prev, objects[0])
+            : null
+        };
+      });
+      
+      res.status(200).json({
+        success: true,
+        count: formattedData.length,
+        detections: formattedData
+      });
+    } catch (error) {
+      console.error("Error fetching detection history:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to fetch detection history" 
+      });
+    }
+  });
+  
+  // Get specific detection details for mission control
+  app.get("/api/mission-control/detection/:id", async (req: Request, res: Response) => {
+    try {
+      const detectionId = parseInt(req.params.id);
+      if (isNaN(detectionId)) {
+        return res.status(400).json({ error: "Invalid detection ID" });
+      }
+      
+      // Retrieve detection from storage
+      const detection = await storage.getDetection(detectionId);
+      if (!detection) {
+        return res.status(404).json({ error: "Detection not found" });
+      }
+      
+      // Get chat messages for this detection
+      const chatMessages = await storage.getChatMessagesByDetection(detectionId);
+      
+      // Transform data for front-end consumption
+      const formattedData = {
+        id: detection.id,
+        timestamp: detection.createdAt,
+        imageUrl: detection.imageUrl,
+        objects: detection.objects,
+        chatHistory: chatMessages
+      };
+      
+      res.status(200).json({
+        success: true,
+        detection: formattedData
+      });
+    } catch (error) {
+      console.error("Error fetching detection details:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to fetch detection details" 
+      });
+    }
+  });
+
   // Chat completion endpoint
   app.post("/api/chat", async (req: Request, res: Response) => {
     try {
@@ -242,6 +345,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Generate a unique ID for the response
       const responseId = `chatcmpl-${randomUUID()}`;
+      
+      // Check if a detectionId was provided to save the chat message
+      if (req.body.detectionId) {
+        try {
+          const detectionId = parseInt(req.body.detectionId);
+          
+          // Save user message
+          await storage.createChatMessage({
+            detectionId,
+            role: 'user',
+            content: validatedData.message
+          });
+          
+          // Save assistant message
+          await storage.createChatMessage({
+            detectionId,
+            role: 'assistant',
+            content: analysis
+          });
+        } catch (dbError) {
+          console.error("Error saving chat message:", dbError);
+          // Continue execution even if saving fails
+        }
+      }
       
       res.status(200).json({
         id: responseId,

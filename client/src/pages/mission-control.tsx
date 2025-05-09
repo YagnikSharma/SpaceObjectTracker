@@ -1,67 +1,99 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
+import { DetectedObject } from '@shared/schema';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useToast } from '@/hooks/use-toast';
 
-interface Detection {
+// Advanced type definitions for our API responses
+interface DetectionSummary {
   id: number;
-  imageUrl: string;
   timestamp: string;
-  objectCount: number;
-  highestConfidence: number;
+  imageUrl: string;
+  totalObjects: number;
+  categories: Record<string, number>;
+  averageConfidence: number;
+  issues: {
+    component: string;
+    issue: string;
+    confidence: number;
+  }[];
+  highestConfidenceObject: DetectedObject | null;
+}
+
+interface DetectionHistoryResponse {
+  success: boolean;
+  count: number;
+  detections: DetectionSummary[];
+}
+
+interface DetailedDetection {
+  id: number;
+  timestamp: string;
+  imageUrl: string;
+  objects: DetectedObject[];
+  chatHistory: {
+    id: number;
+    detectionId: number;
+    role: 'user' | 'assistant';
+    content: string;
+    createdAt: string;
+  }[];
+}
+
+interface DetectionDetailResponse {
+  success: boolean;
+  detection: DetailedDetection;
 }
 
 export default function MissionControl() {
-  const [detectionHistory, setDetectionHistory] = useState<Detection[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [location, setLocation] = useLocation();
+  const [selectedDetectionId, setSelectedDetectionId] = useState<number | null>(null);
+  const { toast } = useToast();
   
+  // Fetch detection history from the database
+  const { 
+    data: historyData, 
+    isLoading: isHistoryLoading,
+    error: historyError 
+  } = useQuery<DetectionHistoryResponse>({ 
+    queryKey: ['/api/mission-control/history'],
+    refetchInterval: 60000, // Refetch every minute
+  });
+  
+  // Fetch detailed detection data when a detection is selected
+  const { 
+    data: detailData,
+    isLoading: isDetailLoading
+  } = useQuery<DetectionDetailResponse>({
+    queryKey: ['/api/mission-control/detection', selectedDetectionId],
+    enabled: !!selectedDetectionId,
+  });
+  
+  // Handle errors
   useEffect(() => {
-    // In a real application, we would fetch this from the backend
-    // Here we're simulating data for the UI demonstration
-    const mockHistory: Detection[] = [
-      {
-        id: 1,
-        imageUrl: '/uploads/sample-space-1.jpg',
-        timestamp: '2025-05-09T04:32:18Z',
-        objectCount: 3,
-        highestConfidence: 0.92
-      },
-      {
-        id: 2,
-        imageUrl: '/uploads/sample-space-2.jpg',
-        timestamp: '2025-05-08T14:27:43Z',
-        objectCount: 5,
-        highestConfidence: 0.88
-      },
-      {
-        id: 3,
-        imageUrl: '/uploads/sample-space-3.jpg',
-        timestamp: '2025-05-07T09:15:11Z',
-        objectCount: 2,
-        highestConfidence: 0.76
-      },
-      {
-        id: 4,
-        imageUrl: '/uploads/sample-space-4.jpg',
-        timestamp: '2025-05-06T22:04:37Z',
-        objectCount: 7,
-        highestConfidence: 0.94
-      },
-      {
-        id: 5,
-        imageUrl: '/uploads/sample-space-5.jpg',
-        timestamp: '2025-05-05T11:51:09Z',
-        objectCount: 4,
-        highestConfidence: 0.85
-      }
-    ];
-
-    // Simulate API delay
-    setTimeout(() => {
-      setDetectionHistory(mockHistory);
-      setIsLoading(false);
-    }, 800);
-  }, []);
+    if (historyError) {
+      toast({
+        title: "Error loading detection history",
+        description: "Failed to load detection data from the server",
+        variant: "destructive"
+      });
+    }
+  }, [historyError, toast]);
+  
+  // Format the detection history data
+  const detectionHistory = historyData?.detections || [];
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -169,7 +201,7 @@ export default function MissionControl() {
             </div>
             <div className="mt-4">
               <span className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                {isLoading ? '-' : detectionHistory.length}
+                {isHistoryLoading ? '-' : detectionHistory.length}
               </span>
               <div className="flex items-center mt-2 text-xs text-blue-300/60">
                 <span className="bg-green-500/20 text-green-500 rounded-full px-1.5 py-0.5 mr-1.5">+2</span>
@@ -194,7 +226,7 @@ export default function MissionControl() {
             </div>
             <div className="mt-4">
               <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-                {isLoading ? '-' : detectionHistory.reduce((sum, det) => sum + det.objectCount, 0)}
+                {isHistoryLoading ? '-' : detectionHistory.reduce((sum, det) => sum + det.totalObjects, 0)}
               </span>
               <div className="flex items-center mt-2 text-xs text-blue-300/60">
                 <span className="bg-green-500/20 text-green-500 rounded-full px-1.5 py-0.5 mr-1.5">+9</span>
@@ -242,10 +274,28 @@ export default function MissionControl() {
             </button>
           </div>
 
-          {isLoading ? (
+          {isHistoryLoading ? (
             <div className="p-8 flex flex-col items-center">
-              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+              <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4"></div>
               <p className="text-blue-300/70">Loading detection history...</p>
+            </div>
+          ) : detectionHistory.length === 0 ? (
+            <div className="p-8 text-center">
+              <div className="mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-blue-400/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-blue-300 mb-2">No Detections Found</h3>
+              <p className="text-blue-300/70 mb-4">
+                Start capturing space station images to build your detection history.
+              </p>
+              <Button
+                onClick={() => setLocation('/')}
+                className="bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-white"
+              >
+                Start New Detection
+              </Button>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -262,10 +312,13 @@ export default function MissionControl() {
                       Objects
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">
+                      Categories
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">
                       Confidence
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">
-                      Action
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -278,7 +331,7 @@ export default function MissionControl() {
                             className="w-full h-full bg-cover bg-center" 
                             style={{ 
                               backgroundImage: `url(${detection.imageUrl})`,
-                              filter: 'hue-rotate(140deg) brightness(0.9)' 
+                              filter: 'brightness(0.9)' 
                             }}
                           />
                         </div>
@@ -287,25 +340,143 @@ export default function MissionControl() {
                         {formatDate(detection.timestamp)}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="px-2.5 py-1 text-xs rounded-lg bg-blue-500/20 text-blue-300">
-                          {detection.objectCount} objects
+                        <span className="px-2.5 py-1 text-xs rounded-lg bg-yellow-500/20 text-yellow-300">
+                          {detection.totalObjects} objects
                         </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                        <div className="flex flex-wrap gap-1">
+                          {Object.entries(detection.categories).map(([category, count]) => (
+                            <span 
+                              key={category} 
+                              className="px-1.5 py-0.5 text-xs rounded bg-blue-500/20 text-blue-300"
+                              title={`${category}: ${count} objects`}
+                            >
+                              {category} ({count})
+                            </span>
+                          ))}
+                        </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm">
                         <div className="flex items-center">
                           <div className="w-16 h-1.5 bg-[#2a3348] rounded-full mr-2">
                             <div 
-                              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" 
-                              style={{ width: `${detection.highestConfidence * 100}%` }}
+                              className="h-full bg-gradient-to-r from-yellow-500 to-amber-600 rounded-full" 
+                              style={{ width: `${detection.averageConfidence * 100}%` }}
                             />
                           </div>
-                          <span className="text-blue-300">{Math.round(detection.highestConfidence * 100)}%</span>
+                          <span className="text-blue-300">{Math.round(detection.averageConfidence * 100)}%</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm">
-                        <button className="px-3 py-1 text-xs bg-blue-500/20 hover:bg-blue-500/30 rounded-lg text-blue-300 transition-colors">
-                          View
-                        </button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="text-xs bg-yellow-500/20 hover:bg-yellow-500/30 border-yellow-500/30 text-yellow-300 hover:text-yellow-200"
+                              onClick={() => setSelectedDetectionId(detection.id)}
+                            >
+                              View Details
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[900px] bg-[#1a1f2c] border-[#2a3348] text-blue-100">
+                            <DialogHeader>
+                              <DialogTitle className="text-xl font-semibold text-blue-100">
+                                Detection #{detection.id} - {formatDate(detection.timestamp)}
+                              </DialogTitle>
+                            </DialogHeader>
+                            
+                            {isDetailLoading ? (
+                              <div className="py-10 flex flex-col items-center">
+                                <div className="w-10 h-10 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                <p className="text-blue-300/70">Loading detection details...</p>
+                              </div>
+                            ) : detailData?.detection ? (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Detection image */}
+                                <div className="bg-black/40 rounded-lg overflow-hidden">
+                                  <img 
+                                    src={detailData.detection.imageUrl} 
+                                    alt={`Detection #${detailData.detection.id}`} 
+                                    className="w-full h-auto object-contain"
+                                  />
+                                </div>
+                                
+                                {/* Detection details */}
+                                <div className="space-y-4">
+                                  <div className="bg-[#242b3d]/50 rounded-lg p-4">
+                                    <h4 className="font-medium text-yellow-300 mb-2">Objects Detected</h4>
+                                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2">
+                                      {detailData.detection.objects.map((obj, index) => (
+                                        <div key={index} className="flex justify-between items-center bg-[#2a3348]/50 rounded p-2">
+                                          <div className="flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: obj.color || '#3b82f6' }}></span>
+                                            <span>{obj.label}</span>
+                                          </div>
+                                          <span className="text-xs px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300">
+                                            {Math.round(obj.confidence * 100)}%
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  
+                                  {detailData.detection.chatHistory.length > 0 && (
+                                    <div className="bg-[#242b3d]/50 rounded-lg p-4">
+                                      <h4 className="font-medium text-yellow-300 mb-2">Analysis History</h4>
+                                      <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
+                                        {detailData.detection.chatHistory.map((msg) => (
+                                          <div 
+                                            key={msg.id} 
+                                            className={`p-3 rounded-lg text-sm ${
+                                              msg.role === 'user' 
+                                                ? 'bg-blue-600/20 text-blue-100' 
+                                                : 'bg-yellow-500/10 text-yellow-100'
+                                            }`}
+                                          >
+                                            <div className="font-semibold mb-1">
+                                              {msg.role === 'user' ? 'You' : 'ASTROSCAN Assistant'}:
+                                            </div>
+                                            <div>{msg.content}</div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  <div className="flex space-x-2">
+                                    <Button
+                                      onClick={() => window.open(`/api/export-pdf/${detailData.detection.id}`, '_blank')}
+                                      className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-white"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                      </svg>
+                                      Export PDF
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      className="flex items-center gap-2 bg-blue-500/20 hover:bg-blue-500/30 border-blue-500/30 text-blue-300"
+                                      onClick={() => {
+                                        setLocation(`/?detectionId=${detailData.detection.id}`);
+                                      }}
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                      </svg>
+                                      Chat with ASTROSCAN
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-8 text-center">
+                                <p className="text-red-400">Failed to load detection details</p>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
                       </td>
                     </tr>
                   ))}
