@@ -46,9 +46,10 @@ interface ChatInterfaceProps {
   isLoading: boolean;
   detectedObjects: DetectedObject[];
   onSendMessage: (message: string) => void;
+  fullView?: boolean;
 }
 
-export function ChatInterface({ messages, isLoading, detectedObjects, onSendMessage }: ChatInterfaceProps) {
+export function ChatInterface({ messages, isLoading, detectedObjects, onSendMessage, fullView = false }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -70,7 +71,12 @@ export function ChatInterface({ messages, isLoading, detectedObjects, onSendMess
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Chat message area with space theme */}
-      <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400/30 scrollbar-track-transparent p-4 space-y-4" id="chat-messages">
+      <div 
+        className={`flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400/30 scrollbar-track-transparent p-4 space-y-4 ${
+          fullView ? 'min-h-[500px]' : ''
+        }`} 
+        id="chat-messages"
+      >
         {/* Welcome message if no messages exist */}
         {messages.length === 0 && !isLoading && (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-4 py-8">
@@ -80,10 +86,14 @@ export function ChatInterface({ messages, isLoading, detectedObjects, onSendMess
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-medium text-blue-300 mb-2">Galactic Intelligence Unit</h3>
+              <h3 className="text-lg font-medium text-blue-300 mb-2">
+                {fullView ? 'ASTRA - Advanced Space Tools and Resource Assistant' : 'Space Station Assistant'}
+              </h3>
               <p className="text-blue-200/60 text-sm max-w-md">
-                Upload and analyze a space image to chat with the AI about your discoveries. 
-                I can provide detailed information about cosmic objects, celestial bodies, and space phenomena.
+                {fullView 
+                  ? 'The Advanced Space Tools and Resource Assistant (ASTRA) helps analyze space station components and provide technical solutions to issues detected in the station environment.'
+                  : 'Upload and analyze a space station image to chat with ASTRA about your discoveries and get technical assistance with components.'
+                }
               </p>
             </div>
 

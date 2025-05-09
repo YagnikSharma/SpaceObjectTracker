@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FileUploader } from "@/components/ui/file-uploader";
 import { ResultsDisplay, DetectedObject } from "@/components/ui/results-display";
 import { ChatInterface, ChatMessage } from "@/components/ui/chat-interface";
+import { FeedbackForm } from "@/components/ui/feedback-form";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { useChat } from "@/hooks/use-chat";
 import { apiRequest } from "@/lib/queryClient";
@@ -23,7 +24,7 @@ export default function Home() {
   const { toast } = useToast();
   const [location] = useLocation();
   const [isApiConnected, setIsApiConnected] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>("detection"); // detection or analysis
+  const [activeTab, setActiveTab] = useState<string>("detection"); // detection, analysis, or feedback
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // File upload state and handlers
@@ -229,70 +230,128 @@ export default function Home() {
             >
               AI Analysis
             </button>
+            <button 
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                activeTab === 'feedback' 
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              onClick={() => setActiveTab('feedback')}
+            >
+              Model Feedback
+            </button>
           </div>
 
           {/* Floating Islands Layout */}
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Left Island - Upload & Results */}
-            <motion.div 
-              className="w-full lg:w-7/12 space-y-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-[#2a3348] shadow-lg overflow-hidden">
-                <div className="p-4 border-b border-[#2a3348]">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <h2 className="text-md font-semibold ml-2 text-blue-300">Detection Control Center</h2>
+            {activeTab === 'detection' && (
+              <>
+                {/* Left Island - Upload & Results */}
+                <motion.div 
+                  className="w-full lg:w-7/12 space-y-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  key="detection-left"
+                >
+                  <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-[#2a3348] shadow-lg overflow-hidden">
+                    <div className="p-4 border-b border-[#2a3348]">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        <h2 className="text-md font-semibold ml-2 text-blue-300">Detection Control Center</h2>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <FileUploader 
+                        onFileSelect={setSelectedFile} 
+                        onProcessImage={processImage}
+                        isLoading={isUploading}
+                        isProcessed={isProcessed}
+                        setIsProcessed={setIsProcessed}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="p-4">
-                  <FileUploader 
-                    onFileSelect={setSelectedFile} 
-                    onProcessImage={processImage}
+                  
+                  <ResultsDisplay 
                     isLoading={isUploading}
-                    isProcessed={isProcessed}
-                    setIsProcessed={setIsProcessed}
+                    imageUrl={imageUrl}
+                    detectedObjects={detectedObjects}
+                    error={uploadError}
+                    onRetry={resetUpload}
                   />
-                </div>
-              </div>
-              
-              <ResultsDisplay 
-                isLoading={isUploading}
-                imageUrl={imageUrl}
-                detectedObjects={detectedObjects}
-                error={uploadError}
-                onRetry={resetUpload}
-              />
-            </motion.div>
+                </motion.div>
+                
+                {/* Right Island - Chat Interface */}
+                <motion.div 
+                  className="w-full lg:w-5/12"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  key="detection-right"
+                >
+                  <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-[#2a3348] shadow-lg h-full overflow-hidden">
+                    <div className="p-4 border-b border-[#2a3348]">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
+                        <h2 className="text-md font-semibold ml-2 text-blue-300">ASTRA - Space Assistant</h2>
+                      </div>
+                    </div>
+                    <ChatInterface 
+                      messages={messages}
+                      isLoading={isLoadingResponse}
+                      detectedObjects={detectedObjects}
+                      onSendMessage={sendMessage}
+                    />
+                  </div>
+                </motion.div>
+              </>
+            )}
             
-            {/* Right Island - Chat Interface */}
-            <motion.div 
-              className="w-full lg:w-5/12"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-[#2a3348] shadow-lg h-full overflow-hidden">
-                <div className="p-4 border-b border-[#2a3348]">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
-                    <h2 className="text-md font-semibold ml-2 text-blue-300">Galactic Intelligence Unit</h2>
+            {activeTab === 'analysis' && (
+              <motion.div 
+                className="w-full space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                key="analysis"
+              >
+                <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-[#2a3348] shadow-lg overflow-hidden">
+                  <div className="p-4 border-b border-[#2a3348]">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <h2 className="text-md font-semibold ml-2 text-blue-300">Advanced Space Station Analysis</h2>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <ChatInterface 
+                      messages={messages}
+                      isLoading={isLoadingResponse}
+                      detectedObjects={detectedObjects}
+                      onSendMessage={sendMessage}
+                      fullView={true}
+                    />
                   </div>
                 </div>
-                <ChatInterface 
-                  messages={messages}
-                  isLoading={isLoadingResponse}
-                  detectedObjects={detectedObjects}
-                  onSendMessage={sendMessage}
-                />
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
+            
+            {activeTab === 'feedback' && (
+              <motion.div 
+                className="w-full space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                key="feedback"
+              >
+                <FeedbackForm detectedObjects={detectedObjects} />
+              </motion.div>
+            )}
           </div>
         </div>
       </main>
