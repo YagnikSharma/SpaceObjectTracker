@@ -173,7 +173,10 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
                   </div>
                 ) : (
                   <Button 
-                    onClick={onProcessImage} 
+                    onClick={() => {
+                      setIsProcessed(false);
+                      onProcessImage();
+                    }} 
                     disabled={isLoading}
                   >
                     Reprocess Image

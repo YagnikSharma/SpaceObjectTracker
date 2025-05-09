@@ -17,8 +17,10 @@ export default function Home() {
     imageUrl, 
     isUploading, 
     detectedObjects, 
-    uploadError, 
-    setSelectedFile, 
+    uploadError,
+    isProcessed,
+    setSelectedFile,
+    setIsProcessed,
     processImage, 
     resetUpload
   } = useFileUpload();
@@ -79,6 +81,8 @@ export default function Home() {
             onFileSelect={setSelectedFile} 
             onProcessImage={processImage}
             isLoading={isUploading}
+            isProcessed={isProcessed}
+            setIsProcessed={setIsProcessed}
           />
           
           <ResultsDisplay 
