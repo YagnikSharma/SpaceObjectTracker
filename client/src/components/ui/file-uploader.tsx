@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -15,18 +15,25 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading }: FileUp
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-    
-    const file = files[0];
+  // Process image automatically when a file is selected
+  useEffect(() => {
+    if (currentFile && !isLoading) {
+      // Slight delay to let the UI update first
+      const timer = setTimeout(() => {
+        onProcessImage();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [currentFile, isLoading, onProcessImage]);
+
+  const validateFile = (file: File): boolean => {
     if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "File too large",
         description: "Please upload an image smaller than 10MB",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/tiff'];
@@ -36,11 +43,22 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading }: FileUp
         description: "Please upload a JPG, PNG, or TIFF image",
         variant: "destructive",
       });
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    if (!validateFile(file)) return;
 
     setCurrentFile(file);
     onFileSelect(file);
+    // Note: No need to call onProcessImage() here as the useEffect will handle it
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -58,28 +76,11 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading }: FileUp
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
-      
-      if (file.size > 10 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please upload an image smaller than 10MB",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/tiff'];
-      if (!allowedTypes.includes(file.type)) {
-        toast({
-          title: "Invalid file type",
-          description: "Please upload a JPG, PNG, or TIFF image",
-          variant: "destructive",
-        });
-        return;
-      }
+      if (!validateFile(file)) return;
 
       setCurrentFile(file);
       onFileSelect(file);
+      // Note: No need to call onProcessImage() here as the useEffect will handle it
     }
   };
 
@@ -141,20 +142,30 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading }: FileUp
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <button 
-                  className="text-neutral-500 hover:text-neutral-700"
-                  onClick={handleCancelUpload}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-                <Button 
-                  onClick={onProcessImage} 
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Processing...' : 'Process Image'}
-                </Button>
+                {!isLoading && (
+                  <button 
+                    className="text-neutral-500 hover:text-neutral-700"
+                    onClick={handleCancelUpload}
+                    disabled={isLoading}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+                {isLoading ? (
+                  <div className="flex items-center space-x-2 text-primary-600">
+                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                    <span>Processing image...</span>
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={onProcessImage} 
+                    disabled={isLoading}
+                  >
+                    Reprocess Image
+                  </Button>
+                )}
               </div>
             </div>
           </div>
