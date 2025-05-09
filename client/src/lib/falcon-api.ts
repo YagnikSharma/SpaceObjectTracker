@@ -7,12 +7,17 @@ export interface FalconApiResponse {
 }
 
 export const OBJECT_COLORS: Record<string, string> = {
-  satellite: "#3B82F6", // blue
-  debris: "#F59E0B",    // amber
-  station: "#10B981",   // green
-  rocket: "#6366F1",    // indigo
-  telescope: "#8B5CF6", // violet
-  default: "#EF4444",   // red
+  satellite: "#3B82F6",             // blue
+  "space debris": "#F59E0B",        // amber
+  "space station": "#10B981",       // green
+  rocket: "#6366F1",                // indigo
+  "space telescope": "#8B5CF6",     // violet
+  "space shuttle": "#EC4899",       // pink
+  astronaut: "#14B8A6",             // teal
+  "space probe": "#06B6D4",         // cyan
+  "small satellite": "#0284C7",     // light blue
+  "communication satellite": "#2563EB", // blue
+  default: "#EF4444",               // red
 };
 
 export async function uploadImageToFalcon(file: File): Promise<FalconApiResponse> {

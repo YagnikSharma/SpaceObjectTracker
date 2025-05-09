@@ -55,9 +55,16 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
         style={style}
       >
         {showLabels && (
-          <span className="absolute -mt-6 px-1 text-xs rounded text-white" style={{ backgroundColor: object.color }}>
-            {object.label} ({(object.confidence * 100).toFixed(0)}%)
-          </span>
+          <div className="absolute -mt-12">
+            <span className="block px-1 mb-1 text-xs rounded text-white" style={{ backgroundColor: object.color }}>
+              {object.label} ({(object.confidence * 100).toFixed(0)}%)
+            </span>
+            {object.originalClass && (
+              <span className="block px-1 text-xs rounded text-white bg-gray-700 opacity-75">
+                {object.originalClass}
+              </span>
+            )}
+          </div>
         )}
       </div>
     );
@@ -164,8 +171,9 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
             <table className="min-w-full divide-y divide-neutral-200">
               <thead className="bg-neutral-100">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Object</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Space Object</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Confidence</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Original Class</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Location</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Size</th>
                 </tr>
@@ -182,6 +190,11 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={getConfidenceClass(object.confidence)}>
                         {(object.confidence * 100).toFixed(0)}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="text-sm italic text-neutral-600">
+                        {object.originalClass || "N/A"}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
