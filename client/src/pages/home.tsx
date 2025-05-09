@@ -416,6 +416,9 @@ export default function Home() {
             <Link href="/archives" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center">
               <span className="mr-1">🔭</span> Stellar Archives
             </Link>
+            <Link href="/model-management" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center">
+              <span className="mr-1">🧠</span> Model Management
+            </Link>
           </div>
         </div>
       </footer>

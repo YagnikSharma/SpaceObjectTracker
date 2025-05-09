@@ -9,7 +9,7 @@ import MissionControl from "@/pages/mission-control";
 import GalacticMap from "@/pages/galactic-map";
 import StellarArchives from "@/pages/archives";
 import ImageGenerator from "@/pages/image-generator";
-import ModelManager from "@/pages/model-manager";
+import ModelManagement from "@/pages/model-management";
 import { useEffect } from "react";
 
 function Router() {
@@ -20,7 +20,7 @@ function Router() {
       <Route path="/galactic-map" component={GalacticMap} />
       <Route path="/archives" component={StellarArchives} />
       <Route path="/image-generator" component={ImageGenerator} />
-      <Route path="/model-manager" component={ModelManager} />
+      <Route path="/model-management" component={ModelManagement} />
       <Route component={NotFound} />
     </Switch>
   );
