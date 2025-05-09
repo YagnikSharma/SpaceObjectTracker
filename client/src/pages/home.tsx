@@ -297,7 +297,7 @@ export default function Home() {
                         <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                         <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                         <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
-                        <h2 className="text-md font-semibold ml-2 text-blue-300">ASTRA - Space Assistant</h2>
+                        <h2 className="text-md font-semibold ml-2 text-blue-300">ASTROSCAN - Space Analysis Assistant</h2>
                       </div>
                     </div>
                     <ChatInterface 

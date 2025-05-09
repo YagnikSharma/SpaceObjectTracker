@@ -87,12 +87,12 @@ export function ChatInterface({ messages, isLoading, detectedObjects, onSendMess
             </div>
             <div>
               <h3 className="text-lg font-medium text-blue-300 mb-2">
-                {fullView ? 'ASTRA - Advanced Space Tools and Resource Assistant' : 'Space Station Assistant'}
+                {fullView ? 'ASTROSCAN - Space Station Analysis Assistant' : 'Space Station Assistant'}
               </h3>
               <p className="text-blue-200/60 text-sm max-w-md">
                 {fullView 
-                  ? 'The Advanced Space Tools and Resource Assistant (ASTRA) helps analyze space station components and provide technical solutions to issues detected in the station environment.'
-                  : 'Upload and analyze a space station image to chat with ASTRA about your discoveries and get technical assistance with components.'
+                  ? "Hello! I'm Astroscan, your AI assistant for space station analysis. Upload an image, and I'll help you detect flaws and spot what needs fixing — fast and smart."
+                  : "Hello! I'm Astroscan, your AI assistant for space station analysis. Upload an image, and I'll help you detect flaws and spot what needs fixing — fast and smart."
                 }
               </p>
             </div>
