@@ -110,14 +110,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Generating ${imageCount} synthetic ${category} images with Falcon AI...`);
       
       // Generate synthetic images using Falcon AI
-      const imagePaths = await generateSyntheticTrainingImages(category, imageCount);
-      
-      // Return image URLs
-      const imageUrls = imagePaths.map(p => {
-        // Convert absolute path to relative URL
-        const fileName = path.basename(p);
-        return `/uploads/${fileName}`;
+      const generatedImages = await generateSyntheticImages({
+        category: category as any, 
+        count: imageCount
       });
+      
+      // Format the result for the frontend
+      const imageUrls = generatedImages.map((image: any) => ({
+        url: image.url,
+        prompt: image.prompt,
+        filename: image.filename
+      }));
       
       res.status(200).json({
         success: true,
@@ -136,7 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint for retrieving available categories for Falcon generator
   app.get("/api/synthetic-categories", async (req: Request, res: Response) => {
     try {
-      const categories = Object.keys(SPACE_STATION_ELEMENTS);
+      const categories = Object.keys(SPACE_CATEGORIES);
       res.status(200).json({
         categories
       });
