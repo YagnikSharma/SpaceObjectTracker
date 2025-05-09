@@ -151,11 +151,14 @@ export default function ImageGenerator() {
           {/* Page Title */}
           <div className="text-center mb-6">
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Falcon Synthetic Image Generator
+              Falcon AI Synthetic Image Generator
             </h1>
             <p className="text-blue-300/70 mt-2 max-w-2xl mx-auto">
-              Generate realistic synthetic images of space station components to train YOLO 11 object detection models.
+              An advanced tool for creating synthetic space station component images to train YOLO 11 detection models.
             </p>
+            <div className="mt-3 inline-block bg-blue-900/30 border border-blue-500/20 rounded-full px-3 py-1 text-sm">
+              <span className="mr-1 text-xs">🔬</span> <span className="text-blue-300 font-medium">Training & Research Tool</span>
+            </div>
           </div>
 
           {/* Generator Controls */}
