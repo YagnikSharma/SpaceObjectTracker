@@ -205,20 +205,22 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
         style={style}
       >
         {showLabels && (
-          <div className="absolute top-0 left-0 z-10 transform -translate-y-full">
-            <span className="block px-1.5 py-0.5 mb-1 text-xs rounded text-white font-medium whitespace-nowrap" style={{ backgroundColor: object.color }}>
-              {object.label} ({(object.confidence * 100).toFixed(0)}%)
-            </span>
-            {object.issue && (
-              <span className="block px-1.5 py-0.5 mb-1 text-xs rounded font-medium text-white bg-red-500/90 whitespace-nowrap">
-                ⚠️ {object.issue}
+          <div className="absolute top-0 left-0 z-10 -translate-y-7 -translate-x-1">
+            <div className="inline-flex flex-col items-start">
+              <span className="px-1.5 py-0.5 mb-1 text-xs rounded text-white font-medium whitespace-nowrap shadow-md" style={{ backgroundColor: object.color }}>
+                {object.label} ({(object.confidence * 100).toFixed(0)}%)
               </span>
-            )}
-            {object.context && (
-              <span className="block px-1.5 py-0.5 text-xs rounded text-white bg-blue-700/80 whitespace-nowrap">
-                {object.context}
-              </span>
-            )}
+              {object.issue && (
+                <span className="px-1.5 py-0.5 mb-1 text-xs rounded font-medium text-white bg-red-500/90 whitespace-nowrap shadow-md">
+                  ⚠️ {object.issue}
+                </span>
+              )}
+              {object.context && (
+                <span className="px-1.5 py-0.5 text-xs rounded text-white bg-blue-700/80 whitespace-nowrap shadow-md">
+                  {object.context}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -7,6 +7,7 @@ import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
 import yoloService, { detectSpaceStationObjects, getTrainingStatistics } from "./services/yolo-service";
+import { customYOLOService, PRIORITY_CATEGORIES } from "./services/custom-yolo-service";
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
@@ -37,14 +38,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Space object detection endpoint with YOLOv8
+  // Space object detection endpoint with custom YOLO model
   app.post("/api/detect", upload.single("image"), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No image file provided" });
       }
 
-      console.log("Processing image with YOLOv8 and OpenAI Vision...");
+      console.log("Processing image with accurate object detection...");
       
       // Create uploads directory if it doesn't exist
       const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -57,16 +58,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const imagePath = path.join(uploadsDir, imageName);
       fs.writeFileSync(imagePath, req.file.buffer);
       
-      // Get image dimensions (approximated if not available)
-      const imageWidth = 800; // Default width if not provided
-      const imageHeight = 600; // Default height if not provided
+      // First try our specialized custom YOLO model that focuses on space station components
+      const customResult = await customYOLOService.detectObjects(imagePath);
       
-      // Process image with YOLOv8 object detection (with priority to toolbox, fire extinguisher, oxygen tank)
-      const detectedObjects = await detectSpaceStationObjects(req.file.buffer, imageWidth, imageHeight);
+      // If custom detection finds objects, use those results
+      if (customResult.success && customResult.detections.length > 0) {
+        console.log(`Custom YOLO model detected ${customResult.detections.length} objects`);
+        
+        // Store detection in database
+        const detection = await storage.createDetection({
+          imageUrl: `/uploads/${imageName}`,
+          objects: customResult.detections,
+        });
+        
+        return res.status(200).json({
+          imageUrl: `/uploads/${imageName}`,
+          detectedObjects: customResult.detections,
+          detectionId: detection.id,
+          source: "custom-yolo",
+          stats: {
+            priorityObjectsDetected: customResult.detections.length,
+            trainingImagesCount: customYOLOService.getTrainingStats().imageCount
+          }
+        });
+      }
       
+      // If custom model didn't find anything, try the general YOLO model
+      const detectedObjects = await detectSpaceStationObjects(req.file.buffer, 800, 600);
+            
       // Log priority and human detections
       const priorityObjects = detectedObjects.filter(obj => 
-        yoloService.PRIORITY_OBJECTS.some(priority => 
+        PRIORITY_CATEGORIES.some(priority => 
           obj.label.toLowerCase().includes(priority.toLowerCase())
         )
       );
@@ -76,31 +98,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         obj.label.toLowerCase().includes('person')
       );
       
+      // Add priority objects to custom YOLO training dataset
+      if (priorityObjects.length > 0) {
+        priorityObjects.forEach(obj => {
+          console.log(`Added detection of ${obj.label} to training data. Total samples: ${customYOLOService.getTrainingStats().imageCount + 1}`);
+          
+          customYOLOService.addTrainingImage(imagePath, [{
+            class: PRIORITY_CATEGORIES.find(cat => obj.label.toLowerCase().includes(cat)) || obj.label,
+            x: obj.x,
+            y: obj.y,
+            width: obj.width,
+            height: obj.height
+          }]);
+        });
+        
+        // Try to train the model if we have enough data
+        if (customYOLOService.getTrainingStats().imageCount >= 5) {
+          customYOLOService.trainModel().catch(err => 
+            console.error("Error training model:", err)
+          );
+        }
+      }
+      
+      // Log detection results
       console.log(`YOLOv8 Detection Results:`);
       console.log(`- Total Objects: ${detectedObjects.length}`);
       console.log(`- Priority Objects: ${priorityObjects.length}`);
       console.log(`- Humans Detected: ${humanObjects.length}`);
       
-      // Save relative image path to serve statically
-      const relativeImagePath = `/uploads/${imageName}`;
-      
-      // Get training statistics
-      const trainingStats = getTrainingStatistics();
-      
       // Store detection in database
       const detection = await storage.createDetection({
-        imageUrl: relativeImagePath,
+        imageUrl: `/uploads/${imageName}`,
         objects: detectedObjects,
       });
 
+      // Return detection results
       res.status(200).json({
-        imageUrl: relativeImagePath,
+        imageUrl: `/uploads/${imageName}`,
         detectedObjects,
         detectionId: detection.id,
+        source: "yolo",
         stats: {
           priorityObjectsDetected: priorityObjects.length,
           humansDetected: humanObjects.length,
-          totalTrainingSamples: trainingStats.totalSamples
+          trainingImagesCount: customYOLOService.getTrainingStats().imageCount
         }
       });
     } catch (error) {
@@ -114,19 +155,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // YOLOv8 training statistics endpoint
   app.get("/api/training-stats", async (req: Request, res: Response) => {
     try {
-      // Get training statistics from YOLO service
-      const stats = getTrainingStatistics();
+      // Get training statistics from both YOLO services
+      const generalStats = getTrainingStatistics();
+      const customStats = customYOLOService.getTrainingStats();
       
       res.status(200).json({
         success: true,
-        statistics: stats,
+        statistics: {
+          general: generalStats,
+          custom: customStats
+        },
         modelInfo: {
-          name: "YOLOv8",
-          priorityObjects: yoloService.PRIORITY_OBJECTS,
-          colorMapping: {
-            humans: "#4caf50", // green
-            priorityObjects: "#ffc107", // yellow
-            otherObjects: "#f44336" // red
+          generalModel: {
+            name: "YOLOv8 General",
+            priorityObjects: yoloService.PRIORITY_OBJECTS,
+            colorMapping: {
+              humans: "#4caf50", // green
+              priorityObjects: "#ffc107", // yellow
+              otherObjects: "#f44336" // red
+            }
+          },
+          customModel: {
+            name: "Space Station Components Detector",
+            targetClasses: PRIORITY_CATEGORIES,
+            isModelTrained: customStats.isModelTrained,
+            colorMapping: {
+              toolbox: "#FF4500", // orange-red
+              "fire extinguisher": "#FF0000", // red
+              "oxygen tank": "#4169E1" // royal blue
+            }
           }
         }
       });
