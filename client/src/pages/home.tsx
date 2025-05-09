@@ -131,14 +131,14 @@ export default function Home() {
             <div className="hidden md:flex items-center space-x-1">
               {NAV_LINKS.map((link) => (
                 <Link key={link.name} href={link.href}>
-                  <a className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-1 ${
+                  <div className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-1 ${
                     location === link.href 
                       ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30' 
                       : 'hover:bg-[#2a3348]/70 hover:text-blue-300'
                   }`}>
                     <span>{link.icon}</span>
                     <span>{link.name}</span>
-                  </a>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -181,7 +181,7 @@ export default function Home() {
                 <div className="flex flex-col space-y-1 pb-2">
                   {NAV_LINKS.map((link) => (
                     <Link key={link.name} href={link.href}>
-                      <a 
+                      <div 
                         className={`px-4 py-3 rounded-lg flex items-center space-x-3 ${
                           location === link.href 
                             ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30' 
@@ -191,7 +191,7 @@ export default function Home() {
                       >
                         <span className="text-xl">{link.icon}</span>
                         <span>{link.name}</span>
-                      </a>
+                      </div>
                     </Link>
                   ))}
                 </div>
