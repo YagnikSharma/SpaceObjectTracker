@@ -159,8 +159,23 @@ export default function Home() {
               </span>
               
               {/* Theme Toggle */}
-              <div className="bg-card/80 p-1.5 rounded-lg border border-border">
-                <ThemeToggle />
+              <div className="bg-blue-500/30 p-1.5 rounded-lg border border-blue-400/50">
+                <button
+                  onClick={() => {
+                    const html = document.querySelector('html');
+                    const isDark = html?.classList.contains('dark');
+                    if (isDark) {
+                      html?.classList.remove('dark');
+                      html?.classList.add('light');
+                    } else {
+                      html?.classList.remove('light');
+                      html?.classList.add('dark');
+                    }
+                  }}
+                  className="flex items-center justify-center w-8 h-8 rounded-md text-white hover:bg-blue-600/20"
+                >
+                  <span>🌓</span>
+                </button>
               </div>
               
               {/* Mobile menu button */}
