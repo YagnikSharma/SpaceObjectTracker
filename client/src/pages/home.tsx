@@ -247,12 +247,12 @@ export default function Home() {
       <main className="flex-grow relative z-10">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           {/* Content Tabs with Yellow Theme and Animations */}
-          <div className="flex mb-6 bg-card/50 backdrop-blur-md rounded-xl p-1 border border-border/50 w-full sm:w-auto overflow-x-auto">
+          <div className="flex mb-6 bg-card/50 backdrop-blur-md rounded-xl p-1 border border-yellow-500/30 w-full sm:w-auto overflow-x-auto">
             <button 
-              className={`tab-button px-4 py-2 rounded-lg font-medium ${
+              className={`tab-button px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                 activeTab === 'detection' 
-                  ? 'active bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-yellow-500 dark:to-amber-600' 
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  ? 'active bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-md shadow-yellow-500/20' 
+                  : 'text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10'
               }`}
               onClick={() => setActiveTab('detection')}
             >
@@ -266,10 +266,10 @@ export default function Home() {
               </span>
             </button>
             <button 
-              className={`tab-button px-4 py-2 rounded-lg font-medium ${
+              className={`tab-button px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                 activeTab === 'analysis' 
-                  ? 'active bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-yellow-500 dark:to-amber-600' 
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  ? 'active bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-md shadow-yellow-500/20' 
+                  : 'text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10'
               }`}
               onClick={() => setActiveTab('analysis')}
             >
@@ -283,10 +283,10 @@ export default function Home() {
               </span>
             </button>
             <button 
-              className={`tab-button px-4 py-2 rounded-lg font-medium ${
+              className={`tab-button px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                 activeTab === 'feedback' 
-                  ? 'active bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-yellow-500 dark:to-amber-600' 
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  ? 'active bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-md shadow-yellow-500/20' 
+                  : 'text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10'
               }`}
               onClick={() => setActiveTab('feedback')}
             >
@@ -311,13 +311,13 @@ export default function Home() {
                   transition={{ duration: 0.5 }}
                   key="detection-left"
                 >
-                  <div className="bg-card/80 backdrop-blur-md rounded-xl border border-border shadow-lg overflow-hidden hover-glow">
-                    <div className="p-4 border-b border-border">
+                  <div className="bg-card/80 backdrop-blur-md rounded-xl border border-yellow-500/30 shadow-lg overflow-hidden hover-glow hover:border-yellow-500/50 transition-all duration-300">
+                    <div className="p-4 border-b border-yellow-500/20">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                         <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                        <h2 className="text-md font-semibold ml-2 text-primary dark:text-yellow-300">Detection Control Center</h2>
+                        <h2 className="text-md font-semibold ml-2 bg-gradient-to-r from-yellow-500 to-amber-500 bg-clip-text text-transparent">Detection Control Center</h2>
                       </div>
                     </div>
                     <div className="p-4">
@@ -348,13 +348,13 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   key="detection-right"
                 >
-                  <div className="bg-card/80 backdrop-blur-md rounded-xl border border-border shadow-lg h-full overflow-hidden hover-glow">
-                    <div className="p-4 border-b border-border">
+                  <div className="bg-card/80 backdrop-blur-md rounded-xl border border-yellow-500/30 shadow-lg h-full overflow-hidden hover-glow hover:border-yellow-500/50 transition-all duration-300">
+                    <div className="p-4 border-b border-yellow-500/20">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                         <div className="w-3 h-3 rounded-full bg-amber-500"></div>
                         <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                        <h2 className="text-md font-semibold ml-2 text-primary dark:text-yellow-300">ASTROSCAN - Space Analysis Assistant</h2>
+                        <h2 className="text-md font-semibold ml-2 bg-gradient-to-r from-yellow-500 to-amber-500 bg-clip-text text-transparent">ASTROSCAN - Space Analysis Assistant</h2>
                       </div>
                     </div>
                     <ChatInterface 
@@ -376,13 +376,13 @@ export default function Home() {
                 transition={{ duration: 0.5 }}
                 key="analysis"
               >
-                <div className="bg-card/80 backdrop-blur-md rounded-xl border border-border shadow-lg overflow-hidden hover-glow">
-                  <div className="p-4 border-b border-border">
+                <div className="bg-card/80 backdrop-blur-md rounded-xl border border-yellow-500/30 shadow-lg overflow-hidden hover-glow hover:border-yellow-500/50 transition-all duration-300">
+                  <div className="p-4 border-b border-yellow-500/20">
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                       <div className="w-3 h-3 rounded-full bg-amber-500"></div>
                       <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                      <h2 className="text-md font-semibold ml-2 text-primary dark:text-yellow-300">Advanced Space Station Analysis</h2>
+                      <h2 className="text-md font-semibold ml-2 bg-gradient-to-r from-yellow-500 to-amber-500 bg-clip-text text-transparent">Advanced Space Station Analysis</h2>
                     </div>
                   </div>
                   <div className="p-6">
@@ -414,25 +414,25 @@ export default function Home() {
       </main>
 
       {/* Footer with glass effect */}
-      <footer className="relative z-10 bg-card/70 backdrop-blur-md border-t border-border py-4 px-4 sm:px-6 lg:px-8">
+      <footer className="relative z-10 bg-card/70 backdrop-blur-md border-t border-yellow-500/20 py-4 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
-          <div className="text-sm text-muted-foreground mb-4 sm:mb-0 flex items-center">
+          <div className="text-sm mb-4 sm:mb-0 flex items-center">
             <span className="mr-2">🚀</span>
-            <p className="font-semibold bg-gradient-to-r from-primary to-primary/70 dark:from-yellow-400 dark:to-amber-500 bg-clip-text text-transparent">
+            <p className="font-semibold bg-gradient-to-r from-yellow-500 to-amber-500 bg-clip-text text-transparent">
               POWERED BY SYNDETECT AI
             </p>
           </div>
           <div className="flex items-center space-x-6">
-            <Link href="/mission-control" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center">
+            <Link href="/mission-control" className="text-muted-foreground hover:text-yellow-500 transition-colors text-sm flex items-center">
               <span className="mr-1">🛰️</span> Mission Control
             </Link>
-            <Link href="/image-generator" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center">
+            <Link href="/image-generator" className="text-muted-foreground hover:text-yellow-500 transition-colors text-sm flex items-center">
               <span className="mr-1">📷</span> Image Generator
             </Link>
-            <Link href="/galactic-map" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center">
+            <Link href="/galactic-map" className="text-muted-foreground hover:text-yellow-500 transition-colors text-sm flex items-center">
               <span className="mr-1">🪐</span> Galactic Map
             </Link>
-            <Link href="/archives" className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center">
+            <Link href="/archives" className="text-muted-foreground hover:text-yellow-500 transition-colors text-sm flex items-center">
               <span className="mr-1">🔭</span> Stellar Archives
             </Link>
           </div>
