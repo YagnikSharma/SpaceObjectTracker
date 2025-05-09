@@ -4,6 +4,37 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DetectedObject } from "./results-display";
 
+// Helper function to format space station responses with bulletpoints and links
+function formatSpaceStationResponse(text: string): string {
+  if (!text) return "";
+  
+  // Convert URLs to actual links
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  let formattedText = text.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 underline transition-colors">$1</a>');
+  
+  // Add classes to bullet points for better styling
+  formattedText = formattedText.replace(/^(•|⚠️|🛠️|🔧|🛑|⚙️|📊|🧰|🔩|🧲|🔌|🔋|📡|🚨|⚡) (.*)/gm, 
+    '<div class="flex"><span class="mr-2 text-xl">$1</span><span class="flex-1">$2</span></div>');
+    
+  // Add specific styling for bullet point sections
+  formattedText = formattedText.replace(/^## (.*)/gm, '<h3 class="text-lg font-semibold text-blue-300 mt-3 mb-2">$1</h3>');
+  formattedText = formattedText.replace(/^# (.*)/gm, '<h2 class="text-xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-3">$1</h2>');
+  
+  // Style NASA documentation references
+  formattedText = formattedText.replace(/NASA documentation:/gi, 
+    '<span class="block mt-3 text-sm font-medium text-blue-400">NASA Documentation:</span>');
+  
+  // Handle emergency protocols with special styling
+  formattedText = formattedText.replace(/EMERGENCY PROTOCOL:/gi, 
+    '<div class="mt-3 mb-2 text-red-400 font-bold">⚠️ EMERGENCY PROTOCOL:</div>');
+  
+  // Add top spacing to sections that start with the word "Technical" to keep specifications grouped
+  formattedText = formattedText.replace(/(Technical Specifications:)/g, 
+    '<div class="mt-3 font-medium text-blue-300">$1</div>');
+  
+  return formattedText;
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
@@ -96,7 +127,18 @@ export function ChatInterface({ messages, isLoading, detectedObjects, onSendMess
                   : "bg-gradient-to-br from-[#1a1f2c]/80 to-[#242B3E]/80 border border-blue-500/20 text-blue-100"
               }`}
             >
-              <p className="whitespace-pre-wrap">{message.content}</p>
+              {message.role === "assistant" ? (
+                <div className="space-station-response">
+                  <div 
+                    className="whitespace-pre-wrap space-y-2"
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatSpaceStationResponse(message.content) 
+                    }} 
+                  />
+                </div>
+              ) : (
+                <p className="whitespace-pre-wrap">{message.content}</p>
+              )}
             </div>
             
             {message.role === "user" && (

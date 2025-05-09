@@ -32,7 +32,7 @@ const SPACE_STATION_ELEMENTS = {
 };
 
 // Maps for detected issues and solutions
-const COMMON_ISSUES = {
+const COMMON_ISSUES: Record<string, string[]> = {
   "oxygen level gauge": [
     "reading below acceptable range",
     "fluctuating readings",
@@ -72,7 +72,7 @@ const COMMON_ISSUES = {
 };
 
 // Educational resources and reference links
-const REFERENCE_LINKS = {
+const REFERENCE_LINKS: Record<string, string> = {
   "EVA toolkit": "https://www.nasa.gov/spacewalk/tools/",
   "oxygen level gauge": "https://www.nasa.gov/feature/goddard/2019/life-support-system",
   "pressure gauge": "https://www.nasa.gov/feature/facts-and-figures-international-space-station-environmental-control-and-life-support-system",
@@ -168,7 +168,7 @@ Format your response with bullet points, technical specifications, and use appro
       max_tokens: 500
     });
 
-    return response.choices[0].message.content;
+    return response.choices[0].message.content || "";
   } catch (error) {
     console.error("Error generating component analysis:", error);
     return `⚠️ Error analyzing ${component || "component"}.\n\n• Please try again or contact mission control.\n• Current diagnostics unavailable.\n• System status: limited functionality`;
@@ -228,15 +228,24 @@ export function enhanceDetectionWithContext(
         if (obj.label.toLowerCase().includes(item.toLowerCase())) {
           enhancedObj.context = category;
           
-          // Add potential issue if applicable
-          if (COMMON_ISSUES[item]) {
-            const randomIssue = COMMON_ISSUES[item][Math.floor(Math.random() * COMMON_ISSUES[item].length)];
+          // Find matching keys for issues
+          const matchingIssueKey = Object.keys(COMMON_ISSUES).find(key => 
+            item.toLowerCase().includes(key.toLowerCase())
+          );
+          
+          if (matchingIssueKey && COMMON_ISSUES[matchingIssueKey]) {
+            const issues = COMMON_ISSUES[matchingIssueKey];
+            const randomIssue = issues[Math.floor(Math.random() * issues.length)];
             enhancedObj.issue = randomIssue;
           }
           
-          // Add reference link if available
-          if (REFERENCE_LINKS[item]) {
-            enhancedObj.referenceLink = REFERENCE_LINKS[item];
+          // Find matching keys for references
+          const matchingRefKey = Object.keys(REFERENCE_LINKS).find(key => 
+            item.toLowerCase().includes(key.toLowerCase())
+          );
+          
+          if (matchingRefKey && REFERENCE_LINKS[matchingRefKey]) {
+            enhancedObj.referenceLink = REFERENCE_LINKS[matchingRefKey];
           }
           
           break;

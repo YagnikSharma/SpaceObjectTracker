@@ -69,3 +69,78 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Space station response styling */
+.space-station-response {
+  line-height: 1.6;
+}
+
+.space-station-response ul {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.space-station-response ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  list-style-type: decimal;
+}
+
+.space-station-response li {
+  margin-bottom: 0.25rem;
+}
+
+.space-station-response h2 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(147, 197, 253, 1); /* blue-300 */
+}
+
+.space-station-response h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: rgba(147, 197, 253, 0.9); /* blue-300 with opacity */
+}
+
+.space-station-response p {
+  margin-bottom: 0.75rem;
+}
+
+.space-station-response a {
+  color: rgba(96, 165, 250, 1); /* blue-400 */
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+
+.space-station-response a:hover {
+  color: rgba(59, 130, 246, 1); /* blue-500 */
+}
+
+/* Blinking emergency alerts for chat */
+@keyframes emergency-blink {
+  0%, 100% { background-color: rgba(239, 68, 68, 0.1); } /* red-500 with low opacity */
+  50% { background-color: rgba(239, 68, 68, 0.25); } /* red-500 with higher opacity */
+}
+
+.emergency-alert {
+  animation: emergency-blink 2s infinite;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  margin: 0.75rem 0;
+}
+
+/* Tech specs for chat */
+.tech-specs {
+  background-color: rgba(30, 58, 138, 0.15); /* blue-900 with very low opacity */
+  border-left: 3px solid rgba(96, 165, 250, 0.5); /* blue-400 with opacity */
+  padding: 0.5rem 0.75rem;
+  margin: 0.75rem 0;
+  border-radius: 0 0.375rem 0.375rem 0;
+}
