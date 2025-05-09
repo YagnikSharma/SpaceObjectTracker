@@ -31,7 +31,7 @@ export default function GalacticMap() {
         id: 1,
         title: "Webb's First Deep Field",
         description: "NASA's James Webb Space Telescope has produced the deepest and sharpest infrared image of the distant universe to date. Known as Webb's First Deep Field, this image of galaxy cluster SMACS 0723 is overflowing with detail.",
-        imageUrl: "https://stsci-opo.org/STScI-01G8H49Z5K1HGKVT64AYZEG8DY.png",
+        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-first-deep-field-smacs-0723.png",
         link: "https://science.nasa.gov/missions/webb/webbs-first-images/",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
@@ -50,7 +50,7 @@ export default function GalacticMap() {
         id: 2,
         title: "Pillars of Creation",
         description: "NASA's James Webb Space Telescope has captured a lush, highly detailed landscape – the iconic Pillars of Creation – where new stars are forming within dense clouds of gas and dust.",
-        imageUrl: "https://stsci-opo.org/STScI-01GK2KMYS2JYST8YW2KTQY3ZXT.png",
+        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-pillars-of-creation.png",
         link: "https://science.nasa.gov/missions/webb/nasa-james-webb-space-telescope-just-revealed-universe-whole-new-light/",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
@@ -88,7 +88,7 @@ export default function GalacticMap() {
         id: 4,
         title: "Carina Nebula by Webb Telescope",
         description: "This landscape of 'mountains' and 'valleys' speckled with glittering stars is actually the edge of a nearby, young, star-forming region called NGC 3324 in the Carina Nebula.",
-        imageUrl: "https://stsci-opo.org/STScI-01G77PB54JD1D218PG476W6D7M.png",
+        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-carina-nebula.png",
         link: "https://science.nasa.gov/missions/webb/nasas-webb-delivers-deepest-infrared-image-universe-yet/",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
@@ -107,7 +107,7 @@ export default function GalacticMap() {
         id: 5,
         title: "Southern Ring Nebula",
         description: "The Southern Ring Nebula is a planetary nebula – an expanding cloud of gas surrounding a dying star. Webb revealed previously hidden details in this colorful display.",
-        imageUrl: "https://stsci-opo.org/STScI-01G8H15NQKF8HKXESJYGPJ6H7A.png",
+        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-southern-ring-nebula.png",
         link: "https://science.nasa.gov/missions/webb/webbs-first-images/",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
@@ -145,7 +145,7 @@ export default function GalacticMap() {
         id: 7,
         title: "WASP-96 b Atmospheric Spectrum",
         description: "Webb's detailed observation of this hot, puffy exoplanet revealed the presence of specific gas molecules based on tiny decreases in the brightness of precise colors of light.",
-        imageUrl: "https://stsci-opo.org/STScI-01G7DDBW1BQYSDNJHJGQCP8ZTZ.png",
+        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-wasp-96b-spectrum.png",
         link: "https://science.nasa.gov/missions/webb/",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
@@ -164,7 +164,7 @@ export default function GalacticMap() {
         id: 8,
         title: "Stephan's Quintet",
         description: "Webb captured this group of five galaxies that appear close to each other in the sky: two in the middle of merging, with the others distorted by their gravitational interactions.",
-        imageUrl: "https://stsci-opo.org/STScI-01G8H1B5GTFJCYYAC42T3NACEH.png",
+        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-stephans-quintet.png",
         link: "https://science.nasa.gov/missions/webb/",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
@@ -183,7 +183,7 @@ export default function GalacticMap() {
         id: 9,
         title: "Cartwheel Galaxy",
         description: "Webb's powerful infrared vision captured this detailed image of the Cartwheel and two smaller companion galaxies against a backdrop of many other galaxies.",
-        imageUrl: "https://stsci-opo.org/STScI-01G97DZCC51T4H1YV4J9BHR78H.png",
+        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/10/webb-cartwheel-galaxy-miri-nircam-4500.png",
         link: "https://www.nasa.gov/image-feature/goddard/2022/nasas-webb-captures-cartwheel-galaxys-cosmic-dance/",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
@@ -273,7 +273,7 @@ export default function GalacticMap() {
           >
             <div className="dark:bg-[#1a1f2c]/90 bg-card/90 backdrop-blur-md border dark:border-[#2a3348] border-border">
               <div className="p-4 border-b dark:border-[#2a3348] border-border flex justify-between items-center">
-                <h3 className="text-lg font-medium dark:text-blue-300 text-yellow-600">{selectedMap.title}</h3>
+                <h3 className="text-lg font-medium dark:text-blue-300 text-blue-600">{selectedMap.title}</h3>
                 <button 
                   onClick={closeDetail}
                   className="w-6 h-6 rounded-full dark:bg-blue-900/50 bg-yellow-500/20 flex items-center justify-center dark:hover:bg-blue-900/80 hover:bg-yellow-500/30 transition-colors"
@@ -297,13 +297,13 @@ export default function GalacticMap() {
                   <div className="mb-4 grid grid-cols-2 gap-2 text-xs">
                     {selectedMap.scientificData.wavelength && (
                       <div className="dark:bg-blue-900/20 bg-yellow-500/10 p-2 rounded-md">
-                        <span className="dark:text-blue-300 text-yellow-700 font-medium">Wavelength:</span>
+                        <span className="dark:text-blue-300 text-blue-700 font-medium">Wavelength:</span>
                         <p className="dark:text-blue-100/80 text-foreground/80">{selectedMap.scientificData.wavelength}</p>
                       </div>
                     )}
                     {selectedMap.scientificData.distance && (
-                      <div className="dark:bg-blue-900/20 bg-yellow-500/10 p-2 rounded-md">
-                        <span className="dark:text-blue-300 text-yellow-700 font-medium">Distance:</span>
+                      <div className="dark:bg-blue-900/20 bg-blue-500/10 p-2 rounded-md">
+                        <span className="dark:text-blue-300 text-blue-700 font-medium">Distance:</span>
                         <p className="dark:text-blue-100/80 text-foreground/80">{selectedMap.scientificData.distance}</p>
                       </div>
                     )}
