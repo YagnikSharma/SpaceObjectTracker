@@ -5,8 +5,8 @@ import multer from "multer";
 import { chatCompletionRequestSchema, DetectedObject } from "@shared/schema";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
-import { enhanceDetectionWithContext, generateSyntheticImages, SPACE_CATEGORIES } from "./services/falcon-service";
-import { detectSpaceObjects } from "./services/yolo-service";
+import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
+import { detectSpaceStationObjects } from "./services/yolo-service";
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
@@ -62,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const imageHeight = 600; // Default height if not provided
       
       // Process image with our space station object detection
-      const detectedObjects = await detectSpaceObjects(req.file.buffer, imageWidth, imageHeight);
+      const detectedObjects = await detectSpaceStationObjects(req.file.buffer, imageWidth, imageHeight);
       
       // Enhance detection with Falcon context - already done in YOLO service
       console.log(`Enhanced Falcon API detected ${detectedObjects.length} objects in the image`);
@@ -96,9 +96,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { category, count } = req.body;
       
       // Check if category is valid
-      if (category !== 'random' && !SPACE_CATEGORIES[category]) {
+      if (!SPACE_STATION_ELEMENTS[category]) {
         return res.status(400).json({ 
-          error: "Invalid category. Valid categories are: TOOLS, GAUGES, STRUCTURAL, EMERGENCY, or 'random'" 
+          error: "Invalid category. Valid categories are: TOOLS, GAUGES, STRUCTURAL, EMERGENCY" 
         });
       }
       
@@ -110,17 +110,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Generating ${imageCount} synthetic ${category} images with Falcon AI...`);
       
       // Generate synthetic images using Falcon AI
-      const generatedImages = await generateSyntheticImages({
-        category: category as any, 
-        count: imageCount
-      });
+      const imagePaths = await generateSyntheticTrainingImages(category, imageCount);
       
-      // Format the result for the frontend
-      const imageUrls = generatedImages.map((image: any) => ({
-        url: image.url,
-        prompt: image.prompt,
-        filename: image.filename
-      }));
+      // Return image URLs
+      const imageUrls = imagePaths.map(p => {
+        // Convert absolute path to relative URL
+        const fileName = path.basename(p);
+        return `/uploads/${fileName}`;
+      });
       
       res.status(200).json({
         success: true,
@@ -139,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint for retrieving available categories for Falcon generator
   app.get("/api/synthetic-categories", async (req: Request, res: Response) => {
     try {
-      const categories = Object.keys(SPACE_CATEGORIES);
+      const categories = Object.keys(SPACE_STATION_ELEMENTS);
       res.status(200).json({
         categories
       });

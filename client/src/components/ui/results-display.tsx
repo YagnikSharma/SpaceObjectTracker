@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { jsPDF } from "jspdf";
-import 'jspdf-autotable';
 
 export interface DetectedObject {
   id: string;
@@ -41,105 +39,6 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
-  };
-  
-  // Generate and download PDF report
-  const handleExportPDF = () => {
-    if (!detectedObjects.length || !imageUrl) return;
-    
-    // Create PDF document using jsPDF
-    const pdf = new jsPDF();
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    
-    // Add header
-    pdf.setFontSize(18);
-    pdf.setTextColor(65, 105, 225); // Blue
-    pdf.text("Space Station Component Detection Report", pageWidth/2, 15, { align: "center" });
-    
-    // Add date and time
-    pdf.setFontSize(10);
-    pdf.setTextColor(100, 100, 100);
-    pdf.text(`Generated: ${new Date().toLocaleString()}`, pageWidth/2, 22, { align: "center" });
-    
-    // Add image thumbnail if available
-    if (imageUrl) {
-      try {
-        pdf.addImage(imageUrl, "JPEG", 15, 30, 180, 100);
-      } catch (e) {
-        console.error("Could not add image to PDF:", e);
-      }
-    }
-    
-    // Add detection summary
-    pdf.setFontSize(14);
-    pdf.setTextColor(65, 105, 225);
-    pdf.text("Detection Summary", 15, 140);
-    
-    const issueCount = detectedObjects.filter(obj => obj.issue).length;
-    
-    pdf.setFontSize(11);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(`Total components detected: ${detectedObjects.length}`, 20, 150);
-    pdf.text(`Components with issues: ${issueCount}`, 20, 158);
-    
-    if (issueCount > 0) {
-      pdf.setTextColor(220, 53, 69); // Red for issues
-      pdf.text("⚠️ Action required for highlighted components", 20, 166);
-      pdf.setTextColor(0, 0, 0);
-    }
-    
-    // Add table with detection results
-    pdf.setFontSize(12);
-    pdf.text("Detailed Components Analysis", 15, 180);
-    
-    const tableData = detectedObjects.map(obj => [
-      obj.label,
-      `${(obj.confidence * 100).toFixed(0)}%`,
-      obj.context || "N/A",
-      obj.issue || "None",
-    ]);
-    
-    const tableColumns = [
-      { header: "Component", dataKey: "component" },
-      { header: "Confidence", dataKey: "confidence" },
-      { header: "Category", dataKey: "category" },
-      { header: "Issue", dataKey: "issue" }
-    ];
-    
-    // @ts-ignore - jspdf-autotable types are not properly recognized
-    pdf.autoTable({
-      startY: 185,
-      head: [["Component", "Confidence", "Category", "Issue"]],
-      body: tableData,
-      theme: "grid",
-      headStyles: { 
-        fillColor: [65, 105, 225],
-        textColor: 255,
-        fontStyle: 'bold'
-      },
-      columnStyles: {
-        3: {
-          fontStyle: function(cell) {
-            return cell.raw !== "None" ? 'bold' : 'normal';
-          },
-          textColor: function(cell) {
-            return cell.raw !== "None" ? [220, 53, 69] : [0, 0, 0];
-          }
-        }
-      }
-    });
-    
-    // Add footer
-    const pageCount = pdf.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      pdf.setPage(i);
-      pdf.setFontSize(8);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text("Galactic Cop - Space Station Monitoring System", pageWidth/2, pdf.internal.pageSize.getHeight() - 10, { align: "center" });
-    }
-    
-    // Save the PDF
-    pdf.save("space-station-detection-report.pdf");
   };
 
   const renderBoundingBox = (object: DetectedObject) => {
@@ -295,16 +194,7 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Export JSON
-          </button>
-          <button 
-            className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 rounded-lg text-green-400 text-xs font-medium flex items-center transition-colors" 
-            onClick={handleExportPDF}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export PDF
+            Export Data
           </button>
           <button 
             className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center transition-colors ${

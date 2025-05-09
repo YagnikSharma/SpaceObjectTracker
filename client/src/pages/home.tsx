@@ -15,8 +15,7 @@ const NAV_LINKS = [
   { name: "Home", href: "/", icon: "🏠" },
   { name: "Mission Control", href: "/mission-control", icon: "🛰️" },
   { name: "Galactic Map", href: "/galactic-map", icon: "🌌" },
-  { name: "Stellar Archives", href: "/archives", icon: "📚" },
-  { name: "Falcon Generator", href: "/image-generator", icon: "🖼️" }
+  { name: "Stellar Archives", href: "/archives", icon: "📚" }
 ];
 
 export default function Home() {
@@ -315,9 +314,6 @@ export default function Home() {
             </Link>
             <Link href="/archives" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
               <span className="mr-1">📚</span> Stellar Archives
-            </Link>
-            <Link href="/image-generator" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
-              <span className="mr-1">🖼️</span> Falcon Generator
             </Link>
           </div>
         </div>
