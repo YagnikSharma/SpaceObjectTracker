@@ -308,14 +308,14 @@ export default function GalacticMap() {
                       </div>
                     )}
                     {selectedMap.scientificData.discoveryDate && (
-                      <div className="dark:bg-blue-900/20 bg-yellow-500/10 p-2 rounded-md">
-                        <span className="dark:text-blue-300 text-yellow-700 font-medium">Discovered:</span>
+                      <div className="dark:bg-blue-900/20 bg-blue-500/10 p-2 rounded-md">
+                        <span className="dark:text-blue-300 text-blue-700 font-medium">Discovered:</span>
                         <p className="dark:text-blue-100/80 text-foreground/80">{selectedMap.scientificData.discoveryDate}</p>
                       </div>
                     )}
                     {selectedMap.scientificData.size && (
-                      <div className="dark:bg-blue-900/20 bg-yellow-500/10 p-2 rounded-md">
-                        <span className="dark:text-blue-300 text-yellow-700 font-medium">Size:</span>
+                      <div className="dark:bg-blue-900/20 bg-blue-500/10 p-2 rounded-md">
+                        <span className="dark:text-blue-300 text-blue-700 font-medium">Size:</span>
                         <p className="dark:text-blue-100/80 text-foreground/80">{selectedMap.scientificData.size}</p>
                       </div>
                     )}
@@ -324,7 +324,7 @@ export default function GalacticMap() {
                 
                 {selectedMap.facts && (
                   <div className="mb-4">
-                    <h4 className="text-sm font-medium dark:text-blue-300 text-yellow-700 mb-2">Fascinating Facts</h4>
+                    <h4 className="text-sm font-medium dark:text-blue-300 text-blue-700 mb-2">Fascinating Facts</h4>
                     <ul className="list-disc pl-5 space-y-1 text-sm dark:text-blue-100/80 text-foreground/80">
                       {selectedMap.facts.map((fact, i) => (
                         <li key={i}>{fact}</li>
@@ -338,7 +338,7 @@ export default function GalacticMap() {
                     href={selectedMap.link} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="px-4 py-2 dark:bg-blue-500/20 bg-yellow-500/20 dark:hover:bg-blue-500/30 hover:bg-yellow-500/30 rounded-lg dark:text-blue-300 text-yellow-700 transition-colors inline-flex items-center"
+                    className="px-4 py-2 dark:bg-blue-500/20 bg-blue-500/20 dark:hover:bg-blue-500/30 hover:bg-blue-500/30 rounded-lg dark:text-blue-300 text-blue-700 transition-colors inline-flex items-center"
                   >
                     <span>View on {selectedMap.agency.split('/')[0]}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -437,8 +437,8 @@ export default function GalacticMap() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-2xl font-bold dark:text-white text-yellow-700 mb-2">Galactic Map Reference</h2>
-            <p className="dark:text-blue-300/70 text-yellow-700/80">
+            <h2 className="text-2xl font-bold dark:text-white text-blue-700 mb-2">Galactic Map Reference</h2>
+            <p className="dark:text-blue-300/70 text-blue-700/80">
               Explore various astronomical maps used by NASA and other space agencies to navigate and understand our universe
             </p>
           </motion.div>
@@ -469,13 +469,13 @@ export default function GalacticMap() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t dark:from-[#0a0e17] from-background to-transparent opacity-90"></div>
                   <div className="absolute bottom-2 left-3 right-3 text-xs">
-                    <span className="dark:bg-blue-900/50 bg-yellow-500/20 px-2 py-1 rounded-md dark:border-blue-500/20 border-yellow-500/30 border dark:text-blue-300/70 text-yellow-700/90">
+                    <span className="dark:bg-blue-900/50 bg-blue-500/20 px-2 py-1 rounded-md dark:border-blue-500/20 border-blue-500/30 border dark:text-blue-300/70 text-blue-700/90">
                       {map.agency}
                     </span>
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-medium dark:text-blue-300 text-yellow-700 mb-2">{map.title}</h3>
+                  <h3 className="text-lg font-medium dark:text-blue-300 text-blue-700 mb-2">{map.title}</h3>
                   <p className="dark:text-blue-200/70 text-foreground/80 text-sm line-clamp-3 mb-3">
                     {map.description}
                   </p>
@@ -484,7 +484,7 @@ export default function GalacticMap() {
                       href={map.link} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex items-center px-3 py-1.5 text-sm dark:bg-blue-500/20 bg-yellow-500/20 dark:hover:bg-blue-500/30 hover:bg-yellow-500/30 rounded-lg dark:text-blue-300 text-yellow-700 transition-colors"
+                      className="inline-flex items-center px-3 py-1.5 text-sm dark:bg-blue-500/20 bg-blue-500/20 dark:hover:bg-blue-500/30 hover:bg-blue-500/30 rounded-lg dark:text-blue-300 text-blue-700 transition-colors"
                       onClick={(e) => e.stopPropagation()} // Prevent triggering card click
                     >
                       <span>Source</span>
@@ -494,7 +494,7 @@ export default function GalacticMap() {
                     </a>
                     
                     <button 
-                      className="px-3 py-1.5 text-sm dark:bg-blue-500/20 bg-yellow-500/20 dark:hover:bg-blue-500/30 hover:bg-yellow-500/30 rounded-lg dark:text-blue-300 text-yellow-700 transition-colors inline-flex items-center"
+                      className="px-3 py-1.5 text-sm dark:bg-blue-500/20 bg-blue-500/20 dark:hover:bg-blue-500/30 hover:bg-blue-500/30 rounded-lg dark:text-blue-300 text-blue-700 transition-colors inline-flex items-center"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleMapClick(map, e);
@@ -518,7 +518,7 @@ export default function GalacticMap() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.7 }}
         >
-          <h3 className="text-xl font-medium dark:text-blue-300 text-yellow-700 mb-4">
+          <h3 className="text-xl font-medium dark:text-blue-300 text-blue-700 mb-4">
             About NASA's Astronomical Maps and Resources
           </h3>
           <p className="dark:text-blue-200/70 text-foreground/80 mb-4">
