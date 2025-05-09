@@ -127,7 +127,7 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
     doc.text("Detected Components", 15, 170);
     
     const tableColumn = ["Component", "Confidence", "Category", "Issue"];
-    const tableRows = [];
+    const tableRows: Array<[string, string, string, string]> = [];
     
     detectedObjects.forEach(obj => {
       const confidencePercent = Math.round(obj.confidence * 100) + '%';
