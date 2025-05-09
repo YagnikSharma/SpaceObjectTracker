@@ -16,13 +16,13 @@ export default function GalacticMap() {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Simulating fetching NASA map data
+    // NASA and space agencies map data
     const nasaMaps: MapSource[] = [
       {
         id: 1,
         title: "Webb's First Deep Field",
         description: "NASA's James Webb Space Telescope has produced the deepest and sharpest infrared image of the distant universe to date. Known as Webb's First Deep Field, this image of galaxy cluster SMACS 0723 is overflowing with detail.",
-        imageUrl: "https://www.nasa.gov/wp-content/uploads/2022/07/main_image_deep_field_smacs0723-5mb.jpg",
+        imageUrl: "https://stsci-opo.org/STScI-01G8H49Z5K1HGKVT64AYZEG8DY.png",
         link: "https://science.nasa.gov/missions/webb/webbs-first-images/",
         agency: "NASA/ESA/CSA/STScI"
       },
@@ -30,7 +30,7 @@ export default function GalacticMap() {
         id: 2,
         title: "Pillars of Creation",
         description: "NASA's James Webb Space Telescope has captured a lush, highly detailed landscape – the iconic Pillars of Creation – where new stars are forming within dense clouds of gas and dust.",
-        imageUrl: "https://stsci-opo.org/STScI-01GFKQRGABKJ6JZ9FKHQGW3YZVS.png",
+        imageUrl: "https://stsci-opo.org/STScI-01GK2KMYS2JYST8YW2KTQY3ZXT.png",
         link: "https://science.nasa.gov/missions/webb/nasa-james-webb-space-telescope-just-revealed-universe-whole-new-light/",
         agency: "NASA/ESA/CSA/STScI"
       },
@@ -38,33 +38,57 @@ export default function GalacticMap() {
         id: 3,
         title: "Hubble eXtreme Deep Field",
         description: "The Hubble eXtreme Deep Field (XDF) is an image of a small area of space in the center of the Hubble Ultra Deep Field, combining data from Hubble programs from 2002 to 2012.",
-        imageUrl: "https://esahubble.org/media/archives/images/screen/heic1214a.jpg",
+        imageUrl: "https://cdn.spacetelescope.org/archives/images/screen/heic1214a.jpg",
         link: "https://esahubble.org/images/heic1214a/",
         agency: "NASA/ESA/STScI"
       },
       {
         id: 4,
-        title: "SKA Observatory Radio Telescope Map",
-        description: "The Square Kilometre Array (SKA) is an intergovernmental radio telescope project being built in Australia and South Africa. When complete, it will be the world's largest radio telescope.",
-        imageUrl: "https://www.skao.int/sites/default/files/styles/slider/public/2021-04/SKA-Low%20-%20night%20-%20SKAO.jpg",
-        link: "https://www.skao.int/en",
-        agency: "SKAO"
+        title: "Carina Nebula by Webb Telescope",
+        description: "This landscape of 'mountains' and 'valleys' speckled with glittering stars is actually the edge of a nearby, young, star-forming region called NGC 3324 in the Carina Nebula.",
+        imageUrl: "https://stsci-opo.org/STScI-01G77PB54JD1D218PG476W6D7M.png",
+        link: "https://science.nasa.gov/missions/webb/nasas-webb-delivers-deepest-infrared-image-universe-yet/",
+        agency: "NASA/ESA/CSA/STScI"
       },
       {
         id: 5,
-        title: "NASA's Fermi Gamma-ray Space Telescope Sky Map",
-        description: "This view from NASA's Fermi Gamma-ray Space Telescope is the deepest and best-resolved portrait of the gamma-ray sky to date.",
-        imageUrl: "https://www.nasa.gov/wp-content/uploads/2013/10/635809main_fermi_5-year_sky.jpg",
-        link: "https://www.nasa.gov/mission/fermi-gamma-ray-space-telescope/",
-        agency: "NASA/DOE/Fermi LAT Collaboration"
+        title: "Southern Ring Nebula",
+        description: "The Southern Ring Nebula is a planetary nebula – an expanding cloud of gas surrounding a dying star. Webb revealed previously hidden details in this colorful display.",
+        imageUrl: "https://stsci-opo.org/STScI-01G8H15NQKF8HKXESJYGPJ6H7A.png",
+        link: "https://science.nasa.gov/missions/webb/webbs-first-images/",
+        agency: "NASA/ESA/CSA/STScI"
       },
       {
         id: 6,
         title: "Planck Cosmic Microwave Background",
         description: "The most detailed map ever created of the cosmic microwave background – the relic radiation from the Big Bang.",
-        imageUrl: "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2013/03/planck_cmb/12583930-4-eng-GB/Planck_CMB.jpg",
+        imageUrl: "https://cdn.sci.esa.int/documents/36233/36291/1567214818447-Planck_CMB_2018_1237.jpg",
         link: "https://www.esa.int/Science_Exploration/Space_Science/Planck",
         agency: "ESA/Planck Collaboration"
+      },
+      {
+        id: 7,
+        title: "WASP-96 b Atmospheric Spectrum",
+        description: "Webb's detailed observation of this hot, puffy exoplanet revealed the presence of specific gas molecules based on tiny decreases in the brightness of precise colors of light.",
+        imageUrl: "https://stsci-opo.org/STScI-01G7DDBW1BQYSDNJHJGQCP8ZTZ.png",
+        link: "https://science.nasa.gov/missions/webb/",
+        agency: "NASA/ESA/CSA/STScI"
+      },
+      {
+        id: 8,
+        title: "Stephan's Quintet",
+        description: "Webb captured this group of five galaxies that appear close to each other in the sky: two in the middle of merging, with the others distorted by their gravitational interactions.",
+        imageUrl: "https://stsci-opo.org/STScI-01G8H1B5GTFJCYYAC42T3NACEH.png",
+        link: "https://science.nasa.gov/missions/webb/",
+        agency: "NASA/ESA/CSA/STScI"
+      },
+      {
+        id: 9,
+        title: "Cartwheel Galaxy",
+        description: "Webb's powerful infrared vision captured this detailed image of the Cartwheel and two smaller companion galaxies against a backdrop of many other galaxies.",
+        imageUrl: "https://stsci-opo.org/STScI-01G97DZCC51T4H1YV4J9BHR78H.png",
+        link: "https://www.nasa.gov/image-feature/goddard/2022/nasas-webb-captures-cartwheel-galaxys-cosmic-dance/",
+        agency: "NASA/ESA/CSA/STScI"
       }
     ];
 

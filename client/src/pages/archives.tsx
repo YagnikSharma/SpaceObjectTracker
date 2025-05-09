@@ -90,6 +90,62 @@ export default function StellarArchives() {
         imageUrl: "https://esahubble.org/media/archives/images/screen/potw2031a.jpg",
         captureDate: "2020-07-27",
         category: "planet"
+      },
+      {
+        id: 10,
+        title: "Webb's First Deep Field",
+        description: "NASA's James Webb Space Telescope has produced the deepest and sharpest infrared image of the distant universe to date. Known as Webb's First Deep Field, this image of galaxy cluster SMACS 0723 is overflowing with detail.",
+        imageUrl: "https://stsci-opo.org/STScI-01G8H49Z5K1HGKVT64AYZEG8DY.png",
+        captureDate: "2022-07-11",
+        category: "webb"
+      },
+      {
+        id: 11,
+        title: "Webb's Pillars of Creation",
+        description: "The James Webb Space Telescope captured this lush, highly detailed landscape – the iconic Pillars of Creation – where new stars are forming within dense clouds of gas and dust.",
+        imageUrl: "https://stsci-opo.org/STScI-01GK2KMYS2JYST8YW2KTQY3ZXT.png",
+        captureDate: "2022-10-19",
+        category: "webb"
+      },
+      {
+        id: 12,
+        title: "Webb's Southern Ring Nebula",
+        description: "The Southern Ring Nebula is a planetary nebula – an expanding cloud of gas surrounding a dying star. Webb revealed previously hidden details in this colorful display.",
+        imageUrl: "https://stsci-opo.org/STScI-01G8H15NQKF8HKXESJYGPJ6H7A.png",
+        captureDate: "2022-07-12",
+        category: "webb"
+      },
+      {
+        id: 13,
+        title: "Webb's Carina Nebula",
+        description: "This landscape of 'mountains' and 'valleys' speckled with glittering stars is actually the edge of a nearby, young, star-forming region called NGC 3324 in the Carina Nebula.",
+        imageUrl: "https://stsci-opo.org/STScI-01G77PB54JD1D218PG476W6D7M.png",
+        captureDate: "2022-07-12",
+        category: "webb"
+      },
+      {
+        id: 14,
+        title: "Webb's Stephan's Quintet",
+        description: "Webb captured this group of five galaxies that appear close to each other in the sky: two in the middle of merging, with the others distorted by their gravitational interactions.",
+        imageUrl: "https://stsci-opo.org/STScI-01G8H1B5GTFJCYYAC42T3NACEH.png",
+        captureDate: "2022-07-12",
+        category: "webb"
+      },
+      {
+        id: 15,
+        title: "Andromeda Galaxy",
+        description: "The Andromeda Galaxy, also known as Messier 31, is a spiral galaxy approximately 2.5 million light-years from Earth. It is the nearest major galaxy to the Milky Way and is visible to the naked eye on moonless nights.",
+        imageUrl: "https://esahubble.org/media/archives/images/screen/heic1502a.jpg",
+        captureDate: "2015-01-20",
+        category: "galaxy"
+      },
+      {
+        id: 16,
+        title: "Webb's Cartwheel Galaxy",
+        description: "Webb's powerful infrared vision captured this detailed image of the Cartwheel and two smaller companion galaxies against a backdrop of many other galaxies.",
+        imageUrl: "https://stsci-opo.org/STScI-01G97DZCC51T4H1YV4J9BHR78H.png",
+        captureDate: "2022-08-02",
+        category: "webb"
       }
     ];
 
@@ -117,7 +173,8 @@ export default function StellarArchives() {
     { id: 'all', name: 'All Images' },
     { id: 'nebula', name: 'Nebulae' },
     { id: 'galaxy', name: 'Galaxies' },
-    { id: 'planet', name: 'Planets' }
+    { id: 'planet', name: 'Planets' },
+    { id: 'webb', name: 'James Webb Telescope' }
   ];
 
   return (
@@ -191,9 +248,9 @@ export default function StellarArchives() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-2xl font-bold text-white mb-2">NASA Hubble Telescope Archives</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">NASA Space Telescope Archives</h2>
             <p className="text-blue-300/70">
-              Explore the wonders of space through stunning images captured by the Hubble Space Telescope
+              Explore the wonders of space through stunning images captured by the Hubble and James Webb Space Telescopes
             </p>
           </motion.div>
         </div>
@@ -224,7 +281,7 @@ export default function StellarArchives() {
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-10 h-10 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="ml-3 text-blue-300">Loading Hubble images...</span>
+            <span className="ml-3 text-blue-300">Loading space telescope images...</span>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -273,27 +330,50 @@ export default function StellarArchives() {
           transition={{ duration: 0.5, delay: 0.7 }}
         >
           <h3 className="text-xl font-medium text-blue-300 mb-3">
-            About the Hubble Space Telescope
+            About NASA's Space Telescopes
           </h3>
-          <p className="text-blue-200/70 max-w-4xl mx-auto mb-4">
-            The Hubble Space Telescope is a space telescope that was launched into low Earth orbit in 1990 and remains in operation. 
-            It's one of the largest and most versatile space telescopes, renowned for its stunning imagery of distant stars, 
-            galaxies, and nebulae, as well as its crucial role in astronomical research.
-          </p>
-          <p className="text-blue-200/70 max-w-4xl mx-auto">
-            All images displayed in this archive are sourced from NASA and the European Space Agency (ESA) and represent some of the
-            most spectacular cosmic views captured by Hubble throughout its mission.
-          </p>
-          <div className="flex items-center justify-center mt-6">
-            <a 
-              href="https://hubblesite.org/images/gallery" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-white font-medium shadow-lg shadow-blue-500/10 hover:shadow-blue-500/30 transition-all hover:from-blue-500 hover:to-purple-500"
-            >
-              Explore the Official Hubble Gallery
-            </a>
+          <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            <div>
+              <h4 className="text-lg text-blue-400 font-medium mb-2">Hubble Space Telescope</h4>
+              <p className="text-blue-200/70 mb-4 text-sm">
+                The Hubble Space Telescope was launched into low Earth orbit in 1990 and remains in operation. 
+                It's one of the largest and most versatile space telescopes, renowned for its stunning imagery of distant stars, 
+                galaxies, and nebulae, as well as its crucial role in astronomical research.
+              </p>
+              <div className="flex justify-center mt-4">
+                <a 
+                  href="https://hubblesite.org/images/gallery" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 text-sm bg-blue-500/20 hover:bg-blue-500/30 rounded-lg text-blue-300 transition-colors"
+                >
+                  Explore Hubble Gallery
+                </a>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-lg text-blue-400 font-medium mb-2">James Webb Space Telescope</h4>
+              <p className="text-blue-200/70 mb-4 text-sm">
+                The James Webb Space Telescope (JWST) was launched on December 25, 2021, and is the largest optical telescope in space.
+                Operating primarily in the infrared spectrum, it allows astronomers to observe distant objects too old, distant, or faint for the Hubble Space Telescope.
+                JWST is expected to enable a broad range of scientific investigations across fields of astronomy and cosmology.
+              </p>
+              <div className="flex justify-center mt-4">
+                <a 
+                  href="https://webbtelescope.org/resource-gallery/images" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 text-sm bg-blue-500/20 hover:bg-blue-500/30 rounded-lg text-blue-300 transition-colors"
+                >
+                  Explore Webb Gallery
+                </a>
+              </div>
+            </div>
           </div>
+          <p className="text-blue-200/70 max-w-4xl mx-auto mt-6">
+            All images displayed in this archive are sourced from NASA, the European Space Agency (ESA), and their partners, 
+            representing some of the most spectacular cosmic views captured throughout these missions.
+          </p>
         </motion.div>
       </main>
 
