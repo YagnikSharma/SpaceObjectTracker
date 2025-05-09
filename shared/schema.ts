@@ -42,6 +42,27 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).pick({
   content: true,
 });
 
+// Feedback schema
+export const feedback = pgTable("feedback", {
+  id: serial("id").primaryKey(),
+  detectionId: integer("detection_id").references(() => detections.id, { onDelete: "cascade" }),
+  accuracy: integer("accuracy").notNull(), // 1-5 rating
+  missedObjects: text("missed_objects"), // Text description of objects the model missed
+  falseDetections: text("false_detections"), // Text description of false detections
+  suggestions: text("suggestions"), // User suggestions for improvement
+  email: text("email"), // Optional user email for contact
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertFeedbackSchema = createInsertSchema(feedback).pick({
+  detectionId: true,
+  accuracy: true,
+  missedObjects: true,
+  falseDetections: true,
+  suggestions: true,
+  email: true,
+});
+
 // Define types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -51,6 +72,9 @@ export type Detection = typeof detections.$inferSelect;
 
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+
+export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
+export type Feedback = typeof feedback.$inferSelect;
 
 // Define Zod schemas for API requests/responses
 export const detectedObjectSchema = z.object({
