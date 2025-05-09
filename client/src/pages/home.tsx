@@ -130,15 +130,17 @@ export default function Home() {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-1">
               {NAV_LINKS.map((link) => (
-                <Link key={link.name} href={link.href}>
-                  <div className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-1 ${
+                <Link 
+                  key={link.name} 
+                  href={link.href}
+                  className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-1 ${
                     location === link.href 
                       ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30' 
                       : 'hover:bg-[#2a3348]/70 hover:text-blue-300'
-                  }`}>
-                    <span>{link.icon}</span>
-                    <span>{link.name}</span>
-                  </div>
+                  }`}
+                >
+                  <span>{link.icon}</span>
+                  <span>{link.name}</span>
                 </Link>
               ))}
             </div>
@@ -180,18 +182,18 @@ export default function Home() {
               >
                 <div className="flex flex-col space-y-1 pb-2">
                   {NAV_LINKS.map((link) => (
-                    <Link key={link.name} href={link.href}>
-                      <div 
-                        className={`px-4 py-3 rounded-lg flex items-center space-x-3 ${
-                          location === link.href 
-                            ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30' 
-                            : 'hover:bg-[#2a3348]/70 hover:text-blue-300'
-                        }`}
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <span className="text-xl">{link.icon}</span>
-                        <span>{link.name}</span>
-                      </div>
+                    <Link 
+                      key={link.name} 
+                      href={link.href}
+                      className={`px-4 py-3 rounded-lg flex items-center space-x-3 ${
+                        location === link.href 
+                          ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30' 
+                          : 'hover:bg-[#2a3348]/70 hover:text-blue-300'
+                      }`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span className="text-xl">{link.icon}</span>
+                      <span>{link.name}</span>
                     </Link>
                   ))}
                 </div>
@@ -304,15 +306,15 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-center space-x-6">
-            <a href="#" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+            <Link href="/mission-control" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
               <span className="mr-1">👨‍🚀</span> Mission Control
-            </a>
-            <a href="#" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
-              <span className="mr-1">🛡️</span> Privacy
-            </a>
-            <a href="#" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
-              <span className="mr-1">📜</span> Terms
-            </a>
+            </Link>
+            <Link href="/galactic-map" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              <span className="mr-1">🌌</span> Galactic Map
+            </Link>
+            <Link href="/archives" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              <span className="mr-1">📚</span> Stellar Archives
+            </Link>
           </div>
         </div>
       </footer>

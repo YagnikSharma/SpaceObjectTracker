@@ -325,15 +325,15 @@ export default function MissionControl() {
             </p>
           </div>
           <div className="flex items-center space-x-6">
-            <a href="#" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+            <Link href="/mission-control" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
               <span className="mr-1">👨‍🚀</span> Mission Control
-            </a>
-            <a href="#" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
-              <span className="mr-1">🛡️</span> Privacy
-            </a>
-            <a href="#" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
-              <span className="mr-1">📜</span> Terms
-            </a>
+            </Link>
+            <Link href="/galactic-map" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              <span className="mr-1">🌌</span> Galactic Map
+            </Link>
+            <Link href="/archives" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              <span className="mr-1">📚</span> Stellar Archives
+            </Link>
           </div>
         </div>
       </footer>
