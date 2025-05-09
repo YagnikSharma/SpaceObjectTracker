@@ -79,141 +79,260 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
   // Empty state
   if (!isLoading && !imageUrl && !error) {
     return (
-      <Card className="overflow-hidden">
+      <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-[#2a3348] shadow-lg overflow-hidden">
         <div className="p-8 flex flex-col items-center justify-center text-center">
-          <div className="w-20 h-20 rounded-full bg-neutral-100 flex items-center justify-center mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+          <div className="relative w-24 h-24 mb-6">
+            <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-xl"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-blue-400/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
           </div>
-          <h3 className="text-lg font-medium text-neutral-700 mb-2">No Results Yet</h3>
-          <p className="text-neutral-500 max-w-md">Upload a space image to detect satellites, debris, and other space objects using Falcon API.</p>
+          <h3 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-3">
+            No Detection Results Yet
+          </h3>
+          <p className="text-blue-300/60 max-w-md text-sm">
+            Upload an image of space objects to perform advanced YOLO detection and analysis.
+            The system will identify and classify stellar objects with high accuracy.
+          </p>
+          <div className="mt-6 flex justify-center space-x-2 text-xs text-blue-400/50">
+            <span>✓ Galaxies</span>
+            <span>✓ Nebulae</span>
+            <span>✓ Planets</span>
+            <span>✓ Stars</span>
+            <span>✓ Satellites</span>
+          </div>
         </div>
-      </Card>
+      </div>
     );
   }
 
   // Loading state
   if (isLoading) {
     return (
-      <Card className="overflow-hidden">
+      <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-[#2a3348] shadow-lg overflow-hidden">
         <div className="p-8 flex flex-col items-center justify-center">
-          <div className="w-10 h-10 border-2 border-primary-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-neutral-600 text-center">Analyzing image with Falcon API...</p>
-          <p className="text-neutral-500 text-sm mt-2">This may take a few moments</p>
+          <div className="relative mb-6">
+            <div className="w-16 h-16 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center text-xs font-mono text-blue-300">YOLO</div>
+          </div>
+          <div className="flex items-center space-x-2 mb-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+          </div>
+          <h3 className="text-lg font-semibold text-blue-400 mb-2">Advanced YOLO Analysis in Progress</h3>
+          <p className="text-blue-300/70 text-center max-w-md">Scanning image for stellar objects, planetary bodies, and artificial satellites</p>
+          <div className="mt-4 w-64 h-2 bg-[#2a3348] rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse" style={{ width: '60%' }}></div>
+          </div>
         </div>
-      </Card>
+      </div>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <Card className="overflow-hidden">
+      <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-red-500/30 shadow-lg overflow-hidden">
         <div className="p-8 flex flex-col items-center justify-center text-center">
-          <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          <div className="relative w-24 h-24 mb-6">
+            <div className="absolute inset-0 bg-red-500/20 rounded-full blur-xl"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
           </div>
-          <h3 className="text-lg font-medium text-red-700 mb-2">Processing Error</h3>
-          <p className="text-neutral-500 max-w-md">{error}</p>
-          <Button className="mt-4" onClick={onRetry}>Try Again</Button>
+          <h3 className="text-xl font-bold text-red-400 mb-3">Detection System Error</h3>
+          <div className="mb-4 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-lg font-mono text-sm text-red-300/80">
+            {error}
+          </div>
+          <p className="text-blue-300/60 max-w-md text-sm mb-4">
+            The YOLO detection system encountered an error. Please try again with a different image or adjust the parameters.
+          </p>
+          <button 
+            onClick={onRetry}
+            className="px-6 py-2 bg-gradient-to-r from-red-600 to-orange-600 rounded-lg text-white font-medium 
+                     shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all
+                     hover:from-red-500 hover:to-orange-500 flex items-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Reset and Try Again
+          </button>
         </div>
-      </Card>
+      </div>
     );
   }
 
   // Results state
   return (
-    <Card className="overflow-hidden">
-      <div className="border-b border-neutral-200 p-4 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-neutral-800">Detection Results</h2>
-        <div className="flex space-x-2">
+    <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-[#2a3348] shadow-lg overflow-hidden">
+      <div className="border-b border-[#2a3348] p-4 flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+          <h2 className="text-md font-semibold ml-2 text-blue-300">YOLO Detection Results</h2>
+        </div>
+        <div className="flex space-x-3">
           <button 
-            className="text-primary-600 hover:text-primary-800 text-sm font-medium flex items-center" 
+            className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg text-blue-400 text-xs font-medium flex items-center transition-colors" 
             onClick={handleDownloadResults}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Export
+            Export Data
           </button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-neutral-500 hover:text-neutral-700 text-sm font-medium flex items-center"
+          <button 
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center transition-colors ${
+              showLabels 
+                ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400' 
+                : 'bg-gray-500/20 hover:bg-gray-500/30 text-gray-400'
+            }`}
             onClick={() => setShowLabels(!showLabels)}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
             {showLabels ? 'Hide Labels' : 'Show Labels'}
-          </Button>
+          </button>
         </div>
       </div>
+
       <div className="p-4">
-        <div className="relative mb-6 bg-neutral-100 rounded-lg overflow-hidden" style={{height: "320px"}}>
-          {imageUrl && <img 
-            src={imageUrl}
-            alt="Processed space image with detected objects"
-            className="w-full h-full object-cover"
-          />}
+        <div className="relative mb-6 bg-black/30 rounded-lg overflow-hidden border border-[#2a3348]/50" style={{height: "340px"}}>
+          {imageUrl && (
+            <div className="absolute inset-0 overflow-hidden">
+              <img 
+                src={imageUrl}
+                alt="Processed space image with detected objects"
+                className="w-full h-full object-cover"
+              />
+              {/* Add a subtle grid overlay effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-purple-900/10 pointer-events-none"></div>
+              <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px)
+                  `,
+                  backgroundSize: '20px 20px'
+                }}
+              ></div>
+            </div>
+          )}
+          
+          {/* Detection bounding boxes and labels */}
           {detectedObjects.map(renderBoundingBox)}
+
+          {/* Image metadata UI */}
+          <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center">
+            <div className="px-2.5 py-1.5 bg-black/50 backdrop-blur-sm rounded-lg text-xs text-blue-300 flex items-center space-x-3 border border-blue-500/20">
+              <span className="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span className="font-mono">{detectedObjects.length} objects</span>
+              </span>
+              <span className="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="font-mono">{new Date().toISOString().split('T')[0]}</span>
+              </span>
+            </div>
+            <div className="px-2.5 py-1.5 bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur-sm rounded-lg text-xs text-white flex items-center border border-blue-500/20">
+              <span className="mr-1">YOLO</span>
+              <span className="font-mono text-blue-300">v9.0</span>
+            </div>
+          </div>
         </div>
 
-        <div className="text-sm">
-          <h3 className="font-medium text-neutral-700 mb-2">
-            Objects Detected: <span className="font-semibold text-primary-700">{detectedObjects.length}</span>
-          </h3>
-          <div className="overflow-x-auto bg-neutral-50 rounded-lg border border-neutral-200">
-            <table className="min-w-full divide-y divide-neutral-200">
-              <thead className="bg-neutral-100">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Space Object</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Confidence</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Original Class</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Location</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Size</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-neutral-200">
-                {detectedObjects.map((object) => (
-                  <tr key={object.id} className="hover:bg-neutral-50">
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: object.color }}></div>
-                        <span className="font-medium text-neutral-700">{object.label}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={getConfidenceClass(object.confidence)}>
-                        {(object.confidence * 100).toFixed(0)}%
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-sm italic text-neutral-600">
-                        {object.originalClass || "N/A"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="font-mono text-neutral-600 text-xs">
-                        x: {object.x.toFixed(2)}, y: {object.y.toFixed(2)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="font-mono text-neutral-600 text-xs">
-                        w: {object.width.toFixed(2)}, h: {object.height.toFixed(2)}
-                      </span>
-                    </td>
+        <div className="text-blue-200 space-y-4">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-md font-semibold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Stellar Objects Detected: <span className="font-bold text-blue-300 ml-1">{detectedObjects.length}</span>
+            </h3>
+            <div className="text-xs text-blue-300/70 flex items-center">
+              <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>
+              High confidence 
+              <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 mx-1.5"></span>
+              Medium confidence
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-lg border border-[#2a3348]">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-[#2a3348]">
+                <thead className="bg-[#1a1f2c]">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Space Object</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Confidence</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Original Class</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Location</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Size</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-[#2a3348]">
+                  {detectedObjects.map((object) => (
+                    <tr key={object.id} className="hover:bg-[#2a3348]/30 transition-colors">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: object.color }}></div>
+                          <span className="font-medium text-blue-200">{object.label}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-16 h-2 bg-[#2a3348] rounded-full overflow-hidden mr-2">
+                            <div 
+                              className={`h-full ${
+                                object.confidence > 0.7 
+                                  ? 'bg-gradient-to-r from-green-500 to-green-300' 
+                                  : 'bg-gradient-to-r from-yellow-600 to-yellow-300'
+                              }`} 
+                              style={{ width: `${object.confidence * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className={object.confidence > 0.7 ? 'text-green-400' : 'text-yellow-400'}>
+                            {(object.confidence * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-xs italic text-blue-300/70 bg-blue-500/10 px-2 py-0.5 rounded">
+                          {object.originalClass || "N/A"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="font-mono text-xs text-blue-300/70">
+                          x: {object.x.toFixed(2)}, y: {object.y.toFixed(2)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="font-mono text-xs text-blue-300/70">
+                          w: {object.width.toFixed(2)}, h: {object.height.toFixed(2)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

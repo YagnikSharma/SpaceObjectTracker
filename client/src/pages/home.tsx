@@ -6,10 +6,24 @@ import { ChatInterface, ChatMessage } from "@/components/ui/chat-interface";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { useChat } from "@/hooks/use-chat";
 import { apiRequest } from "@/lib/queryClient";
+import { motion, AnimatePresence } from "framer-motion";
+import ReactPlayer from "react-player";
+import { Link, useLocation } from "wouter";
+
+// Navigation links
+const NAV_LINKS = [
+  { name: "Home", href: "/", icon: "🏠" },
+  { name: "Mission Control", href: "/mission-control", icon: "🛰️" },
+  { name: "Galactic Map", href: "/galactic-map", icon: "🌌" },
+  { name: "Stellar Archives", href: "/archives", icon: "📚" }
+];
 
 export default function Home() {
   const { toast } = useToast();
+  const [location] = useLocation();
   const [isApiConnected, setIsApiConnected] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>("detection"); // detection or analysis
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // File upload state and handlers
   const { 
@@ -52,72 +66,282 @@ export default function Home() {
   }, [toast]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-primary-800 text-white shadow-md">
-        <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <h1 className="text-xl font-semibold">Space Object Detection</h1>
+    <div className="min-h-screen bg-[#0a0e17] flex flex-col text-white relative overflow-hidden">
+      {/* Video Background */}
+      <div className="fixed inset-0 z-0 opacity-20 pointer-events-none overflow-hidden">
+        <ReactPlayer 
+          url="https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-1610-large.mp4"
+          playing
+          loop
+          muted
+          width="100%"
+          height="100%"
+          style={{ objectFit: 'cover' }}
+        />
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/60 via-[#0a0e17]/40 to-[#0a0e17]/90"></div>
+      </div>
+
+      {/* Floating Space Station UI Element */}
+      <motion.div 
+        className="absolute top-20 right-10 h-32 w-32 hidden lg:block z-10 pointer-events-none"
+        animate={{ 
+          y: [0, 15, 0],
+          rotate: [0, 2, 0, -2, 0]
+        }}
+        transition={{ 
+          duration: 20, 
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
+        <div className="relative w-full h-full">
+          <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+          <div className="absolute inset-4 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full flex items-center justify-center">
+            <span className="text-4xl">🛰️</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <span className={`text-sm ${isApiConnected ? 'bg-green-500' : 'bg-red-500'} rounded-full px-2 py-1 hidden sm:inline-block`}>
-              {isApiConnected ? 'API Connected' : 'API Disconnected'}
-            </span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        </div>
+      </motion.div>
+
+      {/* Header with glass effect */}
+      <header className="relative z-10 bg-[#1a1f2c]/70 backdrop-blur-md border-b border-[#2a3348] shadow-lg">
+        <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            {/* Logo and Title */}
+            <motion.div 
+              className="flex items-center space-x-3"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                  Galactic Object Detection
+                </h1>
+                <p className="text-xs text-blue-300/80">Powered by YOLO Advanced Analysis</p>
+              </div>
+            </motion.div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-1">
+              {NAV_LINKS.map((link) => (
+                <Link key={link.name} href={link.href}>
+                  <a className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-1 ${
+                    location === link.href 
+                      ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30' 
+                      : 'hover:bg-[#2a3348]/70 hover:text-blue-300'
+                  }`}>
+                    <span>{link.icon}</span>
+                    <span>{link.name}</span>
+                  </a>
+                </Link>
+              ))}
+            </div>
+
+            {/* Status and Mobile Menu Button */}
+            <div className="flex items-center space-x-3">
+              <span className={`text-xs px-2.5 py-1 rounded-full flex items-center ${
+                isApiConnected ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
+                                'bg-red-500/20 text-red-400 border border-red-500/30'
+              }`}>
+                <span className={`w-2 h-2 rounded-full mr-1.5 ${isApiConnected ? 'bg-green-400' : 'bg-red-400'}`}></span>
+                {isApiConnected ? 'System Online' : 'System Offline'}
+              </span>
+              
+              {/* Mobile menu button */}
+              <button 
+                className="md:hidden bg-[#2a3348]/70 p-2 rounded-lg hover:bg-[#3a4358]/70 transition-colors"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {isMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                  )}
+                </svg>
+              </button>
+            </div>
           </div>
+
+          {/* Mobile Navigation */}
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="md:hidden mt-4 overflow-hidden"
+              >
+                <div className="flex flex-col space-y-1 pb-2">
+                  {NAV_LINKS.map((link) => (
+                    <Link key={link.name} href={link.href}>
+                      <a 
+                        className={`px-4 py-3 rounded-lg flex items-center space-x-3 ${
+                          location === link.href 
+                            ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30' 
+                            : 'hover:bg-[#2a3348]/70 hover:text-blue-300'
+                        }`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span className="text-xl">{link.icon}</span>
+                        <span>{link.name}</span>
+                      </a>
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6">
-        {/* Left Panel - Upload & Results */}
-        <div className="w-full lg:w-7/12 space-y-6">
-          <FileUploader 
-            onFileSelect={setSelectedFile} 
-            onProcessImage={processImage}
-            isLoading={isUploading}
-            isProcessed={isProcessed}
-            setIsProcessed={setIsProcessed}
-          />
-          
-          <ResultsDisplay 
-            isLoading={isUploading}
-            imageUrl={imageUrl}
-            detectedObjects={detectedObjects}
-            error={uploadError}
-            onRetry={resetUpload}
-          />
-        </div>
-        
-        {/* Right Panel - Chat Interface */}
-        <div className="w-full lg:w-5/12">
-          <ChatInterface 
-            messages={messages}
-            isLoading={isLoadingResponse}
-            detectedObjects={detectedObjects}
-            onSendMessage={sendMessage}
-          />
+      {/* Main Content with Floating Islands */}
+      <main className="flex-grow relative z-10">
+        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+          {/* Content Tabs */}
+          <div className="flex mb-6 bg-[#1a1f2c]/50 backdrop-blur-md rounded-xl p-1 border border-[#2a3348]/50 w-full sm:w-auto overflow-x-auto">
+            <button 
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                activeTab === 'detection' 
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              onClick={() => setActiveTab('detection')}
+            >
+              Object Detection
+            </button>
+            <button 
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                activeTab === 'analysis' 
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              onClick={() => setActiveTab('analysis')}
+            >
+              AI Analysis
+            </button>
+          </div>
+
+          {/* Floating Islands Layout */}
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Left Island - Upload & Results */}
+            <motion.div 
+              className="w-full lg:w-7/12 space-y-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-[#2a3348] shadow-lg overflow-hidden">
+                <div className="p-4 border-b border-[#2a3348]">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <h2 className="text-md font-semibold ml-2 text-blue-300">Detection Control Center</h2>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <FileUploader 
+                    onFileSelect={setSelectedFile} 
+                    onProcessImage={processImage}
+                    isLoading={isUploading}
+                    isProcessed={isProcessed}
+                    setIsProcessed={setIsProcessed}
+                  />
+                </div>
+              </div>
+              
+              <ResultsDisplay 
+                isLoading={isUploading}
+                imageUrl={imageUrl}
+                detectedObjects={detectedObjects}
+                error={uploadError}
+                onRetry={resetUpload}
+              />
+            </motion.div>
+            
+            {/* Right Island - Chat Interface */}
+            <motion.div 
+              className="w-full lg:w-5/12"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="bg-[#1a1f2c]/70 backdrop-blur-md rounded-xl border border-[#2a3348] shadow-lg h-full overflow-hidden">
+                <div className="p-4 border-b border-[#2a3348]">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
+                    <h2 className="text-md font-semibold ml-2 text-blue-300">Galactic Intelligence Unit</h2>
+                  </div>
+                </div>
+                <ChatInterface 
+                  messages={messages}
+                  isLoading={isLoadingResponse}
+                  detectedObjects={detectedObjects}
+                  onSendMessage={sendMessage}
+                />
+              </div>
+            </motion.div>
+          </div>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-neutral-800 text-white py-4 px-4 sm:px-6 lg:px-8">
+      {/* Footer with glass effect */}
+      <footer className="relative z-10 bg-[#1a1f2c]/70 backdrop-blur-md border-t border-[#2a3348] py-4 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
-          <div className="text-sm text-neutral-400 mb-4 sm:mb-0">
-            <p>Space Object Detection powered by Falcon API</p>
+          <div className="text-sm text-blue-300/70 mb-4 sm:mb-0 flex items-center">
+            <span className="mr-2">🚀</span>
+            <p>Galactic Object Detection powered by Falcon API</p>
           </div>
-          <div className="flex items-center space-x-4">
-            <a href="#" className="text-neutral-400 hover:text-white transition-colors">Help</a>
-            <a href="#" className="text-neutral-400 hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="text-neutral-400 hover:text-white transition-colors">Terms</a>
+          <div className="flex items-center space-x-6">
+            <a href="#" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              <span className="mr-1">👨‍🚀</span> Mission Control
+            </a>
+            <a href="#" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              <span className="mr-1">🛡️</span> Privacy
+            </a>
+            <a href="#" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              <span className="mr-1">📜</span> Terms
+            </a>
           </div>
         </div>
       </footer>
+
+      {/* Floating particles effect */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-blue-400 rounded-full"
+            initial={{ 
+              x: Math.random() * 100 + "%", 
+              y: Math.random() * 100 + "%",
+              opacity: Math.random() * 0.5 + 0.3
+            }}
+            animate={{ 
+              y: [null, Math.random() * 100 + "%"],
+              opacity: [null, Math.random() * 0.5 + 0.1, Math.random() * 0.5 + 0.3]
+            }}
+            transition={{ 
+              duration: Math.random() * 20 + 10, 
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            style={{ 
+              width: Math.random() * 3 + 1 + "px",
+              height: Math.random() * 3 + 1 + "px"
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
