@@ -82,14 +82,80 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
     // Add image if available
     if (imageUrl) {
       try {
-        doc.addImage(imageUrl, 'JPEG', 15, 25, 180, 100);
+        // Create a temp canvas to process the image
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
         
-        // Draw a border around the image
-        doc.setDrawColor(40, 60, 100);
-        doc.setLineWidth(0.5);
-        doc.rect(15, 25, 180, 100);
+        img.onload = function() {
+          // Set canvas dimensions
+          canvas.width = img.width;
+          canvas.height = img.height;
+          
+          // Draw the image onto the canvas
+          ctx.drawImage(img, 0, 0, img.width, img.height);
+          
+          // Draw detection boxes on the image
+          detectedObjects.forEach(obj => {
+            const x = obj.x * img.width;
+            const y = obj.y * img.height;
+            const width = obj.width * img.width;
+            const height = obj.height * img.height;
+            
+            // Draw box
+            ctx.strokeStyle = obj.color;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(x, y, width, height);
+            
+            // Draw label background
+            ctx.fillStyle = obj.color;
+            const labelText = `${obj.label} (${(obj.confidence * 100).toFixed(0)}%)`;
+            const labelWidth = ctx.measureText(labelText).width + 10;
+            ctx.fillRect(x, y - 20, labelWidth, 20);
+            
+            // Draw label text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '14px Arial';
+            ctx.fillText(labelText, x + 5, y - 5);
+          });
+          
+          // Get the processed image as data URL
+          const processedImageUrl = canvas.toDataURL('image/jpeg');
+          
+          // Add the processed image to PDF
+          doc.addImage(processedImageUrl, 'JPEG', 15, 25, 180, 100);
+          
+          // Draw a border around the image
+          doc.setDrawColor(40, 60, 100);
+          doc.setLineWidth(0.5);
+          doc.rect(15, 25, 180, 100);
+          
+          // Continue with the rest of PDF generation
+          addPDFContent();
+          
+          // Save the PDF
+          doc.save("syndetect-report.pdf");
+        };
+        
+        // Set the source of the image
+        img.src = imageUrl;
+        
+        // Return early as we'll complete the PDF in the onload handler
+        return;
       } catch (error) {
         console.error("Failed to add image to PDF:", error);
+        
+        // Fallback: try adding the image directly
+        try {
+          doc.addImage(imageUrl, 'JPEG', 15, 25, 180, 100);
+          
+          // Draw a border around the image
+          doc.setDrawColor(40, 60, 100);
+          doc.setLineWidth(0.5);
+          doc.rect(15, 25, 180, 100);
+        } catch (fallbackError) {
+          console.error("Fallback image add failed:", fallbackError);
+        }
       }
     }
     
@@ -383,7 +449,7 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
               <img 
                 src={imageUrl}
                 alt="Processed space image with detected objects"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
               {/* Add a subtle grid overlay effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-purple-900/10 pointer-events-none"></div>
