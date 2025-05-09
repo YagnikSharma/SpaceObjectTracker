@@ -12,190 +12,247 @@ interface CameraCaptureProps {
 export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
-  const [selectedCamera, setSelectedCamera] = useState<string>("");
+  const [selectedCameraId, setSelectedCameraId] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isCapturing, setIsCapturing] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
-  const [permissionStatus, setPermissionStatus] = useState<string>("prompt");
+  const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
   const { toast } = useToast();
 
-  // Check camera permissions and get available cameras
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // Cleanup function to stop any active streams
+  const stopAllStreams = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  // Initialize - Check permissions and enumerate devices
   useEffect(() => {
-    const checkPermissionsAndGetCameras = async () => {
+    let mounted = true;
+    
+    const initializeCamera = async () => {
       try {
-        // First, check if we have camera permission already by requesting a stream
-        // This will prompt for permission if it hasn't been granted yet
+        setIsLoading(true);
+        setCameraError(null);
+        
+        // First request camera access to trigger permission prompt
         const initialStream = await navigator.mediaDevices.getUserMedia({ 
           video: true, 
           audio: false 
         });
         
-        // Permission granted
-        setPermissionStatus("granted");
+        // Once permission granted, get all camera devices
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cameras = devices.filter(device => device.kind === 'videoinput');
         
-        // Stop the initial stream since we'll start a new one with the selected camera
+        // Clean up the initial stream since we'll start a new one with selected camera
         initialStream.getTracks().forEach(track => track.stop());
         
-        // Now get the list of cameras
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const cameras = devices.filter(device => device.kind === "videoinput");
+        if (mounted) {
+          if (cameras.length === 0) {
+            setCameraError("No cameras detected on your device");
+            setIsLoading(false);
+            return;
+          }
+          
+          setAvailableCameras(cameras);
+          
+          // Select the first camera by default (usually front camera on mobile)
+          // On mobile, try to get the environment-facing camera instead
+          let defaultCamera = cameras[0].deviceId;
+          
+          if (isMobile && cameras.length > 1) {
+            // Try to select a rear camera on mobile devices if available
+            const rearCamera = cameras.find(camera => 
+              camera.label.toLowerCase().includes('back') || 
+              camera.label.toLowerCase().includes('rear') ||
+              camera.label.toLowerCase().includes('environment')
+            );
+            
+            if (rearCamera) {
+              defaultCamera = rearCamera.deviceId;
+            }
+          }
+          
+          setSelectedCameraId(defaultCamera);
+        }
+      } catch (error) {
+        console.error("Camera initialization error:", error);
         
-        if (cameras.length === 0) {
-          toast({
-            title: "No cameras detected",
-            description: "We couldn't find any cameras connected to your device.",
-            variant: "destructive",
-          });
+        if (mounted) {
+          if (error instanceof DOMException && error.name === "NotAllowedError") {
+            setPermissionDenied(true);
+            toast({
+              title: "Camera Access Denied",
+              description: "Please allow camera access to use this feature",
+              variant: "destructive"
+            });
+          } else {
+            setCameraError("Failed to initialize camera. Please try again.");
+            toast({
+              title: "Camera Error",
+              description: "There was a problem accessing your camera",
+              variant: "destructive"
+            });
+          }
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    initializeCamera();
+    
+    return () => {
+      mounted = false;
+      stopAllStreams();
+    };
+  }, [toast, isMobile]);
+
+  // Start camera when selected camera changes
+  useEffect(() => {
+    let mounted = true;
+    
+    if (!selectedCameraId || permissionDenied) return;
+    
+    const startCamera = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Stop any previous stream
+        stopAllStreams();
+        
+        // Configure constraints based on device and selected camera
+        const constraints: MediaStreamConstraints = {
+          video: {
+            deviceId: { exact: selectedCameraId },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        };
+        
+        console.log('Starting camera with constraints:', constraints.video);
+        
+        // Get camera stream
+        const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        if (!mounted) {
+          newStream.getTracks().forEach(track => track.stop());
           return;
         }
         
-        setAvailableCameras(cameras);
-        // Set the first camera as selected if it has a deviceId
-        if (cameras.length > 0) {
-          const firstCamera = cameras[0];
-          // Use a fallback ID if deviceId is empty
-          setSelectedCamera(firstCamera.deviceId || `camera-${0}`);
-        }
-      } catch (error) {
-        console.error("Error during camera setup:", error);
+        // Store the stream for cleanup
+        setStream(newStream);
         
-        // Handle permission denied
-        if (error instanceof DOMException && error.name === "NotAllowedError") {
-          setPermissionStatus("denied");
-          toast({
-            title: "Camera access denied",
-            description: "You need to allow camera access to use this feature. Please check your browser settings.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Camera error",
-            description: "There was a problem accessing your camera. Please try again.",
-            variant: "destructive",
-          });
-        }
-      }
-    };
-
-    checkPermissionsAndGetCameras();
-    
-    // Clean up any streams when component unmounts
-    return () => {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, [toast]);
-
-  // Detect if we're on a mobile device
-  const isMobileDevice = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  };
-  
-  const mobileDevice = isMobileDevice();
-
-  // Start camera stream when selected camera changes
-  useEffect(() => {
-    if (!selectedCamera || permissionStatus !== "granted") return;
-
-    const startCamera = async () => {
-      try {
-        // Stop any existing stream
-        if (cameraStream) {
-          cameraStream.getTracks().forEach(track => track.stop());
-        }
-
-        setIsCameraReady(false);
-        
-        // Different constraints for mobile vs desktop
-        let videoConstraints: MediaTrackConstraints = {};
-        
-        // For mobile devices with multiple cameras, we need to handle things differently
-        if (mobileDevice) {
-          // If we have a specific camera selected and it's not the first camera
-          if (selectedCamera && selectedCamera !== availableCameras[0]?.deviceId) {
-            // For rear camera (often the second camera on a mobile device)
-            videoConstraints = {
-              deviceId: { exact: selectedCamera },
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            };
-          } else {
-            // Default to environment/rear camera when available (first choice for mobile)
-            videoConstraints = {
-              facingMode: { ideal: "environment" },
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            };
-          }
-        } else {
-          // Desktop constraints - use the selected camera by deviceId
-          videoConstraints = {
-            deviceId: selectedCamera ? { exact: selectedCamera } : undefined,
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          };
-        }
-        
-        console.log("Starting camera with constraints:", videoConstraints);
-        
-        // Start new stream with appropriate constraints
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: videoConstraints,
-          audio: false
-        });
-        
-        console.log("Camera stream obtained:", stream);
-        setCameraStream(stream);
-        
-        // Connect stream to video element
+        // Attach stream to video element
         if (videoRef.current) {
-          console.log("Setting video source");
-          videoRef.current.srcObject = stream;
+          videoRef.current.srcObject = newStream;
           
-          // Force play the video
-          try {
-            await videoRef.current.play();
-            console.log("Video playback started");
-            setIsCameraReady(true);
-          } catch (playError) {
-            console.error("Error auto-playing video:", playError);
-            // Try to set it ready anyway
-            setIsCameraReady(true);
-          }
-          
-          // Also mark camera as ready when video can play
-          videoRef.current.onloadedmetadata = () => {
-            console.log("Video metadata loaded");
-            videoRef.current?.play().catch(e => console.error("Play error:", e));
-            setIsCameraReady(true);
+          // Try to play the video
+          videoRef.current.onloadedmetadata = async () => {
+            if (videoRef.current) {
+              try {
+                await videoRef.current.play();
+              } catch (err) {
+                console.error('Error playing video:', err);
+              } finally {
+                if (mounted) setIsLoading(false);
+              }
+            }
           };
-        } else {
-          console.error("Video ref is null");
         }
       } catch (error) {
-        console.error("Error accessing camera:", error);
-        toast({
-          title: "Camera error",
-          description: "There was a problem accessing the selected camera. Please try another one or refresh the page.",
-          variant: "destructive",
-        });
+        console.error('Error starting camera:', error);
+        if (mounted) {
+          setCameraError(`Failed to start camera: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          setIsLoading(false);
+          
+          toast({
+            title: "Camera Error",
+            description: "Could not start the selected camera. Please try another camera.",
+            variant: "destructive"
+          });
+        }
       }
     };
-
+    
     startCamera();
-
-    // Cleanup function to stop camera stream when component unmounts or camera changes
+    
     return () => {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-      }
+      mounted = false;
+      // Don't stop the stream here as it will cause flicker when changing cameras
+      // The cleanup will happen at the start of the next camera
     };
-  }, [selectedCamera, permissionStatus, toast, availableCameras, mobileDevice]);
+  }, [selectedCameraId, permissionDenied, toast]);
 
-  // Handle countdown for capture
+  // Handle camera switching
+  const handleCameraChange = (cameraId: string) => {
+    setSelectedCameraId(cameraId);
+  };
+
+  // Handle camera capture
+  const capturePhoto = () => {
+    if (!canvasRef.current || !videoRef.current) return;
+    
+    try {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      
+      // Set canvas size to match video
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      
+      // Get canvas context and draw current video frame
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
+      }
+      
+      // Draw video frame to canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Convert to blob
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          throw new Error('Failed to create image blob');
+          return;
+        }
+        
+        // Create file from blob
+        const filename = `camera-capture-${new Date().getTime()}.jpg`;
+        const file = new File([blob], filename, { type: 'image/jpeg' });
+        
+        // Pass file to handler
+        onCapture(file);
+        
+        // Reset capture state
+        setIsCapturing(false);
+        setCountdown(null);
+      }, 'image/jpeg', 0.92);
+    } catch (error) {
+      console.error('Error capturing image:', error);
+      toast({
+        title: "Capture Failed",
+        description: "Failed to capture image. Please try again.",
+        variant: "destructive"
+      });
+      setIsCapturing(false);
+      setCountdown(null);
+    }
+  };
+
+  // Start countdown for photo capture
+  const startCountdown = () => {
+    setIsCapturing(true);
+    setCountdown(3);
+  };
+
+  // Handle countdown logic
   useEffect(() => {
     if (countdown === null) return;
     
@@ -206,249 +263,203 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
       
       return () => clearTimeout(timer);
     } else if (countdown === 0) {
-      captureImage();
-      setCountdown(null);
+      capturePhoto();
     }
   }, [countdown]);
 
-  const handleCameraChange = (deviceId: string) => {
-    setSelectedCamera(deviceId);
+  // Handle flipping camera on mobile
+  const flipCamera = () => {
+    if (availableCameras.length <= 1) return;
+    
+    const currentIndex = availableCameras.findIndex(camera => camera.deviceId === selectedCameraId);
+    const nextIndex = (currentIndex + 1) % availableCameras.length;
+    setSelectedCameraId(availableCameras[nextIndex].deviceId);
   };
 
-  const startCountdown = () => {
-    setIsCapturing(true);
-    setCountdown(3); // Start 3 second countdown
-  };
-
-  const captureImage = () => {
-    if (!canvasRef.current || !videoRef.current || !isCameraReady) return;
-    
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Draw the current video frame to the canvas
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Convert canvas to blob
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      
-      // Create a file from the blob
-      const timestamp = new Date().getTime();
-      const file = new File([blob], `camera_capture_${timestamp}.jpg`, { type: 'image/jpeg' });
-      
-      // Send the captured image file back
-      onCapture(file);
-      
-      // Reset state
-      setIsCapturing(false);
-    }, 'image/jpeg', 0.95);
-  };
-
-  const cancelCapture = () => {
+  // Handle cancellation
+  const handleCancel = () => {
+    stopAllStreams();
     setIsCapturing(false);
     setCountdown(null);
     onClose();
   };
 
-  // Permission error message component
-  const PermissionErrorMessage = () => (
-    <div className="p-8 text-center">
-      <div className="text-red-400 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      </div>
-      <h3 className="text-xl font-semibold text-red-400 mb-2">Camera Access Denied</h3>
-      <p className="text-blue-200/70 mb-4">
-        The app needs permission to access your camera to capture images. Please check your browser settings
-        and refresh the page to try again.
-      </p>
-      <div className="mb-6 p-4 bg-[#2a3348]/50 rounded-lg text-sm text-blue-200/80">
-        <p className="font-medium mb-1">How to enable camera access:</p>
-        <ol className="list-decimal list-inside text-left space-y-1">
-          <li>Click on the lock or site settings icon in your browser's address bar</li>
-          <li>Find "Camera" permissions and change it to "Allow"</li>
-          <li>Refresh the page to try again</li>
-        </ol>
-      </div>
-      <Button 
-        variant="outline" 
-        onClick={cancelCapture}
-        className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:text-red-300"
-      >
-        Cancel
-      </Button>
-    </div>
-  );
-
-  // Error with available cameras
-  const NoCamerasMessage = () => (
-    <div className="p-8 text-center">
-      <div className="text-yellow-400 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <h3 className="text-xl font-semibold text-yellow-400 mb-2">No Cameras Detected</h3>
-      <p className="text-blue-200/70 mb-4">
-        We couldn't find any cameras connected to your device. Please make sure you have at least one camera connected
-        and refresh the page.
-      </p>
-      <Button 
-        variant="outline" 
-        onClick={cancelCapture}
-        className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20 hover:text-yellow-300"
-      >
-        Cancel
-      </Button>
-    </div>
-  );
-
-  // Camera flip button for mobile devices
-  const handleFlipCamera = () => {
-    // Find the current camera index
-    const currentIndex = availableCameras.findIndex(camera => camera.deviceId === selectedCamera);
-    // Calculate the next camera index (cycling through available cameras)
-    const nextIndex = (currentIndex + 1) % availableCameras.length;
-    // Set the new camera
-    setSelectedCamera(availableCameras[nextIndex]?.deviceId || '');
-  };
-
-  // Camera interface component
-  const CameraInterface = () => (
-    <div className="relative">
-      {/* Camera feed */}
-      <div className="relative overflow-hidden rounded-t-lg aspect-video flex items-center justify-center dark:bg-[#0a0e17] bg-black/80">
-        <video 
-          ref={videoRef} 
-          autoPlay 
-          playsInline 
-          muted 
-          className={`w-full h-full object-contain ${isCameraReady ? 'opacity-100' : 'opacity-0'}`}
-        />
-        
-        {!isCameraReady && permissionStatus === "granted" && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-10 h-10 border-4 dark:border-blue-500 border-yellow-500 dark:border-t-transparent border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
-        
-        {/* Canvas for capturing (hidden) */}
-        <canvas ref={canvasRef} className="hidden" />
-        
-        {/* Countdown overlay */}
-        {countdown !== null && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <div className="text-9xl font-bold text-white">{countdown}</div>
-          </div>
-        )}
-
-        {/* Mobile camera flip button - only show when ready and multiple cameras available */}
-        {mobileDevice && availableCameras.length > 1 && isCameraReady && (
-          <Button
-            variant="outline"
-            onClick={handleFlipCamera}
-            className="absolute top-4 right-4 p-2 rounded-full bg-black/40 border-white/20 hover:bg-black/60"
-            size="icon"
-            aria-label="Flip camera"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+  // Render permission denied message
+  if (permissionDenied) {
+    return (
+      <Card className="bg-[#1a1f2c]/80 backdrop-blur-lg border border-red-500/30 shadow-xl overflow-hidden">
+        <CardContent className="p-6 text-center">
+          <div className="text-red-400 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-          </Button>
-        )}
-      </div>
-      
-      {/* Controls */}
-      <div className="p-4 bg-gradient-to-t from-[#0a0e17] to-transparent absolute bottom-0 left-0 right-0">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          {/* Desktop camera selector - hide on mobile devices */}
-          {!mobileDevice && availableCameras.length > 0 && (
-            <div className="w-full sm:w-64">
-              <Select value={selectedCamera} onValueChange={handleCameraChange}>
-                <SelectTrigger className="bg-[#2a3348]/80 border-[#3a4358] text-blue-200">
-                  <SelectValue placeholder="Select camera" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1a1f2c] border-[#3a4358]">
-                  {availableCameras.map(camera => (
-                    <SelectItem 
-                      key={camera.deviceId} 
-                      value={camera.deviceId || `camera-${availableCameras.indexOf(camera)}`}
-                      className="text-blue-200 focus:bg-blue-500/20 focus:text-blue-100"
-                    >
-                      {camera.label || `Camera ${availableCameras.indexOf(camera) + 1}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          
-          {/* Capture buttons */}
-          <div className={`flex space-x-3 ${mobileDevice ? 'w-full justify-center' : ''}`}>
-            <Button 
-              variant="outline" 
-              onClick={cancelCapture}
-              className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:text-red-300"
-            >
-              <span className="sr-only sm:not-sr-only">Cancel</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </Button>
-            
-            {/* Capture button with animation for mobile */}
-            <Button 
-              onClick={startCountdown} 
-              disabled={!isCameraReady || isCapturing}
-              className={`
-                bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white
-                ${mobileDevice ? 'h-16 w-16 rounded-full p-0 flex items-center justify-center' : ''}
-              `}
-            >
-              {isCapturing ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span className="sr-only sm:not-sr-only">Capturing...</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className={`${mobileDevice ? 'h-8 w-8' : 'h-5 w-5'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className="sr-only sm:not-sr-only">Capture Image</span>
-                </div>
-              )}
-            </Button>
           </div>
-        </div>
-      </div>
-    </div>
-  );
+          <h3 className="text-xl font-semibold text-red-400 mb-2">Camera Access Denied</h3>
+          <p className="text-blue-200/70 mb-4">
+            To use the camera feature, you need to grant camera access permission.
+          </p>
+          <div className="mb-6 p-4 bg-[#2a3348]/50 rounded-lg text-sm text-blue-200/80">
+            <p className="font-medium mb-1">How to enable camera access:</p>
+            <ol className="list-decimal list-inside text-left space-y-1">
+              <li>Click the lock/site icon in your browser's address bar</li>
+              <li>Find "Camera" permissions and change to "Allow"</li>
+              <li>Refresh the page and try again</li>
+            </ol>
+          </div>
+          <Button 
+            onClick={handleCancel}
+            className="bg-gradient-to-r from-yellow-500 to-amber-600 text-white hover:from-yellow-400 hover:to-amber-500"
+          >
+            Close Camera
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
-  const renderContent = () => {
-    if (permissionStatus === "denied") {
-      return <PermissionErrorMessage />;
-    } else if (permissionStatus === "granted" && availableCameras.length === 0) {
-      return <NoCamerasMessage />;
-    } else {
-      return <CameraInterface />;
-    }
-  };
+  // Render camera error message
+  if (cameraError) {
+    return (
+      <Card className="bg-[#1a1f2c]/80 backdrop-blur-lg border border-yellow-500/30 shadow-xl overflow-hidden">
+        <CardContent className="p-6 text-center">
+          <div className="text-yellow-400 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-yellow-400 mb-2">Camera Error</h3>
+          <p className="text-blue-200/70 mb-4">
+            {cameraError}
+          </p>
+          <Button 
+            onClick={handleCancel}
+            className="bg-gradient-to-r from-yellow-500 to-amber-600 text-white hover:from-yellow-400 hover:to-amber-500"
+          >
+            Close Camera
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
+  // Render main camera UI
   return (
     <Card className="bg-[#1a1f2c]/90 backdrop-blur-md border border-[#2a3348] shadow-xl overflow-hidden w-full">
       <CardContent className="p-0">
-        {renderContent()}
+        <div className="relative">
+          {/* Camera viewfinder */}
+          <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden rounded-t-lg">
+            {/* Video element */}
+            <video 
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className={`w-full h-full object-contain ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+            />
+            
+            {/* Loading spinner */}
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+            
+            {/* Camera flip button (mobile only) */}
+            {!isLoading && isMobile && availableCameras.length > 1 && (
+              <Button
+                onClick={flipCamera}
+                size="icon"
+                className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/50 border border-white/20 hover:bg-black/70 z-10"
+                aria-label="Flip camera"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+              </Button>
+            )}
+            
+            {/* Countdown overlay */}
+            {countdown !== null && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-20">
+                <div className="text-9xl font-bold text-white drop-shadow-lg">
+                  {countdown}
+                </div>
+              </div>
+            )}
+            
+            {/* Hidden canvas for capture */}
+            <canvas ref={canvasRef} className="hidden" />
+          </div>
+          
+          {/* Camera controls */}
+          <div className="p-4 bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 right-0 z-10">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+              {/* Camera selector (desktop only) */}
+              {!isMobile && availableCameras.length > 1 && (
+                <div className="w-full sm:w-64">
+                  <Select value={selectedCameraId} onValueChange={handleCameraChange}>
+                    <SelectTrigger className="bg-[#2a3348]/70 border-[#3a4358] text-blue-200">
+                      <SelectValue placeholder="Select camera" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1f2c] border-[#3a4358]">
+                      {availableCameras.map(camera => (
+                        <SelectItem 
+                          key={camera.deviceId} 
+                          value={camera.deviceId}
+                          className="text-blue-200 focus:bg-yellow-500/20 focus:text-yellow-100"
+                        >
+                          {camera.label || `Camera ${availableCameras.indexOf(camera) + 1}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              
+              {/* Action buttons */}
+              <div className={`flex space-x-3 ${isMobile ? 'w-full justify-center' : ''}`}>
+                {/* Cancel button */}
+                <Button 
+                  variant="outline" 
+                  onClick={handleCancel}
+                  className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:text-red-300"
+                >
+                  <span className="sr-only sm:not-sr-only">Cancel</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </Button>
+                
+                {/* Capture button */}
+                <Button 
+                  onClick={startCountdown} 
+                  disabled={isLoading || isCapturing}
+                  className={`
+                    bg-gradient-to-r from-yellow-500 to-amber-600 text-white 
+                    hover:from-yellow-400 hover:to-amber-500
+                    ${isMobile ? 'h-16 w-16 rounded-full p-0 flex items-center justify-center' : ''}
+                  `}
+                >
+                  {isCapturing ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span className="sr-only sm:not-sr-only">Capturing...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className={`${isMobile ? 'h-8 w-8' : 'h-5 w-5'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span className="sr-only sm:not-sr-only">Capture Photo</span>
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
