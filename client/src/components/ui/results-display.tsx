@@ -130,8 +130,8 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
             <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
             <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
           </div>
-          <h3 className="text-lg font-semibold text-blue-400 mb-2">Advanced YOLO Analysis in Progress</h3>
-          <p className="text-blue-300/70 text-center max-w-md">Scanning image for stellar objects, planetary bodies, and artificial satellites</p>
+          <h3 className="text-lg font-semibold text-blue-400 mb-2">Space Station YOLO Analysis</h3>
+          <p className="text-blue-300/70 text-center max-w-md">Scanning image for tools, gauges, panel components, and potential structural issues</p>
           <div className="mt-4 w-64 h-2 bg-[#2a3348] rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse" style={{ width: '60%' }}></div>
           </div>
@@ -268,9 +268,18 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-md font-semibold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              Stellar Objects Detected: <span className="font-bold text-blue-300 ml-1">{detectedObjects.length}</span>
+              Space Station Components: <span className="font-bold text-blue-300 ml-1">{detectedObjects.length}</span>
+              {detectedObjects.some(obj => obj.issue) && (
+                <span className="ml-3 text-xs text-white bg-red-500/80 px-2 py-0.5 rounded flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Issues detected
+                </span>
+              )}
             </h3>
             <div className="text-xs text-blue-300/70 flex items-center">
               <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>
@@ -280,16 +289,46 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
             </div>
           </div>
 
+          {/* Reference Links */}
+          {detectedObjects.some(obj => obj.referenceLink) && (
+            <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <h4 className="text-sm font-medium text-blue-300 mb-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                NASA Documentation References
+              </h4>
+              <div className="space-y-2">
+                {detectedObjects.filter(obj => obj.referenceLink).map(obj => (
+                  <div key={`ref-${obj.id}`} className="flex items-start text-xs">
+                    <div className="h-2 w-2 rounded-full mt-1 mr-2" style={{ backgroundColor: obj.color }}></div>
+                    <div>
+                      <span className="text-blue-200 font-medium">{obj.label}: </span>
+                      <a 
+                        href={obj.referenceLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-blue-400 hover:text-blue-300 underline"
+                      >
+                        Technical documentation
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           <div className="overflow-hidden rounded-lg border border-[#2a3348]">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-[#2a3348]">
                 <thead className="bg-[#1a1f2c]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Space Object</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Component</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Confidence</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Original Class</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Category</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Location</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Size</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Issue</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2a3348]">
@@ -320,7 +359,7 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="text-xs italic text-blue-300/70 bg-blue-500/10 px-2 py-0.5 rounded">
-                          {object.originalClass || "N/A"}
+                          {object.context || object.originalClass || "N/A"}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -329,9 +368,15 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="font-mono text-xs text-blue-300/70">
-                          w: {object.width.toFixed(2)}, h: {object.height.toFixed(2)}
-                        </span>
+                        {object.issue ? (
+                          <span className="text-xs text-white bg-red-500/80 px-2 py-0.5 rounded">
+                            ⚠️ {object.issue}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-blue-300/70 bg-green-500/20 px-2 py-0.5 rounded">
+                            ✓ No issues detected
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}
