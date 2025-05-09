@@ -9,7 +9,7 @@ import fs from "fs";
 let yoloModel: tf.GraphModel | null = null;
 
 // Define space object colors for visualization
-const SPACE_OBJECT_COLORS = {
+const SPACE_OBJECT_COLORS: Record<string, string> = {
   // Space station tools colors
   "torque wrench": "#ff9800",
   "power drill": "#ffeb3b",
@@ -53,7 +53,7 @@ const SPACE_OBJECT_COLORS = {
 };
 
 // Mapping of detected objects to space station objects
-const DETECTED_TO_SPACE = {
+const DETECTED_TO_SPACE: Record<string, string> = {
   // Map generic objects to space station equivalents
   "person": "astronaut",
   "bicycle": "mobility device",
@@ -146,37 +146,8 @@ export async function detectSpaceStationObjects(
       "air filtration unit", "water recycling system", "electrical panel"
     ];
     
-    // Create random positions for objects that don't overlap too much
-    const usedPositions: {x: number, y: number, width: number, height: number}[] = [];
-    
-    for (let i = 0; i < numObjects; i++) {
-      // Pick a random tool
-      const toolIdx = Math.floor(Math.random() * spaceTools.length);
-      const toolName = spaceTools[toolIdx];
-      
-      // Generate position (with collision avoidance)
-      let position = generateNonOverlappingPosition(usedPositions);
-      usedPositions.push(position);
-      
-      // Get color for this space tool
-      const color = SPACE_OBJECT_COLORS[toolName] || SPACE_OBJECT_COLORS.default;
-      
-      // Add to detected objects
-      detectedObjects.push({
-        id: randomUUID(),
-        label: toolName,
-        confidence: 0.75 + (Math.random() * 0.2), // Random confidence between 0.75-0.95
-        x: position.x,
-        y: position.y,
-        width: position.width,
-        height: position.height,
-        color,
-        originalClass: "simulated-tool"
-      });
-    }
-    
     // Helper function to generate non-overlapping positions
-    function generateNonOverlappingPosition(existing: {x: number, y: number, width: number, height: number}[]): {x: number, y: number, width: number, height: number} {
+    const generateNonOverlappingPosition = (existing: {x: number, y: number, width: number, height: number}[]): {x: number, y: number, width: number, height: number} => {
       const maxAttempts = 10;
       let attempts = 0;
       
@@ -218,6 +189,37 @@ export async function detectSpaceStationObjects(
         width: 0.05 + (Math.random() * 0.15),
         height: 0.05 + (Math.random() * 0.15)
       };
+    };
+    
+    // Create random positions for objects that don't overlap too much
+    const usedPositions: {x: number, y: number, width: number, height: number}[] = [];
+    
+    for (let i = 0; i < numObjects; i++) {
+      // Pick a random tool
+      const toolIdx = Math.floor(Math.random() * spaceTools.length);
+      const toolName = spaceTools[toolIdx];
+      
+      // Generate position (with collision avoidance)
+      let position = generateNonOverlappingPosition(usedPositions);
+      usedPositions.push(position);
+      
+      // Get color for this space tool - use index signature for safety
+      const color = (toolName in SPACE_OBJECT_COLORS) 
+        ? (SPACE_OBJECT_COLORS as Record<string, string>)[toolName] 
+        : SPACE_OBJECT_COLORS.default;
+      
+      // Add to detected objects
+      detectedObjects.push({
+        id: randomUUID(),
+        label: toolName,
+        confidence: 0.75 + (Math.random() * 0.2), // Random confidence between 0.75-0.95
+        x: position.x,
+        y: position.y,
+        width: position.width,
+        height: position.height,
+        color,
+        originalClass: "simulated-tool"
+      });
     }
     
     // Enhance detections for more interesting results
@@ -260,16 +262,22 @@ export async function detectSpaceStationObjects(
 /**
  * Add some additional interesting space objects to enhance the detection
  */
-async function enhanceDetections(
+const enhanceDetections = async (
   detectedObjects: DetectedObject[], 
   originalWidth: number, 
   originalHeight: number
-): Promise<DetectedObject[]> {
+): Promise<DetectedObject[]> => {
   // Add some variety to make results more interesting
   const enhancedObjects = [...detectedObjects];
   
   // Add a small chance to include special space station objects if we have few detections
   if (detectedObjects.length < 3 && Math.random() > 0.4) {
+    // Safety accessor for colors
+    const getColorSafely = (key: string): string => 
+      (key in SPACE_OBJECT_COLORS) 
+        ? (SPACE_OBJECT_COLORS as Record<string, string>)[key]
+        : SPACE_OBJECT_COLORS.default;
+    
     const specialObjects = [
       {
         label: "oxygen level gauge",
@@ -279,7 +287,7 @@ async function enhanceDetections(
         width: 0.05 + (Math.random() * 0.15),
         height: 0.05 + (Math.random() * 0.1),
         originalClass: "enhanced-gauge",
-        color: SPACE_OBJECT_COLORS["oxygen level gauge"]
+        color: getColorSafely("oxygen level gauge")
       },
       {
         label: "airlock",
@@ -289,7 +297,7 @@ async function enhanceDetections(
         width: 0.1 + (Math.random() * 0.2),
         height: 0.1 + (Math.random() * 0.2),
         originalClass: "enhanced-airlock",
-        color: SPACE_OBJECT_COLORS["airlock"]
+        color: getColorSafely("airlock")
       },
       {
         label: "pressure gauge",
@@ -299,7 +307,7 @@ async function enhanceDetections(
         width: 0.05 + (Math.random() * 0.1),
         height: 0.05 + (Math.random() * 0.1),
         originalClass: "enhanced-gauge",
-        color: SPACE_OBJECT_COLORS["pressure gauge"]
+        color: getColorSafely("pressure gauge")
       },
       {
         label: "temperature gauge",
@@ -309,7 +317,7 @@ async function enhanceDetections(
         width: 0.05 + (Math.random() * 0.1),
         height: 0.05 + (Math.random() * 0.1),
         originalClass: "enhanced-gauge",
-        color: SPACE_OBJECT_COLORS["temperature gauge"]
+        color: getColorSafely("temperature gauge")
       }
     ];
     
@@ -328,18 +336,23 @@ async function enhanceDetections(
   }
   
   return enhancedObjects;
-}
+};
 
 /**
  * Generate a fallback space object in case of errors or no detections
  */
-function generateFallbackObject(): DetectedObject {
+const generateFallbackObject = (): DetectedObject => {
   // Choose a space station object type
   const spaceStationCategories = [
     "torque wrench", "power drill", "multimeter", "pressure gauge", 
     "oxygen level gauge", "temperature gauge", "airlock", "hatch seal"
   ];
   const randomType = spaceStationCategories[Math.floor(Math.random() * spaceStationCategories.length)];
+  
+  // Get color from the color map with safety check
+  const color = (randomType in SPACE_OBJECT_COLORS) 
+    ? (SPACE_OBJECT_COLORS as Record<string, string>)[randomType] 
+    : SPACE_OBJECT_COLORS.default;
   
   return {
     id: randomUUID(),
@@ -349,10 +362,10 @@ function generateFallbackObject(): DetectedObject {
     y: 0.3 + (Math.random() * 0.4),
     width: 0.1 + (Math.random() * 0.1),      // Random size
     height: 0.1 + (Math.random() * 0.1),
-    color: SPACE_OBJECT_COLORS[randomType] || SPACE_OBJECT_COLORS.default,
+    color,
     originalClass: "fallback-tool"
   };
-}
+};
 
 // Initialize model when module is loaded
 initYOLOModel().catch(err => console.error("Failed to initialize YOLO model:", err));
