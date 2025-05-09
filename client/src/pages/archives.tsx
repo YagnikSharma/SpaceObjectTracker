@@ -151,43 +151,33 @@ export default function StellarArchives() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Link href="/">
-                <a className="flex items-center space-x-3">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shadow-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                      Galactic Cop
-                    </h1>
-                    <p className="text-xs text-blue-300/80">Stellar Archives</p>
-                  </div>
-                </a>
+              <Link href="/" className="flex items-center space-x-3">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                    Galactic Cop
+                  </h1>
+                  <p className="text-xs text-blue-300/80">Stellar Archives</p>
+                </div>
               </Link>
             </motion.div>
 
             <nav className="hidden md:flex space-x-6">
-              <Link href="/">
-                <a className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
-                  Detection Hub
-                </a>
+              <Link href="/" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
+                Detection Hub
               </Link>
-              <Link href="/mission-control">
-                <a className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
-                  Mission Control
-                </a>
+              <Link href="/mission-control" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
+                Mission Control
               </Link>
-              <Link href="/galactic-map">
-                <a className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
-                  Galactic Map
-                </a>
+              <Link href="/galactic-map" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
+                Galactic Map
               </Link>
-              <Link href="/archives">
-                <a className="px-3 py-2 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                  Stellar Archives
-                </a>
+              <Link href="/archives" className="px-3 py-2 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                Stellar Archives
               </Link>
             </nav>
           </div>
