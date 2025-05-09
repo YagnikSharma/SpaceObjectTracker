@@ -31,8 +31,8 @@ export default function GalacticMap() {
         id: 1,
         title: "Webb's First Deep Field",
         description: "NASA's James Webb Space Telescope has produced the deepest and sharpest infrared image of the distant universe to date. Known as Webb's First Deep Field, this image of galaxy cluster SMACS 0723 is overflowing with detail.",
-        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-first-deep-field-smacs-0723.png",
-        link: "https://science.nasa.gov/missions/webb/webbs-first-images/",
+        imageUrl: "https://www.nasa.gov/wp-content/uploads/2023/03/main_image_deep_field_smacs0723-5mb.jpg",
+        link: "https://www.nasa.gov/mission/webb/nasas-webb-delivers-deepest-infrared-image-of-universe-yet/",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
           "This image covers a patch of sky approximately the size of a grain of sand held at arm's length.",
@@ -50,8 +50,8 @@ export default function GalacticMap() {
         id: 2,
         title: "Pillars of Creation",
         description: "NASA's James Webb Space Telescope has captured a lush, highly detailed landscape – the iconic Pillars of Creation – where new stars are forming within dense clouds of gas and dust.",
-        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-pillars-of-creation.png",
-        link: "https://science.nasa.gov/missions/webb/nasa-james-webb-space-telescope-just-revealed-universe-whole-new-light/",
+        imageUrl: "https://images-assets.nasa.gov/image/pillars_of_creation/pillars_of_creation~orig.jpg",
+        link: "https://www.nasa.gov/missions-and-programs/webb/nasas-webb-takes-star-filled-portrait-of-pillars-of-creation/",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
           "The pillars are actually columns of cool interstellar gas and dust that are incubators for new stars.",
@@ -67,20 +67,20 @@ export default function GalacticMap() {
       },
       {
         id: 3,
-        title: "Hubble eXtreme Deep Field",
-        description: "The Hubble eXtreme Deep Field (XDF) is an image of a small area of space in the center of the Hubble Ultra Deep Field, combining data from Hubble programs from 2002 to 2012.",
-        imageUrl: "https://cdn.spacetelescope.org/archives/images/screen/heic1214a.jpg",
-        link: "https://esahubble.org/images/heic1214a/",
+        title: "Hubble Ultra Deep Field",
+        description: "The Hubble Ultra Deep Field is an image of a small area of space in the constellation Fornax, combining data from Hubble programs from 2003 to 2012, showing some of the oldest galaxies ever observed.",
+        imageUrl: "https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~orig.jpg",
+        link: "https://hubblesite.org/contents/media/images/2004/07/1457-Image.html",
         agency: "NASA/ESA/STScI",
         facts: [
-          "This image contains approximately 5,500 galaxies.",
+          "This image contains approximately 10,000 galaxies.",
           "The faintest galaxies are one ten-billionth the brightness of what the human eye can see.",
           "This represents a view of the universe that reaches back about 13.2 billion years."
         ],
         scientificData: {
           wavelength: "Ultraviolet, visible, and near-infrared",
           distance: "13.2 billion light-years (farthest objects)",
-          discoveryDate: "September 25, 2012",
+          discoveryDate: "March 2004, updated through 2012",
           size: "2.3 arcminutes"
         }
       },
@@ -88,8 +88,8 @@ export default function GalacticMap() {
         id: 4,
         title: "Carina Nebula by Webb Telescope",
         description: "This landscape of 'mountains' and 'valleys' speckled with glittering stars is actually the edge of a nearby, young, star-forming region called NGC 3324 in the Carina Nebula.",
-        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-carina-nebula.png",
-        link: "https://science.nasa.gov/missions/webb/nasas-webb-delivers-deepest-infrared-image-universe-yet/",
+        imageUrl: "https://images-assets.nasa.gov/image/PIA23946/PIA23946~orig.jpg",
+        link: "https://www.nasa.gov/image-feature/goddard/2022/nasa-s-webb-reveals-cosmic-cliffs-glittering-landscape-of-star-birth",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
           "The 'mountains' in this image are actually the edge of a nearby stellar nursery called NGC 3324.",
@@ -107,8 +107,8 @@ export default function GalacticMap() {
         id: 5,
         title: "Southern Ring Nebula",
         description: "The Southern Ring Nebula is a planetary nebula – an expanding cloud of gas surrounding a dying star. Webb revealed previously hidden details in this colorful display.",
-        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-southern-ring-nebula.png",
-        link: "https://science.nasa.gov/missions/webb/webbs-first-images/",
+        imageUrl: "https://images-assets.nasa.gov/image/PIA08093/PIA08093~orig.jpg",
+        link: "https://www.nasa.gov/image-feature/goddard/2022/nasas-webb-captures-dying-stars-final-performance-in-fine-detail",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
           "This nebula is nearly half a light-year in diameter.",
@@ -126,8 +126,8 @@ export default function GalacticMap() {
         id: 6,
         title: "Planck Cosmic Microwave Background",
         description: "The most detailed map ever created of the cosmic microwave background – the relic radiation from the Big Bang.",
-        imageUrl: "https://cdn.sci.esa.int/documents/36233/36291/1567214818447-Planck_CMB_2018_1237.jpg",
-        link: "https://www.esa.int/Science_Exploration/Space_Science/Planck",
+        imageUrl: "https://images-assets.nasa.gov/image/PIA15629/PIA15629~orig.jpg",
+        link: "https://www.nasa.gov/mission_pages/planck/news/planck20130321.html",
         agency: "ESA/Planck Collaboration",
         facts: [
           "This map shows temperature fluctuations that correspond to regions of slightly different densities in the early universe.",
@@ -143,10 +143,10 @@ export default function GalacticMap() {
       },
       {
         id: 7,
-        title: "WASP-96 b Atmospheric Spectrum",
+        title: "WASP-96 b Exoplanet",
         description: "Webb's detailed observation of this hot, puffy exoplanet revealed the presence of specific gas molecules based on tiny decreases in the brightness of precise colors of light.",
-        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-wasp-96b-spectrum.png",
-        link: "https://science.nasa.gov/missions/webb/",
+        imageUrl: "https://images-assets.nasa.gov/image/PIA14293/PIA14293~orig.jpg",
+        link: "https://www.nasa.gov/image-feature/goddard/2022/nasa-s-webb-reveals-steamy-atmosphere-of-distant-planet-in-detail",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
           "WASP-96 b is a gas giant planet that orbits a Sun-like star about 1,150 light-years away.",
@@ -164,8 +164,8 @@ export default function GalacticMap() {
         id: 8,
         title: "Stephan's Quintet",
         description: "Webb captured this group of five galaxies that appear close to each other in the sky: two in the middle of merging, with the others distorted by their gravitational interactions.",
-        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/09/webb-stephans-quintet.png",
-        link: "https://science.nasa.gov/missions/webb/",
+        imageUrl: "https://www.nasa.gov/wp-content/uploads/2023/03/main_image_galaxies_stephans_quintet_sq.jpg",
+        link: "https://www.nasa.gov/image-feature/goddard/2022/nasas-webb-sheds-light-on-galaxy-evolution-black-holes",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
           "This compact group of galaxies was discovered in 1877, the first compact galaxy group ever discovered.",
@@ -183,7 +183,7 @@ export default function GalacticMap() {
         id: 9,
         title: "Cartwheel Galaxy",
         description: "Webb's powerful infrared vision captured this detailed image of the Cartwheel and two smaller companion galaxies against a backdrop of many other galaxies.",
-        imageUrl: "https://science.nasa.gov/wp-content/uploads/2023/10/webb-cartwheel-galaxy-miri-nircam-4500.png",
+        imageUrl: "https://www.nasa.gov/wp-content/uploads/2022/08/main_image_cartwheel_miri_nircam_sidebyside-5mb.jpg",
         link: "https://www.nasa.gov/image-feature/goddard/2022/nasas-webb-captures-cartwheel-galaxys-cosmic-dance/",
         agency: "NASA/ESA/CSA/STScI",
         facts: [
