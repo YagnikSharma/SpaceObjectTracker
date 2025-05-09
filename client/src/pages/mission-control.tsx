@@ -113,7 +113,7 @@ export default function MissionControl() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                    Galactic Cop
+                    Syndetect
                   </h1>
                   <p className="text-xs text-blue-300/80">Mission Control Center</p>
                 </div>
@@ -321,7 +321,7 @@ export default function MissionControl() {
           <div className="text-sm text-blue-300/70 mb-4 sm:mb-0 flex items-center">
             <span className="mr-2">🚀</span>
             <p className="font-semibold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              POWERED BY TECH TITANS
+              POWERED BY SYNDETECT AI
             </p>
           </div>
           <div className="flex items-center space-x-6">
