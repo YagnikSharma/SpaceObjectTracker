@@ -89,6 +89,13 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
     };
   }, [toast]);
 
+  // Detect if we're on a mobile device
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+  
+  const mobileDevice = isMobileDevice();
+
   // Start camera stream when selected camera changes
   useEffect(() => {
     if (!selectedCamera || permissionStatus !== "granted") return;
@@ -102,14 +109,39 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
 
         setIsCameraReady(false);
         
-        // Start new stream with selected camera
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
+        // Different constraints for mobile vs desktop
+        let videoConstraints: MediaTrackConstraints = {};
+        
+        // For mobile devices with multiple cameras, we need to handle things differently
+        if (mobileDevice) {
+          // If we have a specific camera selected and it's not the first camera
+          if (selectedCamera && selectedCamera !== availableCameras[0]?.deviceId) {
+            // For rear camera (often the second camera on a mobile device)
+            videoConstraints = {
+              deviceId: { exact: selectedCamera },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            };
+          } else {
+            // Default to environment/rear camera when available (first choice for mobile)
+            videoConstraints = {
+              facingMode: { ideal: "environment" },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            };
+          }
+        } else {
+          // Desktop constraints - use the selected camera by deviceId
+          videoConstraints = {
             deviceId: selectedCamera ? { exact: selectedCamera } : undefined,
-            facingMode: "environment", // Prefer rear camera on mobile
             width: { ideal: 1280 },
             height: { ideal: 720 }
-          },
+          };
+        }
+        
+        // Start new stream with appropriate constraints
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: videoConstraints,
           audio: false
         });
         
@@ -141,7 +173,7 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
         cameraStream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [selectedCamera, permissionStatus, toast]);
+  }, [selectedCamera, permissionStatus, toast, availableCameras, mobileDevice]);
 
   // Handle countdown for capture
   useEffect(() => {
@@ -260,6 +292,16 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
     </div>
   );
 
+  // Camera flip button for mobile devices
+  const handleFlipCamera = () => {
+    // Find the current camera index
+    const currentIndex = availableCameras.findIndex(camera => camera.deviceId === selectedCamera);
+    // Calculate the next camera index (cycling through available cameras)
+    const nextIndex = (currentIndex + 1) % availableCameras.length;
+    // Set the new camera
+    setSelectedCamera(availableCameras[nextIndex]?.deviceId || '');
+  };
+
   // Camera interface component
   const CameraInterface = () => (
     <div className="relative">
@@ -288,12 +330,28 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
             <div className="text-9xl font-bold text-white">{countdown}</div>
           </div>
         )}
+
+        {/* Mobile camera flip button - only show when ready and multiple cameras available */}
+        {mobileDevice && availableCameras.length > 1 && isCameraReady && (
+          <Button
+            variant="outline"
+            onClick={handleFlipCamera}
+            className="absolute top-4 right-4 p-2 rounded-full bg-black/40 border-white/20 hover:bg-black/60"
+            size="icon"
+            aria-label="Flip camera"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+          </Button>
+        )}
       </div>
       
       {/* Controls */}
       <div className="p-4 bg-gradient-to-t from-[#0a0e17] to-transparent absolute bottom-0 left-0 right-0">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          {availableCameras.length > 0 && (
+          {/* Desktop camera selector - hide on mobile devices */}
+          {!mobileDevice && availableCameras.length > 0 && (
             <div className="w-full sm:w-64">
               <Select value={selectedCamera} onValueChange={handleCameraChange}>
                 <SelectTrigger className="bg-[#2a3348]/80 border-[#3a4358] text-blue-200">
@@ -314,32 +372,40 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
             </div>
           )}
           
-          <div className="flex space-x-3">
+          {/* Capture buttons */}
+          <div className={`flex space-x-3 ${mobileDevice ? 'w-full justify-center' : ''}`}>
             <Button 
               variant="outline" 
               onClick={cancelCapture}
               className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:text-red-300"
             >
-              Cancel
+              <span className="sr-only sm:not-sr-only">Cancel</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </Button>
             
+            {/* Capture button with animation for mobile */}
             <Button 
               onClick={startCountdown} 
               disabled={!isCameraReady || isCapturing}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white"
+              className={`
+                bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white
+                ${mobileDevice ? 'h-16 w-16 rounded-full p-0 flex items-center justify-center' : ''}
+              `}
             >
               {isCapturing ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Capturing...</span>
+                  <span className="sr-only sm:not-sr-only">Capturing...</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className={`${mobileDevice ? 'h-8 w-8' : 'h-5 w-5'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span>Capture Image</span>
+                  <span className="sr-only sm:not-sr-only">Capture Image</span>
                 </div>
               )}
             </Button>
