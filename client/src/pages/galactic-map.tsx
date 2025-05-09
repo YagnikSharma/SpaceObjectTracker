@@ -221,10 +221,25 @@ export default function GalacticMap() {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    // If click is on the right side of the screen, show popup to the left
-    // If click is on the bottom half of the screen, show popup above
-    const posX = x > viewportWidth / 2 ? x - 400 : x + 50;
-    const posY = y > viewportHeight / 2 ? y - 300 : y + 50;
+    // Fixed width of detail panel
+    const DETAIL_WIDTH = 384; // 96rem = 384px
+    const DETAIL_HEIGHT = 500; // Approximate height
+    
+    // Calculate position while ensuring the panel stays within viewport
+    let posX = x > viewportWidth / 2 ? x - DETAIL_WIDTH - 20 : x + 20;
+    let posY = y > viewportHeight / 2 ? y - DETAIL_HEIGHT / 2 : y;
+    
+    // Ensure panel doesn't go off the left edge
+    posX = Math.max(20, posX);
+    
+    // Ensure panel doesn't go off the right edge
+    posX = Math.min(viewportWidth - DETAIL_WIDTH - 20, posX);
+    
+    // Ensure panel doesn't go off the top edge
+    posY = Math.max(20, posY);
+    
+    // Ensure panel doesn't go off the bottom edge
+    posY = Math.min(viewportHeight - DETAIL_HEIGHT - 20, posY);
     
     setDetailPosition({ x: posX, y: posY });
   };
@@ -276,7 +291,7 @@ export default function GalacticMap() {
                 <h3 className="text-lg font-medium dark:text-blue-300 text-blue-600">{selectedMap.title}</h3>
                 <button 
                   onClick={closeDetail}
-                  className="w-6 h-6 rounded-full dark:bg-blue-900/50 bg-yellow-500/20 flex items-center justify-center dark:hover:bg-blue-900/80 hover:bg-yellow-500/30 transition-colors"
+                  className="w-6 h-6 rounded-full dark:bg-blue-900/50 bg-blue-500/20 flex items-center justify-center dark:hover:bg-blue-900/80 hover:bg-blue-500/30 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -296,7 +311,7 @@ export default function GalacticMap() {
                 {selectedMap.scientificData && (
                   <div className="mb-4 grid grid-cols-2 gap-2 text-xs">
                     {selectedMap.scientificData.wavelength && (
-                      <div className="dark:bg-blue-900/20 bg-yellow-500/10 p-2 rounded-md">
+                      <div className="dark:bg-blue-900/20 bg-blue-500/10 p-2 rounded-md">
                         <span className="dark:text-blue-300 text-blue-700 font-medium">Wavelength:</span>
                         <p className="dark:text-blue-100/80 text-foreground/80">{selectedMap.scientificData.wavelength}</p>
                       </div>
