@@ -251,7 +251,9 @@ export default function MissionControl() {
             </div>
             <div className="mt-4">
               <span className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                {isLoading ? '-' : '87%'}
+                {isHistoryLoading ? '-' : detectionHistory.length > 0 
+                  ? `${Math.round(detectionHistory.reduce((sum, det) => sum + det.averageConfidence, 0) / detectionHistory.length * 100)}%` 
+                  : '0%'}
               </span>
               <div className="flex items-center mt-2 text-xs text-blue-300/60">
                 <span className="bg-green-500/20 text-green-500 rounded-full px-1.5 py-0.5 mr-1.5">+5%</span>
