@@ -234,6 +234,43 @@ names:
   }
   
   /**
+   * Import a pre-trained model file
+   * This will be the entry point for importing the model you're training with Anaconda
+   */
+  public importPretrainedModel(modelBuffer: Buffer, options?: {
+    modelName?: string,
+    classes?: string[]
+  }) {
+    try {
+      log('Importing pre-trained model...', 'yolo');
+      
+      // Save the model to the models directory
+      const modelName = options?.modelName || 'imported-space-components.pt';
+      const modelPath = path.join(process.cwd(), 'models', modelName);
+      
+      // Save the model file
+      fs.writeFileSync(modelPath, modelBuffer);
+      
+      // Update our model path to point to the imported model
+      this.modelPath = modelPath;
+      this.isModelLoaded = true;
+      
+      log(`Pre-trained model imported successfully to ${modelPath}`, 'yolo');
+      return { 
+        success: true, 
+        message: 'Model imported successfully',
+        modelPath
+      };
+    } catch (error) {
+      log(`Error importing model: ${error.message}`, 'yolo');
+      return { 
+        success: false, 
+        message: `Error importing model: ${error.message}`
+      };
+    }
+  }
+  
+  /**
    * Detect objects in an image
    */
   public detectObjects(imagePath: string) {

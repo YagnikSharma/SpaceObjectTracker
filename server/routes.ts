@@ -394,6 +394,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upload trained YOLO model endpoint
+  app.post("/api/upload-model", upload.single("model"), async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No model file provided" });
+      }
+      
+      console.log(`Received trained model file: ${req.file.originalname}`);
+      
+      // Create models directory if it doesn't exist
+      const modelsDir = path.join(process.cwd(), 'models');
+      if (!fs.existsSync(modelsDir)) {
+        fs.mkdirSync(modelsDir, { recursive: true });
+      }
+      
+      // Get model configuration from request body
+      const modelName = req.body.modelName || "custom-space-objects.pt";
+      const classes = req.body.classes ? JSON.parse(req.body.classes) : PRIORITY_CATEGORIES;
+      
+      // Import the model using our custom YOLO service
+      const importResult = customYOLOService.importPretrainedModel(req.file.buffer, {
+        modelName,
+        classes
+      });
+      
+      if (importResult.success) {
+        res.status(200).json({
+          success: true,
+          message: "Model uploaded and imported successfully",
+          modelName,
+          modelPath: importResult.modelPath,
+          classes
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          error: importResult.message
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading model:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to upload model" 
+      });
+    }
+  });
+  
   // Chat completion endpoint
   app.post("/api/chat", async (req: Request, res: Response) => {
     try {

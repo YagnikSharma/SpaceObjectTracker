@@ -51,3 +51,53 @@ export async function checkFalconApiStatus(): Promise<boolean> {
     return false;
   }
 }
+
+export interface ModelUploadResponse {
+  success: boolean;
+  message: string;
+  modelName?: string;
+  modelPath?: string;
+  classes?: string[];
+  error?: string;
+}
+
+export async function uploadTrainedModel(
+  file: File, 
+  options: { 
+    modelName?: string, 
+    classes?: string[] 
+  } = {}
+): Promise<ModelUploadResponse> {
+  const formData = new FormData();
+  formData.append('model', file);
+  
+  if (options.modelName) {
+    formData.append('modelName', options.modelName);
+  }
+  
+  if (options.classes) {
+    formData.append('classes', JSON.stringify(options.classes));
+  }
+  
+  try {
+    const response = await fetch('/api/upload-model', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`${response.status}: ${text || response.statusText}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      message: 'Failed to upload model',
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
+}
