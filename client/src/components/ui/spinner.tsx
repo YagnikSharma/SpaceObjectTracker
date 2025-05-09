@@ -7,26 +7,26 @@ interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Spinner({
-  className,
   size = "md",
   variant = "default",
+  className,
   ...props
 }: SpinnerProps) {
   const sizeClasses = {
-    sm: "h-4 w-4 border-2",
-    md: "h-6 w-6 border-2",
-    lg: "h-10 w-10 border-3",
+    sm: "w-4 h-4 border-2",
+    md: "w-8 h-8 border-3",
+    lg: "w-12 h-12 border-4",
   };
 
   const variantClasses = {
-    default: "border-t-blue-500",
-    light: "border-t-white",
+    default: "border-blue-600/30 border-t-blue-600",
+    light: "border-white/30 border-t-white",
   };
 
   return (
     <div
       className={cn(
-        "animate-spin rounded-full border-solid border-gray-600/30",
+        "animate-spin rounded-full",
         sizeClasses[size],
         variantClasses[variant],
         className

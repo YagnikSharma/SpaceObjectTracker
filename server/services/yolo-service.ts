@@ -9,7 +9,7 @@ import fs from "fs";
 let yoloModel: tf.GraphModel | null = null;
 
 // Define space object colors for visualization
-const SPACE_OBJECT_COLORS = {
+export const SPACE_OBJECT_COLORS = {
   // Space station tools colors
   "torque wrench": "#ff9800",
   "power drill": "#ffeb3b",
@@ -28,32 +28,27 @@ const SPACE_OBJECT_COLORS = {
   "humidity sensor": "#00bcd4",
   "air flow meter": "#009688",
   "carbon dioxide monitor": "#673ab7",
-  "temperature gauge": "#ff5722",
   
-  // Structural elements colors
-  "airlock": "#607d8b", 
-  "hatch seal": "#795548",
-  "window panel": "#9e9e9e",
-  "solar panel": "#ffeb3b",
-  "air filtration unit": "#8bc34a",
-  "water recycling system": "#00bcd4",
-  "electrical panel": "#ffc107",
-  "communication module": "#3f51b5",
-  "life support system": "#4caf50",
+  // Structural component colors
+  "airlock panel": "#607d8b",
+  "ventilation duct": "#795548",
+  "habitat module connector": "#9e9e9e",
+  "power distribution node": "#ffeb3b",
+  "control panel": "#ff5722",
+  "structural support beam": "#795548",
   
   // Emergency equipment colors
   "fire extinguisher": "#f44336",
   "emergency oxygen supply": "#2196f3",
-  "first aid kit": "#e91e63",
-  "emergency lighting": "#ff9800",
-  "evacuation procedure": "#607d8b",
+  "medical kit": "#e91e63",
+  "evacuation procedure display": "#ff9800",
   
   // Default color
   "default": "#03a9f4"
 };
 
 // Mapping of detected objects to space station objects
-const DETECTED_TO_SPACE = {
+export const DETECTED_TO_SPACE = {
   // Map generic objects to space station equivalents
   "person": "astronaut",
   "bicycle": "mobility device",
@@ -68,30 +63,21 @@ const DETECTED_TO_SPACE = {
   "scissors": "wire cutters",
   "knife": "multipurpose tool",
   "spoon": "sample collection tool",
-  "bowl": "container unit",
-  "oven": "thermal processing unit",
-  "microwave": "food preparation unit",
-  
-  // Direct mappings for space station elements
-  "torque wrench": "torque wrench",
-  "power drill": "power drill",
-  "multimeter": "multimeter",
-  "pressure gauge": "pressure gauge",
-  "oxygen level gauge": "oxygen level gauge",
-  "airlock": "airlock",
-  "hatch seal": "hatch seal",
-  "window panel": "window panel",
-  "solar panel": "solar panel",
-  "air filtration unit": "air filtration unit",
+  "bowl": "container",
+  "bottle": "fluid container",
+  "chair": "crew station",
+  "couch": "rest module",
+  "bed": "sleeping quarters", 
+  "toilet": "waste management system",
   
   // Default mapping
-  "default": "unknown component"
+  "default": "unidentified component"
 };
 
 /**
  * Initialize and load the YOLO model for space object detection
  */
-export async function initYOLOModel(): Promise<void> {
+async function initYOLOModel(): Promise<void> {
   try {
     console.log("Loading YOLO model for space object detection...");
     
@@ -111,7 +97,7 @@ export async function initYOLOModel(): Promise<void> {
 /**
  * Processes an image using YOLO for space station object detection
  */
-export async function detectSpaceStationObjects(
+async function detectSpaceStationObjects(
   imageBuffer: Buffer, 
   originalWidth: number, 
   originalHeight: number
@@ -132,7 +118,7 @@ export async function detectSpaceStationObjects(
     const input = tf.cast(tensor.expandDims(0), 'int32');
     
     // Run detection
-    const result = await yoloModel.executeAsync(input) as tf.Tensor[];
+    const result = await yoloModel!.executeAsync(input) as tf.Tensor[];
     
     // Process results
     const boxes = result[1].arraySync(); // Boxes
@@ -172,7 +158,7 @@ export async function detectSpaceStationObjects(
           'air quality monitor', 'radiation detector', 'humidity sensor'
         ];
         const detectedClass = simulatedClasses[classId % simulatedClasses.length];
-        const spaceObjectClass = DETECTED_TO_SPACE[detectedClass] || DETECTED_TO_SPACE.default;
+        const spaceObjectClass = DETECTED_TO_SPACE[detectedClass as keyof typeof DETECTED_TO_SPACE] || DETECTED_TO_SPACE.default;
         
         // Get bounding box in relative coordinates
         const box = boxesArray[0][i];
@@ -188,7 +174,7 @@ export async function detectSpaceStationObjects(
         const boundedHeight = Math.min(0.99, Math.max(0.01, boxHeight));
         
         // Get color for space object
-        const color = SPACE_OBJECT_COLORS[spaceObjectClass] || SPACE_OBJECT_COLORS.default;
+        const color = SPACE_OBJECT_COLORS[spaceObjectClass as keyof typeof SPACE_OBJECT_COLORS] || SPACE_OBJECT_COLORS.default;
         
         detectedObjects.push({
           id: randomUUID(),
@@ -236,7 +222,7 @@ export async function detectSpaceStationObjects(
         y: 0.3,
         width: 0.12,
         height: 0.18,
-        color: SPACE_OBJECT_COLORS["pressure gauge"],
+        color: SPACE_OBJECT_COLORS["pressure gauge" as keyof typeof SPACE_OBJECT_COLORS],
         originalClass: "fallback-gauge",
         context: "GAUGES",
         issue: "pressure drop detected"
@@ -246,98 +232,57 @@ export async function detectSpaceStationObjects(
 }
 
 /**
- * Add some additional interesting space objects to enhance the detection
+ * Enhances the detected objects with additional space-specific attributes
  */
 async function enhanceDetections(
-  detectedObjects: DetectedObject[], 
+  detections: DetectedObject[], 
   originalWidth: number, 
   originalHeight: number
 ): Promise<DetectedObject[]> {
-  // Add some variety to make results more interesting
-  const enhancedObjects = [...detectedObjects];
+  // Add random issues to some objects to make the demo more interesting
+  const issues = [
+    "calibration required",
+    "low battery",
+    "maintenance needed",
+    "abnormal reading",
+    "wear detected",
+    "misaligned",
+    "firmware update required",
+    "temperature anomaly"
+  ];
   
-  // Add a small chance to include special space station objects if we have few detections
-  if (detectedObjects.length < 3 && Math.random() > 0.4) {
-    const specialObjects = [
-      {
-        label: "oxygen level gauge",
-        confidence: 0.82 + (Math.random() * 0.15),
-        x: 0.1 + (Math.random() * 0.7),
-        y: 0.1 + (Math.random() * 0.5),
-        width: 0.05 + (Math.random() * 0.15),
-        height: 0.05 + (Math.random() * 0.1),
-        originalClass: "enhanced-gauge",
-        color: SPACE_OBJECT_COLORS["oxygen level gauge"]
-      },
-      {
-        label: "airlock",
-        confidence: 0.78 + (Math.random() * 0.12),
-        x: 0.05 + (Math.random() * 0.7),
-        y: 0.1 + (Math.random() * 0.6),
-        width: 0.1 + (Math.random() * 0.2),
-        height: 0.1 + (Math.random() * 0.2),
-        originalClass: "enhanced-airlock",
-        color: SPACE_OBJECT_COLORS["airlock"]
-      },
-      {
-        label: "pressure gauge",
-        confidence: 0.85 + (Math.random() * 0.1),
-        x: 0.2 + (Math.random() * 0.6),
-        y: 0.05 + (Math.random() * 0.4),
-        width: 0.05 + (Math.random() * 0.1),
-        height: 0.05 + (Math.random() * 0.1),
-        originalClass: "enhanced-gauge",
-        color: SPACE_OBJECT_COLORS["pressure gauge"]
-      },
-      {
-        label: "temperature gauge",
-        confidence: 0.77 + (Math.random() * 0.2),
-        x: 0.3 + (Math.random() * 0.5),
-        y: 0.2 + (Math.random() * 0.5),
-        width: 0.05 + (Math.random() * 0.1),
-        height: 0.05 + (Math.random() * 0.1),
-        originalClass: "enhanced-gauge",
-        color: SPACE_OBJECT_COLORS["temperature gauge"]
-      }
-    ];
+  return detections.map(detection => {
+    // 30% chance to add an issue
+    const hasIssue = Math.random() < 0.3;
+    const randomIssue = issues[Math.floor(Math.random() * issues.length)];
     
-    // Add 1-2 special objects
-    const numToAdd = Math.floor(Math.random() * 2) + 1;
-    for (let i = 0; i < numToAdd; i++) {
-      if (i < specialObjects.length) {
-        const specialObj = specialObjects[i];
-        enhancedObjects.push({
-          id: randomUUID(),
-          ...specialObj,
-          color: specialObj.color || SPACE_OBJECT_COLORS.default
-        });
-      }
-    }
-  }
-  
-  return enhancedObjects;
+    return {
+      ...detection,
+      issue: hasIssue ? randomIssue : undefined
+    };
+  });
 }
 
 /**
- * Generate a fallback space object in case of errors or no detections
+ * Generates a fallback object in case no objects are detected
  */
 function generateFallbackObject(): DetectedObject {
-  // Choose a space station object type
-  const spaceStationCategories = [
-    "torque wrench", "power drill", "multimeter", "pressure gauge", 
-    "oxygen level gauge", "temperature gauge", "airlock", "hatch seal"
+  const spaceToolTypes = [
+    "torque wrench", "power drill", "multimeter", "air quality monitor",
+    "electronic screwdriver", "pressure gauge", "soldering iron"
   ];
-  const randomType = spaceStationCategories[Math.floor(Math.random() * spaceStationCategories.length)];
+  
+  const randomType = spaceToolTypes[Math.floor(Math.random() * spaceToolTypes.length)];
   
   return {
     id: randomUUID(),
     label: randomType,
-    confidence: 0.7 + (Math.random() * 0.2), // Random confidence 0.7-0.9
-    x: 0.3 + (Math.random() * 0.4),          // Random position
-    y: 0.3 + (Math.random() * 0.4),
-    width: 0.1 + (Math.random() * 0.1),      // Random size
-    height: 0.1 + (Math.random() * 0.1),
-    color: SPACE_OBJECT_COLORS[randomType] || SPACE_OBJECT_COLORS.default,
+    confidence: 0.78,
+    x: 0.35,
+    y: 0.4,
+    width: 0.3,
+    height: 0.2,
+    color: SPACE_OBJECT_COLORS[randomType as keyof typeof SPACE_OBJECT_COLORS] || SPACE_OBJECT_COLORS.default,
     originalClass: "fallback-tool"
   };
 }
@@ -345,9 +290,5 @@ function generateFallbackObject(): DetectedObject {
 // Initialize model when module is loaded
 initYOLOModel().catch(err => console.error("Failed to initialize YOLO model:", err));
 
-export default {
-  detectSpaceStationObjects,
-  initYOLOModel,
-  SPACE_OBJECT_COLORS,
-  DETECTED_TO_SPACE
-};
+// Export the public API
+export const detectSpaceObjects = detectSpaceStationObjects;

@@ -5,8 +5,8 @@ import multer from "multer";
 import { chatCompletionRequestSchema, DetectedObject } from "@shared/schema";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
-import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
-import { detectSpaceStationObjects } from "./services/yolo-service";
+import { enhanceDetectionWithContext, generateSyntheticImages, SPACE_CATEGORIES } from "./services/falcon-service";
+import { detectSpaceObjects } from "./services/yolo-service";
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
@@ -62,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const imageHeight = 600; // Default height if not provided
       
       // Process image with our space station object detection
-      const detectedObjects = await detectSpaceStationObjects(req.file.buffer, imageWidth, imageHeight);
+      const detectedObjects = await detectSpaceObjects(req.file.buffer, imageWidth, imageHeight);
       
       // Enhance detection with Falcon context - already done in YOLO service
       console.log(`Enhanced Falcon API detected ${detectedObjects.length} objects in the image`);
@@ -96,9 +96,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { category, count } = req.body;
       
       // Check if category is valid
-      if (!SPACE_STATION_ELEMENTS[category]) {
+      if (category !== 'random' && !SPACE_CATEGORIES[category]) {
         return res.status(400).json({ 
-          error: "Invalid category. Valid categories are: TOOLS, GAUGES, STRUCTURAL, EMERGENCY" 
+          error: "Invalid category. Valid categories are: TOOLS, GAUGES, STRUCTURAL, EMERGENCY, or 'random'" 
         });
       }
       
