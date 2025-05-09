@@ -75,22 +75,33 @@ export default function MissionControl() {
   // Fetch detailed detection data when a detection is selected
   const { 
     data: detailData,
-    isLoading: isDetailLoading
+    isLoading: isDetailLoading,
+    error: detailError
   } = useQuery<DetectionDetailResponse>({
-    queryKey: ['/api/mission-control/detection', selectedDetectionId],
+    queryKey: [`/api/mission-control/detection/${selectedDetectionId}`],
     enabled: !!selectedDetectionId,
   });
   
   // Handle errors
   useEffect(() => {
     if (historyError) {
+      console.error("History error:", historyError);
       toast({
         title: "Error loading detection history",
         description: "Failed to load detection data from the server",
         variant: "destructive"
       });
     }
-  }, [historyError, toast]);
+    
+    if (detailError) {
+      console.error("Detail error:", detailError);
+      toast({
+        title: "Error loading detection details",
+        description: "Failed to load the detailed detection information",
+        variant: "destructive"
+      });
+    }
+  }, [historyError, detailError, toast]);
   
   // Format the detection history data
   const detectionHistory = historyData?.detections || [];
