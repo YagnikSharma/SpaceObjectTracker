@@ -118,16 +118,16 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="bg-gradient-to-r dark:from-blue-500 dark:to-purple-600 from-yellow-400 to-yellow-600 p-2 rounded-lg shadow-lg">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shadow-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                   Syndetect
                 </h1>
-                <p className="text-xs dark:text-blue-300/80 text-yellow-700/90">Space Station Monitoring System</p>
+                <p className="text-xs text-blue-300/80">Space Station Monitoring System</p>
               </div>
             </motion.div>
 
@@ -160,7 +160,7 @@ export default function Home() {
               </span>
               
               {/* Theme Toggle */}
-              <div className="dark:bg-blue-500/30 bg-yellow-500/30 p-1.5 rounded-lg border dark:border-blue-400/50 border-yellow-500/50">
+              <div className="bg-blue-500/30 p-1.5 rounded-lg border border-blue-400/50">
                 <button
                   onClick={() => {
                     const html = document.documentElement;
@@ -175,7 +175,7 @@ export default function Home() {
                       localStorage.setItem('syndetect-theme', 'dark');
                     }
                   }}
-                  className="flex items-center justify-center w-8 h-8 rounded-md dark:hover:bg-blue-600/20 hover:bg-yellow-600/20 dark:text-white text-yellow-800"
+                  className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-600/20 text-white"
                   aria-label="Toggle theme"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden dark:block">
@@ -296,7 +296,7 @@ export default function Home() {
                     <div className="p-4 border-b border-border">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                         <div className="w-3 h-3 rounded-full bg-green-500"></div>
                         <h2 className="text-md font-semibold ml-2 text-primary dark:text-blue-300">Detection Control Center</h2>
                       </div>
