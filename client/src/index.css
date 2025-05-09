@@ -2,37 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Default root theme values - Dark space theme */
 :root {
-  /* Light mode - Black/White theme with yellow highlights */
-  --background: 0 0% 100%;
-  --foreground: 0 0% 0%;
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 40%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 0%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 0%;
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
-  
-  /* Yellow primary highlight color */
-  --primary: 45 100% 50%;
-  --primary-foreground: 0 0% 0%;
-  
-  /* Secondary colors */
-  --secondary: 0 0% 96%;
-  --secondary-foreground: 0 0% 0%;
-  --accent: 45 100% 96%;
-  --accent-foreground: 0 0% 0%;
-  
-  /* Other UI elements */
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-  --ring: 45 100% 50%;
-  --radius: 0.5rem;
-}
-
-.dark {
   /* Dark mode - Deep space theme */
   --background: 222 47% 5%;
   --foreground: 210 40% 98%;
@@ -59,6 +30,37 @@
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
   --ring: 213 90% 60%;
+  --radius: 0.5rem;
+}
+
+/* Light mode theme - Black/White with yellow highlights */
+:root:not(.dark) {
+  /* Light mode - Black/White theme with yellow highlights */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 40%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 0%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  
+  /* Yellow primary highlight color */
+  --primary: 45 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  
+  /* Secondary colors */
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 0%;
+  --accent: 45 100% 96%;
+  --accent-foreground: 0 0% 0%;
+  
+  /* Other UI elements */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 45 100% 50%;
   --radius: 0.5rem;
 }
 

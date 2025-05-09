@@ -139,21 +139,41 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
           };
         }
         
+        console.log("Starting camera with constraints:", videoConstraints);
+        
         // Start new stream with appropriate constraints
         const stream = await navigator.mediaDevices.getUserMedia({
           video: videoConstraints,
           audio: false
         });
         
+        console.log("Camera stream obtained:", stream);
         setCameraStream(stream);
         
         // Connect stream to video element
         if (videoRef.current) {
+          console.log("Setting video source");
           videoRef.current.srcObject = stream;
-          // Mark camera as ready when video can play
+          
+          // Force play the video
+          try {
+            await videoRef.current.play();
+            console.log("Video playback started");
+            setIsCameraReady(true);
+          } catch (playError) {
+            console.error("Error auto-playing video:", playError);
+            // Try to set it ready anyway
+            setIsCameraReady(true);
+          }
+          
+          // Also mark camera as ready when video can play
           videoRef.current.onloadedmetadata = () => {
+            console.log("Video metadata loaded");
+            videoRef.current?.play().catch(e => console.error("Play error:", e));
             setIsCameraReady(true);
           };
+        } else {
+          console.error("Video ref is null");
         }
       } catch (error) {
         console.error("Error accessing camera:", error);

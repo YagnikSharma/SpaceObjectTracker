@@ -159,22 +159,38 @@ export default function Home() {
               </span>
               
               {/* Theme Toggle */}
-              <div className="bg-blue-500/30 p-1.5 rounded-lg border border-blue-400/50">
+              <div className="bg-blue-500/30 dark:bg-blue-500/30 light:bg-yellow-500/30 p-1.5 rounded-lg border border-blue-400/50 dark:border-blue-400/50 light:border-yellow-400/50">
                 <button
                   onClick={() => {
-                    const html = document.querySelector('html');
-                    const isDark = html?.classList.contains('dark');
+                    const html = document.documentElement;
+                    const isDark = html.classList.contains('dark');
                     if (isDark) {
-                      html?.classList.remove('dark');
-                      html?.classList.add('light');
+                      // Switch to light mode
+                      html.classList.remove('dark');
+                      localStorage.setItem('syndetect-theme', 'light');
                     } else {
-                      html?.classList.remove('light');
-                      html?.classList.add('dark');
+                      // Switch to dark mode
+                      html.classList.add('dark');
+                      localStorage.setItem('syndetect-theme', 'dark');
                     }
                   }}
-                  className="flex items-center justify-center w-8 h-8 rounded-md text-white hover:bg-blue-600/20"
+                  className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-600/20 dark:hover:bg-blue-600/20 light:hover:bg-yellow-600/20"
+                  aria-label="Toggle theme"
                 >
-                  <span>🌓</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden dark:block">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="block dark:hidden">
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                  </svg>
                 </button>
               </div>
               
