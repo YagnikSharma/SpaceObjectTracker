@@ -167,25 +167,26 @@ function addToTrainingData(detectedObject: DetectedObject): void {
 }
 
 /**
- * Analyze image with OpenAI Vision API to enhance YOLOv8 detections
+ * Analyze image with OpenAI Vision API for accurate object detection
  */
 async function analyzeImageWithAI(imageBase64: string): Promise<DetectedObject[]> {
   try {
-    console.log("Analyzing image with OpenAI...");
+    console.log("Analyzing image with OpenAI Vision API...");
     
+    // Use OpenAI Vision API to analyze the image - this is real, not simulated
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
       messages: [
         {
           role: "system",
-          content: "You are an expert computer vision system specifically trained to identify space station objects like toolboxes, fire extinguishers, oxygen tanks, and astronauts. Detect all objects and output ONLY a JSON array with objects. Each object should have: label (string), confidence (number 0-1), x (normalized 0-1), y (normalized 0-1), width (normalized 0-1), height (normalized 0-1). Focus on finding the priority objects: toolbox/toolkit, fire extinguisher, oxygen tank, and people/astronauts."
+          content: "You are an accurate computer vision system. ONLY identify objects that are ACTUALLY present in the image. DO NOT hallucinate or make up objects. Be very conservative with your detections. You should ONLY detect real objects that are visibly present. Output a JSON array of objects with the key 'objects'. If no objects of interest are found, return an empty array. For each object present include: label (string - actual object name), confidence (number 0-1), x (normalized 0-1), y (normalized 0-1), width (normalized 0-1), height (normalized 0-1)."
         },
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: "Analyze this space station image and detect all objects. Focus on toolboxes, fire extinguishers, oxygen tanks, and astronauts. Return only JSON array of objects."
+              text: "Analyze this image and identify ONLY REAL objects that are ACTUALLY present. Do not hallucinate objects. Be very conservative. If you're not certain, don't detect it. Focus on detecting: toolboxes, fire extinguishers, oxygen tanks, and people if present. Only return objects that are definitely present in the image."
             },
             {
               type: "image_url",
@@ -200,44 +201,62 @@ async function analyzeImageWithAI(imageBase64: string): Promise<DetectedObject[]
       max_tokens: 1000,
     });
 
-    const result = JSON.parse(response.choices[0].message.content || "{}");
-    
-    if (result.objects && Array.isArray(result.objects)) {
-      return result.objects.map((obj: any) => {
-        // Convert to DetectedObject format
-        const label = obj.label.toLowerCase();
-        
-        // Determine color - green for humans, red for others unless they're in our color map
-        let color = "#f44336"; // default red
-        
-        if (label.includes("person") || label.includes("astronaut")) {
-          color = "#4caf50"; // green for humans
-        } else if (label in SPACE_OBJECT_COLORS) {
-          color = SPACE_OBJECT_COLORS[label];
-        }
-        
-        const detectedObject: DetectedObject = {
-          id: randomUUID(),
-          label: obj.label,
-          confidence: obj.confidence,
-          x: obj.x,
-          y: obj.y,
-          width: obj.width,
-          height: obj.height,
-          color,
-          originalClass: "ai-detected"
-        };
-        
-        // Add to training data
-        addToTrainingData(detectedObject);
-        
-        return detectedObject;
-      });
+    // Parse the response
+    try {
+      const result = JSON.parse(response.choices[0].message.content || "{}");
+      
+      // Only process if we have objects and they're in an array
+      if (result.objects && Array.isArray(result.objects) && result.objects.length > 0) {
+        return result.objects.map((obj: any) => {
+          // Validate the object has all required properties
+          if (!obj.label || typeof obj.confidence !== 'number' || 
+              typeof obj.x !== 'number' || typeof obj.y !== 'number' ||
+              typeof obj.width !== 'number' || typeof obj.height !== 'number') {
+            console.error("Invalid object format from OpenAI:", obj);
+            return null;
+          }
+          
+          // Convert to DetectedObject format
+          const label = obj.label.toLowerCase();
+          
+          // Determine color - green for humans, red for others unless they're in our color map
+          let color = "#f44336"; // default red
+          
+          if (label.includes("person") || label.includes("astronaut") || label.includes("human")) {
+            color = "#4caf50"; // green for humans
+          } else if (PRIORITY_OBJECTS.some(priority => label.includes(priority))) {
+            color = "#ffc107"; // yellow for priority objects
+          } else if (label in SPACE_OBJECT_COLORS) {
+            color = SPACE_OBJECT_COLORS[label];
+          }
+          
+          const detectedObject: DetectedObject = {
+            id: randomUUID(),
+            label: obj.label,
+            confidence: obj.confidence,
+            x: obj.x,
+            y: obj.y,
+            width: obj.width,
+            height: obj.height,
+            color,
+            originalClass: "vision-detected"
+          };
+          
+          // Add to training data only if confidence is high
+          if (obj.confidence > 0.7) {
+            addToTrainingData(detectedObject);
+          }
+          
+          return detectedObject;
+        }).filter(Boolean); // Remove any null objects
+      }
+    } catch (error) {
+      console.error("Error parsing OpenAI response:", error, "Response:", response.choices[0].message.content);
     }
     
     return [];
   } catch (error) {
-    console.error("Error analyzing image with AI:", error);
+    console.error("Error analyzing image with OpenAI Vision API:", error);
     return [];
   }
 }
@@ -251,12 +270,10 @@ export async function detectSpaceStationObjects(
   originalHeight: number
 ): Promise<DetectedObject[]> {
   try {
-    console.log("Running YOLOv8 object detection...");
+    console.log("Processing image with accurate object detection...");
     
-    // Make sure model is loaded
-    if (!yoloModel) {
-      await initYOLOModel();
-    }
+    // Note: We're not actually using YOLOv8 real-time detection in this implementation
+    // Instead, we're using OpenAI Vision API for precise object detection
     
     // Convert image buffer to base64 for AI analysis
     const imageBase64 = imageBuffer.toString('base64');
@@ -309,170 +326,14 @@ export async function detectSpaceStationObjects(
       return contextEnhancedObjects;
     }
     
-    // Fallback to simulated YOLOv8 detection if AI detection failed
-    console.log("Using YOLOv8 simulated detection for space station objects");
-    
-    const detectedObjects: DetectedObject[] = [];
-    
-    // Add at least one priority object
-    const priorityObject = PRIORITY_OBJECTS[Math.floor(Math.random() * PRIORITY_OBJECTS.length)];
-    detectedObjects.push({
-      id: randomUUID(),
-      label: priorityObject,
-      confidence: 0.85 + (Math.random() * 0.12),
-      x: 0.3 + (Math.random() * 0.4),
-      y: 0.2 + (Math.random() * 0.4),
-      width: 0.12 + (Math.random() * 0.1),
-      height: 0.12 + (Math.random() * 0.1),
-      color: SPACE_OBJECT_COLORS[priorityObject] || "#ffc107",
-      originalClass: "priority-object"
-    });
-    
-    // Add an astronaut with 50% probability
-    if (Math.random() > 0.5) {
-      detectedObjects.push({
-        id: randomUUID(),
-        label: "astronaut",
-        confidence: 0.9 + (Math.random() * 0.09),
-        x: 0.1 + (Math.random() * 0.4),
-        y: 0.3 + (Math.random() * 0.5),
-        width: 0.15 + (Math.random() * 0.1),
-        height: 0.25 + (Math.random() * 0.15),
-        color: "#4caf50", // always green for humans
-        originalClass: "human"
-      });
-    }
-    
-    // Helper function to generate non-overlapping positions
-    const generateNonOverlappingPosition = (existing: {x: number, y: number, width: number, height: number}[]): {x: number, y: number, width: number, height: number} => {
-      const maxAttempts = 10;
-      let attempts = 0;
-      
-      while (attempts < maxAttempts) {
-        // Generate random position and size
-        const width = 0.05 + (Math.random() * 0.15);
-        const height = 0.05 + (Math.random() * 0.15);
-        const x = 0.05 + (Math.random() * (0.9 - width));
-        const y = 0.05 + (Math.random() * (0.9 - height));
-        
-        // Check if it overlaps with existing positions
-        let overlaps = false;
-        for (const pos of existing) {
-          // Simple overlap check
-          if (
-            x < pos.x + pos.width + 0.05 && 
-            x + width + 0.05 > pos.x && 
-            y < pos.y + pos.height + 0.05 && 
-            y + height + 0.05 > pos.y
-          ) {
-            overlaps = true;
-            break;
-          }
-        }
-        
-        // If no overlap, return this position
-        if (!overlaps || existing.length === 0) {
-          return { x, y, width, height };
-        }
-        
-        attempts++;
-      }
-      
-      // If we couldn't find non-overlapping position after max attempts,
-      // just return a random position
-      return {
-        x: 0.1 + (Math.random() * 0.7),
-        y: 0.1 + (Math.random() * 0.7),
-        width: 0.05 + (Math.random() * 0.15),
-        height: 0.05 + (Math.random() * 0.15)
-      };
-    };
-    
-    // Get positions of existing objects
-    const usedPositions = detectedObjects.map(obj => ({
-      x: obj.x,
-      y: obj.y,
-      width: obj.width,
-      height: obj.height
-    }));
-    
-    // Add 2-3 more random space station objects
-    const additionalObjects = 2 + Math.floor(Math.random() * 2);
-    const spaceTools = [
-      "torque wrench", "power drill", "multimeter", "pressure gauge", 
-      "oxygen level gauge", "temperature gauge", "air flow meter",
-      "air quality monitor", "radiation detector", "humidity sensor",
-      "airlock", "hatch seal", "window panel", "solar panel", 
-      "air filtration unit", "water recycling system", "electrical panel"
-    ];
-    
-    for (let i = 0; i < additionalObjects; i++) {
-      // Pick a random tool
-      const toolIdx = Math.floor(Math.random() * spaceTools.length);
-      const toolName = spaceTools[toolIdx];
-      
-      // Generate position (with collision avoidance)
-      let position = generateNonOverlappingPosition(usedPositions);
-      usedPositions.push(position);
-      
-      // Get color for this space tool
-      const color = (toolName in SPACE_OBJECT_COLORS) 
-        ? (SPACE_OBJECT_COLORS as Record<string, string>)[toolName] 
-        : "#f44336"; // Default red
-      
-      // Add to detected objects
-      detectedObjects.push({
-        id: randomUUID(),
-        label: toolName,
-        confidence: 0.75 + (Math.random() * 0.2),
-        x: position.x,
-        y: position.y,
-        width: position.width,
-        height: position.height,
-        color,
-        originalClass: "space-tool"
-      });
-    }
-    
-    // Add training data for each object
-    detectedObjects.forEach(obj => addToTrainingData(obj));
-    
-    // Enhance detected objects with Falcon context
-    const contextEnhancedObjects = enhanceDetectionWithContext(detectedObjects);
-    
-    console.log(`YOLOv8 Detection found ${contextEnhancedObjects.length} space objects`);
-    return contextEnhancedObjects;
+    // If OpenAI Vision API didn't detect any objects, return empty array
+    console.log("No objects detected in the image by Vision API");
+    return [];
     
   } catch (error) {
-    console.error('Error in YOLOv8 detection:', error);
-    // Return fallback objects in case of error
-    return [
-      {
-        id: randomUUID(),
-        label: "toolbox",
-        confidence: 0.87,
-        x: 0.3,
-        y: 0.4,
-        width: 0.15,
-        height: 0.15,
-        color: SPACE_OBJECT_COLORS["toolbox"] || "#ffc107",
-        originalClass: "fallback-priority",
-        context: "TOOLS"
-      },
-      {
-        id: randomUUID(),
-        label: "oxygen tank",
-        confidence: 0.82,
-        x: 0.65,
-        y: 0.35,
-        width: 0.12,
-        height: 0.25,
-        color: SPACE_OBJECT_COLORS["oxygen tank"] || "#2196f3",
-        originalClass: "fallback-priority",
-        context: "EMERGENCY",
-        issue: "low pressure warning"
-      }
-    ];
+    console.error('Error in object detection:', error);
+    // Return empty array in case of error - no fake objects
+    return [];
   }
 }
 
