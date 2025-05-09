@@ -311,7 +311,7 @@ export default function Home() {
                   transition={{ duration: 0.5 }}
                   key="detection-left"
                 >
-                  <div className="bg-card/80 backdrop-blur-md rounded-xl border border-border shadow-lg overflow-hidden">
+                  <div className="bg-card/80 backdrop-blur-md rounded-xl border border-border shadow-lg overflow-hidden hover-glow">
                     <div className="p-4 border-b border-border">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -348,12 +348,12 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   key="detection-right"
                 >
-                  <div className="bg-card/80 backdrop-blur-md rounded-xl border border-border shadow-lg h-full overflow-hidden">
+                  <div className="bg-card/80 backdrop-blur-md rounded-xl border border-border shadow-lg h-full overflow-hidden hover-glow">
                     <div className="p-4 border-b border-border">
                       <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                        <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-orange-500"></div>
                         <h2 className="text-md font-semibold ml-2 text-primary dark:text-yellow-300">ASTROSCAN - Space Analysis Assistant</h2>
                       </div>
                     </div>
@@ -376,12 +376,12 @@ export default function Home() {
                 transition={{ duration: 0.5 }}
                 key="analysis"
               >
-                <div className="bg-card/80 backdrop-blur-md rounded-xl border border-border shadow-lg overflow-hidden">
+                <div className="bg-card/80 backdrop-blur-md rounded-xl border border-border shadow-lg overflow-hidden hover-glow">
                   <div className="p-4 border-b border-border">
                     <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
-                      <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-orange-500"></div>
                       <h2 className="text-md font-semibold ml-2 text-primary dark:text-yellow-300">Advanced Space Station Analysis</h2>
                     </div>
                   </div>
@@ -439,12 +439,12 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Floating particles effect */}
+      {/* Floating yellow particles effect */}
       <div className="fixed inset-0 pointer-events-none z-0">
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-primary dark:bg-blue-400 rounded-full"
+            className="absolute w-1 h-1 bg-primary dark:bg-yellow-400 rounded-full"
             initial={{ 
               x: Math.random() * 100 + "%", 
               y: Math.random() * 100 + "%",
@@ -461,7 +461,8 @@ export default function Home() {
             }}
             style={{ 
               width: Math.random() * 3 + 1 + "px",
-              height: Math.random() * 3 + 1 + "px"
+              height: Math.random() * 3 + 1 + "px",
+              boxShadow: "0 0 3px 1px rgba(255, 215, 0, 0.2)" // Subtle glow for particles
             }}
           />
         ))}
