@@ -6,7 +6,7 @@ import { chatCompletionRequestSchema, DetectedObject } from "@shared/schema";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
-import { detectSpaceStationObjects } from "./services/yolo-service";
+import yoloService, { detectSpaceStationObjects, getTrainingStatistics } from "./services/yolo-service";
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
@@ -37,14 +37,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Space object detection endpoint
+  // Space object detection endpoint with YOLOv8
   app.post("/api/detect", upload.single("image"), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No image file provided" });
       }
 
-      console.log("Processing image with enhanced Falcon API...");
+      console.log("Processing image with YOLOv8 and OpenAI Vision...");
       
       // Create uploads directory if it doesn't exist
       const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -61,14 +61,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const imageWidth = 800; // Default width if not provided
       const imageHeight = 600; // Default height if not provided
       
-      // Process image with our space station object detection
+      // Process image with YOLOv8 object detection (with priority to toolbox, fire extinguisher, oxygen tank)
       const detectedObjects = await detectSpaceStationObjects(req.file.buffer, imageWidth, imageHeight);
       
-      // Enhance detection with Falcon context - already done in YOLO service
-      console.log(`Enhanced Falcon API detected ${detectedObjects.length} objects in the image`);
+      // Log priority and human detections
+      const priorityObjects = detectedObjects.filter(obj => 
+        yoloService.PRIORITY_OBJECTS.some(priority => 
+          obj.label.toLowerCase().includes(priority.toLowerCase())
+        )
+      );
+      
+      const humanObjects = detectedObjects.filter(obj => 
+        obj.label.toLowerCase().includes('astronaut') || 
+        obj.label.toLowerCase().includes('person')
+      );
+      
+      console.log(`YOLOv8 Detection Results:`);
+      console.log(`- Total Objects: ${detectedObjects.length}`);
+      console.log(`- Priority Objects: ${priorityObjects.length}`);
+      console.log(`- Humans Detected: ${humanObjects.length}`);
       
       // Save relative image path to serve statically
       const relativeImagePath = `/uploads/${imageName}`;
+      
+      // Get training statistics
+      const trainingStats = getTrainingStatistics();
       
       // Store detection in database
       const detection = await storage.createDetection({
@@ -79,12 +96,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json({
         imageUrl: relativeImagePath,
         detectedObjects,
-        detectionId: detection.id
+        detectionId: detection.id,
+        stats: {
+          priorityObjectsDetected: priorityObjects.length,
+          humansDetected: humanObjects.length,
+          totalTrainingSamples: trainingStats.totalSamples
+        }
       });
     } catch (error) {
       console.error("Error processing image:", error);
       res.status(500).json({ 
         error: error instanceof Error ? error.message : "Failed to process image" 
+      });
+    }
+  });
+  
+  // YOLOv8 training statistics endpoint
+  app.get("/api/training-stats", async (req: Request, res: Response) => {
+    try {
+      // Get training statistics from YOLO service
+      const stats = getTrainingStatistics();
+      
+      res.status(200).json({
+        success: true,
+        statistics: stats,
+        modelInfo: {
+          name: "YOLOv8",
+          priorityObjects: yoloService.PRIORITY_OBJECTS,
+          colorMapping: {
+            humans: "#4caf50", // green
+            priorityObjects: "#ffc107", // yellow
+            otherObjects: "#f44336" // red
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error retrieving training statistics:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to retrieve training statistics" 
       });
     }
   });
