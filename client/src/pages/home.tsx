@@ -246,37 +246,56 @@ export default function Home() {
       {/* Main Content with Floating Islands */}
       <main className="flex-grow relative z-10">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-          {/* Content Tabs */}
+          {/* Content Tabs with Yellow Theme and Animations */}
           <div className="flex mb-6 bg-card/50 backdrop-blur-md rounded-xl p-1 border border-border/50 w-full sm:w-auto overflow-x-auto">
             <button 
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`tab-button px-4 py-2 rounded-lg font-medium ${
                 activeTab === 'detection' 
-                  ? 'bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-blue-500 dark:to-purple-600' 
+                  ? 'active bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-yellow-500 dark:to-amber-600' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
               onClick={() => setActiveTab('detection')}
             >
-              Object Detection
+              <span className="relative z-10 flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+                Object Detection
+              </span>
             </button>
             <button 
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`tab-button px-4 py-2 rounded-lg font-medium ${
                 activeTab === 'analysis' 
-                  ? 'bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-blue-500 dark:to-purple-600' 
+                  ? 'active bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-yellow-500 dark:to-amber-600' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
               onClick={() => setActiveTab('analysis')}
             >
-              AI Analysis
+              <span className="relative z-10 flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                  <line x1="12" y1="22" x2="12" y2="12"></line>
+                </svg>
+                AI Analysis
+              </span>
             </button>
             <button 
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`tab-button px-4 py-2 rounded-lg font-medium ${
                 activeTab === 'feedback' 
-                  ? 'bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-blue-500 dark:to-purple-600' 
+                  ? 'active bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-yellow-500 dark:to-amber-600' 
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
               onClick={() => setActiveTab('feedback')}
             >
-              Model Feedback
+              <span className="relative z-10 flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Model Feedback
+              </span>
             </button>
           </div>
 
@@ -298,7 +317,7 @@ export default function Home() {
                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                         <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                        <h2 className="text-md font-semibold ml-2 text-primary dark:text-blue-300">Detection Control Center</h2>
+                        <h2 className="text-md font-semibold ml-2 text-primary dark:text-yellow-300">Detection Control Center</h2>
                       </div>
                     </div>
                     <div className="p-4">
@@ -335,7 +354,7 @@ export default function Home() {
                         <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                         <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                         <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
-                        <h2 className="text-md font-semibold ml-2 text-primary dark:text-blue-300">ASTROSCAN - Space Analysis Assistant</h2>
+                        <h2 className="text-md font-semibold ml-2 text-primary dark:text-yellow-300">ASTROSCAN - Space Analysis Assistant</h2>
                       </div>
                     </div>
                     <ChatInterface 
@@ -363,7 +382,7 @@ export default function Home() {
                       <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
                       <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                       <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                      <h2 className="text-md font-semibold ml-2 text-primary dark:text-blue-300">Advanced Space Station Analysis</h2>
+                      <h2 className="text-md font-semibold ml-2 text-primary dark:text-yellow-300">Advanced Space Station Analysis</h2>
                     </div>
                   </div>
                   <div className="p-6">
@@ -399,7 +418,7 @@ export default function Home() {
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
           <div className="text-sm text-muted-foreground mb-4 sm:mb-0 flex items-center">
             <span className="mr-2">🚀</span>
-            <p className="font-semibold bg-gradient-to-r from-primary to-primary/70 dark:from-blue-400 dark:to-purple-500 bg-clip-text text-transparent">
+            <p className="font-semibold bg-gradient-to-r from-primary to-primary/70 dark:from-yellow-400 dark:to-amber-500 bg-clip-text text-transparent">
               POWERED BY SYNDETECT AI
             </p>
           </div>
