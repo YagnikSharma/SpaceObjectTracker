@@ -7,9 +7,11 @@ interface FileUploaderProps {
   onFileSelect: (file: File) => void;
   onProcessImage: () => void;
   isLoading: boolean;
+  isProcessed: boolean;
+  setIsProcessed: (processed: boolean) => void;
 }
 
-export function FileUploader({ onFileSelect, onProcessImage, isLoading }: FileUploaderProps) {
+export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProcessed, setIsProcessed }: FileUploaderProps) {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -17,14 +19,25 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading }: FileUp
 
   // Process image automatically when a file is selected
   useEffect(() => {
-    if (currentFile && !isLoading) {
+    if (currentFile && !isLoading && !isProcessed) {
+      // Mark that we're processing this file
+      setIsProcessed(true);
+      
       // Slight delay to let the UI update first
       const timer = setTimeout(() => {
         onProcessImage();
       }, 300);
+      
       return () => clearTimeout(timer);
     }
-  }, [currentFile, isLoading, onProcessImage]);
+  }, [currentFile, isLoading, isProcessed, onProcessImage, setIsProcessed]);
+  
+  // Reset processing flag when file changes
+  useEffect(() => {
+    if (!currentFile) {
+      setIsProcessed(false);
+    }
+  }, [currentFile, setIsProcessed]);
 
   const validateFile = (file: File): boolean => {
     if (file.size > 10 * 1024 * 1024) {
