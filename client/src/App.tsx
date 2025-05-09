@@ -5,11 +5,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import MissionControl from "@/pages/mission-control";
+import GalacticMap from "@/pages/galactic-map";
+import StellarArchives from "@/pages/archives";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/mission-control" component={MissionControl} />
+      <Route path="/galactic-map" component={GalacticMap} />
+      <Route path="/archives" component={StellarArchives} />
       <Route component={NotFound} />
     </Switch>
   );
