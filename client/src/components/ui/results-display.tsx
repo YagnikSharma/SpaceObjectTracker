@@ -18,10 +18,9 @@ export interface DetectedObject {
   originalClass?: string; // Original COCO-SSD detection class
   context?: string; // Space station context category (TOOLS, GAUGES, etc.)
   issue?: string; // Detected issue with the component
-  referenceLink?: string; // Link to official documentation
 }
 
-interface ResultsDisplayProps {
+export interface ResultsDisplayProps {
   isLoading: boolean;
   imageUrl: string | null;
   detectedObjects: DetectedObject[];
@@ -31,286 +30,174 @@ interface ResultsDisplayProps {
 
 export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, onRetry }: ResultsDisplayProps) {
   const [showLabels, setShowLabels] = useState(true);
-  const { speaking, supported, speakResults, stopSpeaking, playAlertSound } = useSpeech();
-  
-  // Check for critical issues and play alert sound
-  useEffect(() => {
-    if (detectedObjects.length > 0) {
-      const criticalIssues = detectedObjects.filter(obj => obj.issue);
-      if (criticalIssues.length > 0) {
-        playAlertSound('critical');
-      }
-    }
-  }, [detectedObjects, playAlertSound]);
+  const { supported, speaking, speak, cancel: stopSpeaking } = useSpeech();
 
+  // Speak results using browser's speech synthesis
+  const speakResults = (objects: DetectedObject[]) => {
+    if (!supported || objects.length === 0) return;
+    
+    const intro = `Detected ${objects.length} objects in space station image.`;
+    const detections = objects
+      .map(obj => `${obj.label} with ${Math.round(obj.confidence * 100)}% confidence.${obj.issue ? ' Issue detected: ' + obj.issue : ''}`)
+      .join(' ');
+
+    speak(`${intro} ${detections}`);
+  };
+
+  // Generate and download JSON of detection results
   const handleDownloadResults = () => {
     if (!detectedObjects.length) return;
     
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(detectedObjects, null, 2));
+    const resultsJson = JSON.stringify({
+      timestamp: new Date().toISOString(),
+      detectedObjects: detectedObjects.map(obj => ({
+        ...obj,
+        confidence: Math.round(obj.confidence * 1000) / 1000 // Round to 3 decimal places
+      }))
+    }, null, 2);
+    
+    const blob = new Blob([resultsJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
     const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "syndetect-results.json");
+    downloadAnchorNode.href = url;
+    downloadAnchorNode.download = `syndetect-results-${new Date().getTime()}.json`;
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
   };
   
   const handleExportPDF = () => {
-    if (!detectedObjects.length || !imageUrl) return;
-    
-    // Create a new jsPDF instance
-    const doc = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-    
-    // Add header
-    doc.setFillColor(20, 30, 50);
-    doc.rect(0, 0, 210, 20, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("SYNDETECT - Space Station Monitoring Report", 105, 10, { align: 'center' });
-    
-    // Add date and time
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    const now = new Date();
-    doc.text(`Generated: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`, 105, 15, { align: 'center' });
-    
-    // Add image if available
-    if (imageUrl) {
-      try {
-        // Create a temp canvas to process the image
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
-        
-        img.onload = function() {
-          // Set canvas dimensions
-          canvas.width = img.width;
-          canvas.height = img.height;
-          
-          if (ctx) {
-            // Draw the image onto the canvas
-            ctx.drawImage(img, 0, 0, img.width, img.height);
-            
-            // Draw detection boxes on the image
-            detectedObjects.forEach(obj => {
-              const x = obj.x * img.width;
-              const y = obj.y * img.height;
-              const width = obj.width * img.width;
-              const height = obj.height * img.height;
-              
-              // Draw box
-              ctx.strokeStyle = obj.color;
-              ctx.lineWidth = 3;
-              ctx.strokeRect(x, y, width, height);
-              
-              // Draw label background
-              ctx.fillStyle = obj.color;
-              const labelText = `${obj.label} (${(obj.confidence * 100).toFixed(0)}%)`;
-              const labelWidth = ctx.measureText(labelText).width + 10;
-              ctx.fillRect(x, y - 20, labelWidth, 20);
-              
-              // Draw label text
-              ctx.fillStyle = '#FFFFFF';
-              ctx.font = '14px Arial';
-              ctx.fillText(labelText, x + 5, y - 5);
-            });
-            
-            // Get the processed image as data URL
-            const processedImageUrl = canvas.toDataURL('image/jpeg');
-            
-            // Add the processed image to PDF
-            doc.addImage(processedImageUrl, 'JPEG', 15, 25, 180, 100);
-            
-            // Draw a border around the image
-            doc.setDrawColor(40, 60, 100);
-            doc.setLineWidth(0.5);
-            doc.rect(15, 25, 180, 100);
-          } else {
-            // Fallback if canvas context is null
-            doc.addImage(imageUrl, 'JPEG', 15, 25, 180, 100);
-            doc.setDrawColor(40, 60, 100);
-            doc.setLineWidth(0.5);
-            doc.rect(15, 25, 180, 100);
-          }
-          
-          // Continue with the rest of PDF generation
-          // Add detection summary
-          doc.setFontSize(14);
-          doc.setFont("helvetica", "bold");
-          doc.setTextColor(40, 60, 100);
-          doc.text("Detection Summary", 15, 135);
-          
-          // Add summary text
-          doc.setFontSize(11);
-          doc.setFont("helvetica", "normal");
-          doc.setTextColor(60, 60, 60);
-          
-          const criticalIssues = detectedObjects.filter(obj => obj.issue);
-          const highConfidence = detectedObjects.filter(obj => obj.confidence > 0.7).length;
-          
-          const summaryTexts = [
-            `Total objects detected: ${detectedObjects.length}`,
-            `High confidence detections: ${highConfidence} (${Math.round(highConfidence/detectedObjects.length*100)}%)`,
-            `Objects with issues: ${criticalIssues.length}`,
-            `Detection model: YOLOv8`,
-          ];
-          
-          let yPos = 140;
-          summaryTexts.forEach(text => {
-            doc.text(text, 15, yPos);
-            yPos += 6;
-          });
-          
-          // Create table of detections
-          doc.setFontSize(14);
-          doc.setFont("helvetica", "bold");
-          doc.setTextColor(40, 60, 100);
-          doc.text("Detected Components", 15, 170);
-          
-          const tableColumn = ["Component", "Confidence", "Category", "Issue"];
-          const tableRows: Array<[string, string, string, string]> = [];
-          
-          detectedObjects.forEach(obj => {
-            const confidencePercent = Math.round(obj.confidence * 100) + '%';
-            tableRows.push([
-              obj.label,
-              confidencePercent,
-              obj.context || "Uncategorized",
-              obj.issue || "None"
-            ]);
-          });
-          
-          // Add table
-          (doc as any).autoTable({
-            head: [tableColumn],
-            body: tableRows,
-            startY: 175,
-            theme: 'grid',
-            styles: { fontSize: 10, cellPadding: 2 },
-            headStyles: { fillColor: [60, 90, 150], textColor: [255, 255, 255] },
-            columnStyles: {
-              0: { cellWidth: 50 }, // Component
-              1: { cellWidth: 25, halign: 'center' }, // Confidence
-              2: { cellWidth: 40 }, // Category
-              3: { cellWidth: 'auto' } // Issue
-            },
-            alternateRowStyles: { fillColor: [240, 245, 255] },
-            rowStyles: { minCellHeight: 10 }
-          });
-          
-          // Add footer
-          const finalY = (doc as any).lastAutoTable.finalY + 10;
-          
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "italic");
-          doc.setTextColor(100, 100, 100);
-          doc.text("This report was automatically generated by the Syndetect Space Station Monitoring System.", 105, finalY, { align: 'center' });
-          
-          // Save the PDF
-          doc.save("syndetect-report.pdf");
-        };
-        
-        // Set the source of the image
-        img.src = imageUrl;
-        
-        // Return early as we'll complete the PDF in the onload handler
-        return;
-      } catch (error) {
-        console.error("Failed to add image to PDF:", error);
-        
-        // Fallback: try adding the image directly
-        try {
-          doc.addImage(imageUrl, 'JPEG', 15, 25, 180, 100);
-          
-          // Draw a border around the image
-          doc.setDrawColor(40, 60, 100);
-          doc.setLineWidth(0.5);
-          doc.rect(15, 25, 180, 100);
-        } catch (fallbackError) {
-          console.error("Fallback image add failed:", fallbackError);
-        }
-      }
+    if (!detectedObjects.length || !imageUrl) {
+      console.log("No objects or imageUrl available for PDF export");
+      return;
     }
     
-    // Add detection summary
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(40, 60, 100);
-    doc.text("Detection Summary", 15, 135);
-    
-    // Add summary text
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(60, 60, 60);
-    
-    const criticalIssues = detectedObjects.filter(obj => obj.issue);
-    const highConfidence = detectedObjects.filter(obj => obj.confidence > 0.7).length;
-    
-    const summaryTexts = [
-      `Total objects detected: ${detectedObjects.length}`,
-      `High confidence detections: ${highConfidence} (${Math.round(highConfidence/detectedObjects.length*100)}%)`,
-      `Objects with issues: ${criticalIssues.length}`,
-      `Detection model: YOLOv8`,
-    ];
-    
-    let yPos = 140;
-    summaryTexts.forEach(text => {
-      doc.text(text, 15, yPos);
-      yPos += 6;
-    });
-    
-    // Create table of detections
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(40, 60, 100);
-    doc.text("Detected Components", 15, 170);
-    
-    const tableColumn = ["Component", "Confidence", "Category", "Issue"];
-    const tableRows: Array<[string, string, string, string]> = [];
-    
-    detectedObjects.forEach(obj => {
-      const confidencePercent = Math.round(obj.confidence * 100) + '%';
-      tableRows.push([
-        obj.label,
-        confidencePercent,
-        obj.context || "Uncategorized",
-        obj.issue || "None"
-      ]);
-    });
-    
-    // Add table
-    (doc as any).autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 175,
-      theme: 'grid',
-      styles: { fontSize: 10, cellPadding: 2 },
-      headStyles: { fillColor: [60, 90, 150], textColor: [255, 255, 255] },
-      columnStyles: {
-        0: { cellWidth: 50 }, // Component
-        1: { cellWidth: 25, halign: 'center' }, // Confidence
-        2: { cellWidth: 40 }, // Category
-        3: { cellWidth: 'auto' } // Issue
-      },
-      alternateRowStyles: { fillColor: [240, 245, 255] },
-      rowStyles: { minCellHeight: 10 }
-    });
-    
-    // Add footer
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(100, 100, 100);
-    doc.text("This report was automatically generated by the Syndetect Space Station Monitoring System.", 105, finalY, { align: 'center' });
-    
-    // Save the PDF
-    doc.save("syndetect-report.pdf");
+    try {
+      // Create a new jsPDF instance with more conservative settings
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
+      
+      // Add header
+      doc.setFillColor(20, 30, 50);
+      doc.rect(0, 0, 210, 20, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("SYNDETECT - Space Station Monitoring Report", 105, 10, { align: 'center' });
+      
+      // Add date and time
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      const now = new Date();
+      doc.text(`Generated: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`, 105, 15, { align: 'center' });
+      
+      // Simple PDF without image processing to avoid corruption
+      // Add detection summary sections directly
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(40, 60, 100);
+      doc.text("Detection Summary", 15, 45);
+      
+      // Add summary text
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(60, 60, 60);
+      
+      const criticalIssues = detectedObjects.filter(obj => obj.issue);
+      const highConfidence = detectedObjects.filter(obj => obj.confidence > 0.7).length;
+      
+      const percentHighConf = detectedObjects.length ? Math.round(highConfidence/detectedObjects.length*100) : 0;
+      
+      const summaryTexts = [
+        `Total objects detected: ${detectedObjects.length}`,
+        `High confidence detections: ${highConfidence} (${percentHighConf}%)`,
+        `Objects with issues: ${criticalIssues.length}`,
+        `Detection method: Vision API`,
+      ];
+      
+      let yPos = 55;
+      summaryTexts.forEach(text => {
+        doc.text(text, 15, yPos);
+        yPos += 6;
+      });
+      
+      // Create table of detections
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(40, 60, 100);
+      doc.text("Detected Components", 15, 85);
+      
+      const tableColumn = ["Component", "Confidence", "Category", "Issue"];
+      const tableRows: Array<[string, string, string, string]> = [];
+      
+      detectedObjects.forEach(obj => {
+        const confidencePercent = Math.round(obj.confidence * 100) + '%';
+        tableRows.push([
+          obj.label,
+          confidencePercent,
+          obj.context || "Uncategorized",
+          obj.issue || "None"
+        ]);
+      });
+      
+      // Add table with autoTable plugin
+      try {
+        (doc as any).autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 90,
+          theme: 'grid',
+          styles: { fontSize: 10, cellPadding: 2 },
+          headStyles: { fillColor: [60, 90, 150], textColor: [255, 255, 255] },
+          columnStyles: {
+            0: { cellWidth: 50 }, // Component
+            1: { cellWidth: 25, halign: 'center' }, // Confidence
+            2: { cellWidth: 40 }, // Category
+            3: { cellWidth: 'auto' } // Issue
+          },
+          alternateRowStyles: { fillColor: [240, 245, 255] },
+          rowStyles: { minCellHeight: 10 }
+        });
+        
+        // Add footer after table
+        const finalY = (doc as any).lastAutoTable.finalY + 10;
+        
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(100, 100, 100);
+        doc.text("This report was automatically generated by the Syndetect Space Station Monitoring System.", 105, finalY, { align: 'center' });
+      } catch (tableError) {
+        console.error("Failed to create table in PDF:", tableError);
+        
+        // Basic fallback if autoTable fails
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text("Detection Results:", 15, 90);
+        
+        let resultY = 100;
+        detectedObjects.forEach(obj => {
+          doc.text(`${obj.label} - ${Math.round(obj.confidence * 100)}% confidence`, 20, resultY);
+          resultY += 7;
+        });
+      }
+      
+      // Save the PDF
+      try {
+        doc.save("syndetect-report.pdf");
+        console.log("PDF exported successfully");
+      } catch (saveError) {
+        console.error("Failed to save PDF:", saveError);
+        alert("Failed to export PDF. Please try again.");
+      }
+      
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      alert("PDF export failed. Please try again.");
+    }
   };
 
   const renderBoundingBox = (object: DetectedObject) => {
@@ -373,15 +260,15 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
             Space Station Monitoring Ready
           </h3>
           <p className="text-blue-300/60 max-w-md text-sm">
-            Upload an image of space station components to perform advanced YOLO detection and analysis.
+            Upload an image of space station components to perform advanced Vision API detection and analysis.
             The system will identify and classify tools, gauges, and structural elements with high accuracy.
           </p>
           <div className="mt-6 flex justify-center flex-wrap gap-2 text-xs text-blue-400/50 max-w-md">
-            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Torque Wrenches</span>
-            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Power Drills</span>
-            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Air Quality Monitors</span>
+            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Toolboxes</span>
+            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Fire Extinguishers</span>
+            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Oxygen Tanks</span>
             <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Pressure Gauges</span>
-            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Panel Components</span>
+            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Astronauts</span>
           </div>
         </div>
       </div>
@@ -395,14 +282,14 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
         <div className="p-8 flex flex-col items-center justify-center">
           <div className="relative mb-6">
             <div className="w-16 h-16 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
-            <div className="absolute inset-0 flex items-center justify-center text-xs font-mono text-blue-300">YOLO</div>
+            <div className="absolute inset-0 flex items-center justify-center text-xs font-mono text-blue-300">API</div>
           </div>
           <div className="flex items-center space-x-2 mb-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
             <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
             <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
           </div>
-          <h3 className="text-lg font-semibold text-blue-400 mb-2">Space Station YOLO Analysis</h3>
+          <h3 className="text-lg font-semibold text-blue-400 mb-2">Space Station Object Analysis</h3>
           <p className="text-blue-300/70 text-center max-w-md">Scanning image for tools, gauges, panel components, and potential structural issues</p>
           <div className="mt-4 w-64 h-2 bg-[#2a3348] rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse" style={{ width: '60%' }}></div>
@@ -430,7 +317,7 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
             {error}
           </div>
           <p className="text-blue-300/60 max-w-md text-sm mb-4">
-            The YOLO detection system encountered an error. Please try again with a different image or adjust the parameters.
+            The detection system encountered an error. Please try again with a different image or adjust the parameters.
           </p>
           <button 
             onClick={onRetry}
@@ -456,7 +343,7 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
           <div className="w-3 h-3 rounded-full bg-blue-500"></div>
           <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-          <h2 className="text-md font-semibold ml-2 text-blue-300">YOLO Detection Results</h2>
+          <h2 className="text-md font-semibold ml-2 text-blue-300">Vision API Detection Results</h2>
         </div>
         <div className="flex space-x-3">
           {supported && (
@@ -541,147 +428,109 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
                   backgroundSize: '20px 20px'
                 }}
               ></div>
-            </div>
-          )}
-          
-          {/* Detection bounding boxes and labels */}
-          {detectedObjects.map(renderBoundingBox)}
+              
+              {/* Render bounding boxes for detected objects */}
+              {detectedObjects.map(renderBoundingBox)}
 
-          {/* Image metadata UI */}
-          <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center">
-            <div className="px-2.5 py-1.5 bg-black/50 backdrop-blur-sm rounded-lg text-xs text-blue-300 flex items-center space-x-3 border border-blue-500/20">
-              <span className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span className="font-mono">{detectedObjects.length} objects</span>
-              </span>
-              <span className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span className="font-mono">{new Date().toISOString().split('T')[0]}</span>
-              </span>
-            </div>
-            <div className="px-2.5 py-1.5 bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur-sm rounded-lg text-xs text-white flex items-center border border-blue-500/20">
-              <span className="mr-1">YOLO</span>
-              <span className="font-mono text-blue-300">v9.0</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-blue-200 space-y-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-md font-semibold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Space Station Components: <span className="font-bold text-blue-300 ml-1">{detectedObjects.length}</span>
-              {detectedObjects.some(obj => obj.issue) && (
-                <span className="ml-3 text-xs text-white bg-red-500/80 px-2 py-0.5 rounded flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  Issues detected
-                </span>
-              )}
-            </h3>
-            <div className="text-xs text-blue-300/70 flex items-center">
-              <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>
-              High confidence 
-              <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 mx-1.5"></span>
-              Medium confidence
-            </div>
-          </div>
-
-          {/* Reference Links */}
-          {detectedObjects.some(obj => obj.referenceLink) && (
-            <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <h4 className="text-sm font-medium text-blue-300 mb-2 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                NASA Documentation References
-              </h4>
-              <div className="space-y-2">
-                {detectedObjects.filter(obj => obj.referenceLink).map(obj => (
-                  <div key={`ref-${obj.id}`} className="flex items-start text-xs">
-                    <div className="h-2 w-2 rounded-full mt-1 mr-2" style={{ backgroundColor: obj.color }}></div>
-                    <div>
-                      <span className="text-blue-200 font-medium">{obj.label}: </span>
-                      <a 
-                        href={obj.referenceLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-blue-400 hover:text-blue-300 underline"
-                      >
-                        Technical documentation
-                      </a>
+              {/* Image metadata UI */}
+              <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center">
+                <div className="px-2.5 py-1.5 bg-black/50 backdrop-blur-sm rounded-lg text-xs text-blue-300 flex items-center space-x-3 border border-blue-500/20">
+                  <span className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {new Date().toLocaleDateString()}
+                  </span>
+                  <span className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {new Date().toLocaleTimeString()}
+                  </span>
+                </div>
+                <div className="px-2.5 py-1.5 bg-black/50 backdrop-blur-sm rounded-lg text-xs flex items-center space-x-3 border border-blue-500/20">
+                  <span className="flex items-center space-x-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                    <span className="font-medium text-blue-300">
+                      Space Station Components: <span className="font-bold text-blue-300 ml-1">{detectedObjects.length}</span>
+                    </span>
+                  </span>
+                  <span className="hidden md:flex items-center space-x-2 mr-1">
+                    <div className="flex space-x-1 items-center">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span className="text-green-400">High confidence</span>
                     </div>
-                  </div>
-                ))}
+                    <div className="flex space-x-1 items-center">
+                      <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                      <span className="text-yellow-400">Medium confidence</span>
+                    </div>
+                  </span>
+                </div>
               </div>
             </div>
           )}
-          
-          <div className="overflow-hidden rounded-lg border border-[#2a3348]">
+        </div>
+        
+        {/* Object list */}
+        {detectedObjects.length > 0 && (
+          <div className="mt-2 bg-[#151922] rounded-lg border border-[#2a3348]/70 overflow-hidden">
+            <div className="px-4 py-3 bg-[#1e2330] text-blue-300 text-xs font-medium flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>Component List</span>
+              </div>
+              <span className="rounded bg-blue-500/20 px-1.5 py-0.5 text-blue-300 text-xs">
+                {detectedObjects.length} object{detectedObjects.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+            
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-[#2a3348]">
-                <thead className="bg-[#1a1f2c]">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Component</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Confidence</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Category</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Location</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-blue-300 uppercase tracking-wider">Issue</th>
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-[#1a1f2c] text-xs font-medium text-blue-300 border-b border-[#2a3348]">
+                    <th className="px-4 py-2 text-left">COMPONENT</th>
+                    <th className="px-4 py-2 text-center">CONFIDENCE</th>
+                    <th className="px-4 py-2 text-left">CATEGORY</th>
+                    <th className="px-4 py-2 text-left">LOCATION</th>
+                    <th className="px-4 py-2 text-left">ISSUE</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#2a3348]">
-                  {detectedObjects.map((object) => (
-                    <tr key={object.id} className="hover:bg-[#2a3348]/30 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: object.color }}></div>
-                          <span className="font-medium text-blue-200">{object.label}</span>
-                        </div>
+                <tbody className="divide-y divide-[#2a3348]/50">
+                  {detectedObjects.map(obj => (
+                    <tr key={obj.id} className="hover:bg-[#1a1f2c]/50 transition-colors text-xs">
+                      <td className="px-4 py-2.5 flex items-center space-x-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: obj.color }}></div>
+                        <span className="font-medium text-blue-100">{obj.label}</span>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-16 h-2 bg-[#2a3348] rounded-full overflow-hidden mr-2">
-                            <div 
-                              className={`h-full ${
-                                object.confidence > 0.7 
-                                  ? 'bg-gradient-to-r from-green-500 to-green-300' 
-                                  : 'bg-gradient-to-r from-yellow-600 to-yellow-300'
-                              }`} 
-                              style={{ width: `${object.confidence * 100}%` }}
-                            ></div>
-                          </div>
-                          <span className={object.confidence > 0.7 ? 'text-green-400' : 'text-yellow-400'}>
-                            {(object.confidence * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="text-xs italic text-blue-300/70 bg-blue-500/10 px-2 py-0.5 rounded">
-                          {object.context || object.originalClass || "N/A"}
+                      <td className="px-4 py-2.5 text-center">
+                        <span className={getConfidenceClass(obj.confidence)}>
+                          {Math.round(obj.confidence * 100)}%
                         </span>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="font-mono text-xs text-blue-300/70">
-                          x: {object.x.toFixed(2)}, y: {object.y.toFixed(2)}
-                        </span>
+                      <td className="px-4 py-2.5 text-blue-300">
+                        {obj.context || "Uncategorized"}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        {object.issue ? (
-                          <span className="text-xs text-white bg-red-500/80 px-2 py-0.5 rounded">
-                            ⚠️ {object.issue}
+                      <td className="px-4 py-2.5 text-blue-300/80 font-mono">
+                        x: {obj.x.toFixed(2)}, y: {obj.y.toFixed(2)}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        {obj.issue ? (
+                          <span className="flex items-center space-x-1 text-orange-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>{obj.issue}</span>
                           </span>
                         ) : (
-                          <span className="text-xs text-blue-300/70 bg-green-500/20 px-2 py-0.5 rounded">
-                            ✓ No issues detected
+                          <span className="text-green-400/80 flex items-center space-x-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>No issues detected</span>
                           </span>
                         )}
                       </td>
@@ -691,7 +540,7 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
               </table>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
