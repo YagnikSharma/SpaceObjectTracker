@@ -13,6 +13,9 @@ export interface DetectedObject {
   height: number;
   color: string;
   originalClass?: string; // Original COCO-SSD detection class
+  context?: string; // Space station context category (TOOLS, GAUGES, etc.)
+  issue?: string; // Detected issue with the component
+  referenceLink?: string; // Link to official documentation
 }
 
 interface ResultsDisplayProps {
@@ -55,13 +58,18 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
         style={style}
       >
         {showLabels && (
-          <div className="absolute -mt-12">
-            <span className="block px-1 mb-1 text-xs rounded text-white" style={{ backgroundColor: object.color }}>
+          <div className="absolute -mt-14 z-10">
+            <span className="block px-1.5 py-0.5 mb-1 text-xs rounded text-white font-medium" style={{ backgroundColor: object.color }}>
               {object.label} ({(object.confidence * 100).toFixed(0)}%)
             </span>
-            {object.originalClass && (
-              <span className="block px-1 text-xs rounded text-white bg-gray-700 opacity-75">
-                {object.originalClass}
+            {object.issue && (
+              <span className="block px-1.5 py-0.5 mb-1 text-xs rounded font-medium text-white bg-red-500/90">
+                ⚠️ {object.issue}
+              </span>
+            )}
+            {object.context && (
+              <span className="block px-1.5 py-0.5 text-xs rounded text-white bg-blue-700/80">
+                {object.context}
               </span>
             )}
           </div>
@@ -90,18 +98,18 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
             </div>
           </div>
           <h3 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-3">
-            No Detection Results Yet
+            Space Station Monitoring Ready
           </h3>
           <p className="text-blue-300/60 max-w-md text-sm">
-            Upload an image of space objects to perform advanced YOLO detection and analysis.
-            The system will identify and classify stellar objects with high accuracy.
+            Upload an image of space station components to perform advanced YOLO detection and analysis.
+            The system will identify and classify tools, gauges, and structural elements with high accuracy.
           </p>
-          <div className="mt-6 flex justify-center space-x-2 text-xs text-blue-400/50">
-            <span>✓ Galaxies</span>
-            <span>✓ Nebulae</span>
-            <span>✓ Planets</span>
-            <span>✓ Stars</span>
-            <span>✓ Satellites</span>
+          <div className="mt-6 flex justify-center flex-wrap gap-2 text-xs text-blue-400/50 max-w-md">
+            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Torque Wrenches</span>
+            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Power Drills</span>
+            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Air Quality Monitors</span>
+            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Pressure Gauges</span>
+            <span className="px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">✓ Panel Components</span>
           </div>
         </div>
       </div>

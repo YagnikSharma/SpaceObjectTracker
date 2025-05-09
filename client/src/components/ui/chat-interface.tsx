@@ -91,11 +91,13 @@ export function ChatInterface({ messages, isLoading, detectedObjects, onSendMess
               <div className="mt-4 bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-blue-300 text-sm">
                 <p className="font-semibold mb-1">Suggested questions:</p>
                 <ul className="text-left list-disc list-inside space-y-1 text-blue-300/80">
-                  <li>Tell me about the {detectedObjects[0].label} in this image</li>
-                  <li>What's the difference between {detectedObjects.length > 1 ? 
-                    `${detectedObjects[0].label} and ${detectedObjects[1].label}` : 
-                    `${detectedObjects[0].label} and a nebula`}</li>
-                  <li>How does YOLO detection work for space objects?</li>
+                  <li>Tell me about this {detectedObjects[0].label} and how to maintain it</li>
+                  <li>What's the emergency protocol for a damaged {detectedObjects[0].label}?</li>
+                  {detectedObjects[0].issue ? (
+                    <li>How do I fix the "{detectedObjects[0].issue}" issue?</li>
+                  ) : (
+                    <li>What are common issues with a {detectedObjects[0].label}?</li>
+                  )}
                 </ul>
               </div>
             ) : (
@@ -177,8 +179,8 @@ export function ChatInterface({ messages, isLoading, detectedObjects, onSendMess
             <input
               type="text"
               placeholder={detectedObjects.length === 0 
-                ? "Upload an image to start the conversation..." 
-                : "Ask about the detected space objects..."}
+                ? "Upload a space station image to start the conversation..." 
+                : `Ask about the detected ${detectedObjects[0]?.label || "components"}...`}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={isLoading || detectedObjects.length === 0}
