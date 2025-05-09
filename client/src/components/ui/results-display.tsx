@@ -12,6 +12,7 @@ export interface DetectedObject {
   width: number;
   height: number;
   color: string;
+  originalClass?: string; // Original COCO-SSD detection class
 }
 
 interface ResultsDisplayProps {
