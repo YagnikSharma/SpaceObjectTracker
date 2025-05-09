@@ -1,10 +1,16 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
-import { chatCompletionRequestSchema } from "@shared/schema";
-import { processImageWithFalcon } from "./services/falcon-service";
-import { generateChatCompletion } from "./services/openai-service";
+import { chatCompletionRequestSchema, DetectedObject } from "@shared/schema";
+import { ParamsDictionary } from "express-serve-static-core";
+import { ParsedQs } from "qs";
+import { generateComponentAnalysis, enhanceDetectionWithContext } from "./services/falcon-service";
+import { detectSpaceStationObjects } from "./services/yolo-service";
+import { randomUUID } from "crypto";
+import * as fs from "fs";
+import * as path from "path";
+import OpenAI from "openai";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -38,16 +44,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No image file provided" });
       }
 
-      // Process image with Falcon API
-      const result = await processImageWithFalcon(req.file.buffer);
+      console.log("Processing image with enhanced Falcon API...");
+      
+      // Create uploads directory if it doesn't exist
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      // Save the image with a unique filename
+      const imageName = `space_station_scan_${randomUUID()}.jpg`;
+      const imagePath = path.join(uploadsDir, imageName);
+      fs.writeFileSync(imagePath, req.file.buffer);
+      
+      // Get image dimensions (approximated if not available)
+      const imageWidth = 800; // Default width if not provided
+      const imageHeight = 600; // Default height if not provided
+      
+      // Process image with our space station object detection
+      const detectedObjects = await detectSpaceStationObjects(req.file.buffer, imageWidth, imageHeight);
+      
+      // Enhance detection with Falcon context - already done in YOLO service
+      console.log(`Enhanced Falcon API detected ${detectedObjects.length} objects in the image`);
+      
+      // Save relative image path to serve statically
+      const relativeImagePath = `/uploads/${imageName}`;
       
       // Store detection in database
       const detection = await storage.createDetection({
-        imageUrl: result.imageUrl,
-        objects: result.detectedObjects,
+        imageUrl: relativeImagePath,
+        objects: detectedObjects,
       });
 
-      res.status(200).json(result);
+      res.status(200).json({
+        imageUrl: relativeImagePath,
+        detectedObjects,
+        detectionId: detection.id
+      });
     } catch (error) {
       console.error("Error processing image:", error);
       res.status(500).json({ 
@@ -61,15 +94,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = chatCompletionRequestSchema.parse(req.body);
       
-      // Generate chat completion using OpenAI
-      const completion = await generateChatCompletion(
-        validatedData.message,
+      // Initialize OpenAI client
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
+      // Extract component information from message or detected objects
+      let componentName = "";
+      let detectedIssue = "";
+      
+      // Extract space station component name from user message
+      const message = validatedData.message.toLowerCase();
+      
+      // Try to find component mentioned in the message
+      if (message.includes("oxygen")) componentName = "oxygen level gauge";
+      else if (message.includes("pressure")) componentName = "pressure gauge";
+      else if (message.includes("temperature")) componentName = "temperature gauge";
+      else if (message.includes("airlock")) componentName = "airlock";
+      else if (message.includes("hatch")) componentName = "hatch seal";
+      else if (message.includes("filter") || message.includes("air quality")) componentName = "air filtration unit";
+      else if (message.includes("wrench")) componentName = "torque wrench";
+      else if (message.includes("drill")) componentName = "power drill";
+      
+      // Try to identify issue in message
+      if (message.includes("leak")) detectedIssue = "air leakage detected";
+      else if (message.includes("malfunction")) detectedIssue = "control panel malfunction";
+      else if (message.includes("error")) detectedIssue = "calibration error";
+      else if (message.includes("reading") && message.includes("fluctuat")) detectedIssue = "fluctuating readings";
+      else if (message.includes("crack")) detectedIssue = "gauge glass cracked";
+      
+      // If no component explicitly mentioned, try to extract from detected objects
+      if (!componentName && validatedData.detectedObjects && validatedData.detectedObjects.length > 0) {
+        // Find the object with highest confidence
+        const highestConfidenceObj = validatedData.detectedObjects.reduce(
+          (prev, current) => (current.confidence > prev.confidence ? current : prev),
+          validatedData.detectedObjects[0]
+        );
+        
+        componentName = highestConfidenceObj.label;
+        
+        // Use detected issue if available
+        if (highestConfidenceObj.issue) {
+          detectedIssue = highestConfidenceObj.issue;
+        }
+      }
+      
+      // Generate component analysis using Falcon AI
+      const analysis = await generateComponentAnalysis(
+        componentName,
+        detectedIssue,
         validatedData.detectedObjects
       );
       
+      // Generate a unique ID for the response
+      const responseId = `chatcmpl-${randomUUID()}`;
+      
       res.status(200).json({
-        id: completion.id,
-        content: completion.content,
+        id: responseId,
+        content: analysis,
       });
     } catch (error) {
       console.error("Error generating chat completion:", error);

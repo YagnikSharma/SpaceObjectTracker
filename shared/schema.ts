@@ -63,6 +63,9 @@ export const detectedObjectSchema = z.object({
   height: z.number(),
   color: z.string().optional(),
   originalClass: z.string().optional(), // Original COCO-SSD class for debugging
+  context: z.string().optional(), // Space station context category (TOOLS, GAUGES, etc.)
+  issue: z.string().optional(), // Detected issue with the component
+  referenceLink: z.string().optional(), // Link to official documentation
 });
 
 export const chatCompletionRequestSchema = z.object({
