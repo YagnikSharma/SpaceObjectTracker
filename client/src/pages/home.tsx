@@ -4,6 +4,7 @@ import { FileUploader } from "@/components/ui/file-uploader";
 import { ResultsDisplay, DetectedObject } from "@/components/ui/results-display";
 import { ChatInterface, ChatMessage } from "@/components/ui/chat-interface";
 import { FeedbackForm } from "@/components/ui/feedback-form";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { useChat } from "@/hooks/use-chat";
 import { apiRequest } from "@/lib/queryClient";
