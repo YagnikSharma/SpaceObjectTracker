@@ -362,37 +362,37 @@ export default function GalacticMap() {
               transition={{ duration: 0.5 }}
             >
               <Link href="/" className="flex items-center space-x-3">
-                <div className="bg-gradient-to-r dark:from-blue-500 dark:to-purple-600 from-yellow-400 to-yellow-600 p-2 rounded-lg shadow-lg">
+                <div className="bg-gradient-to-r dark:from-blue-500 dark:to-purple-600 from-blue-400 to-blue-600 p-2 rounded-lg shadow-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+                  <h1 className="text-xl font-bold bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 from-blue-500 to-blue-600 bg-clip-text text-transparent">
                     Syndetect
                   </h1>
-                  <p className="text-xs dark:text-blue-300/80 text-yellow-700/90">Galactic Map Explorer</p>
+                  <p className="text-xs dark:text-blue-300/80 text-blue-700/90">Galactic Map Explorer</p>
                 </div>
               </Link>
             </motion.div>
 
             <nav className="hidden md:flex space-x-6">
-              <Link href="/" className="px-3 py-2 rounded-lg dark:text-blue-300/80 text-yellow-700/80 hover:text-blue-300 dark:hover:bg-blue-600/20 hover:bg-yellow-500/20 transition-colors">
+              <Link href="/" className="px-3 py-2 rounded-lg dark:text-blue-300/80 text-blue-700/80 hover:text-blue-300 dark:hover:bg-blue-600/20 hover:bg-blue-500/20 transition-colors">
                 Detection Hub
               </Link>
-              <Link href="/mission-control" className="px-3 py-2 rounded-lg dark:text-blue-300/80 text-yellow-700/80 hover:text-blue-300 dark:hover:bg-blue-600/20 hover:bg-yellow-500/20 transition-colors">
+              <Link href="/mission-control" className="px-3 py-2 rounded-lg dark:text-blue-300/80 text-blue-700/80 hover:text-blue-300 dark:hover:bg-blue-600/20 hover:bg-blue-500/20 transition-colors">
                 Mission Control
               </Link>
-              <Link href="/galactic-map" className="px-3 py-2 rounded-lg dark:bg-blue-500/20 bg-yellow-500/20 dark:text-blue-300 text-yellow-700 dark:border-blue-500/30 border-yellow-500/30 border">
+              <Link href="/galactic-map" className="px-3 py-2 rounded-lg dark:bg-blue-500/20 bg-blue-500/20 dark:text-blue-300 text-blue-700 dark:border-blue-500/30 border-blue-500/30 border">
                 Galactic Map
               </Link>
-              <Link href="/archives" className="px-3 py-2 rounded-lg dark:text-blue-300/80 text-yellow-700/80 hover:text-blue-300 dark:hover:bg-blue-600/20 hover:bg-yellow-500/20 transition-colors">
+              <Link href="/archives" className="px-3 py-2 rounded-lg dark:text-blue-300/80 text-blue-700/80 hover:text-blue-300 dark:hover:bg-blue-600/20 hover:bg-blue-500/20 transition-colors">
                 Stellar Archives
               </Link>
             </nav>
             
             {/* Theme toggle button */}
-            <div className="dark:bg-blue-500/30 bg-yellow-500/30 p-1.5 rounded-lg border dark:border-blue-400/50 border-yellow-500/50">
+            <div className="dark:bg-blue-500/30 bg-blue-500/30 p-1.5 rounded-lg border dark:border-blue-400/50 border-blue-500/50">
               <button
                 onClick={() => {
                   const html = document.documentElement;
@@ -407,7 +407,7 @@ export default function GalacticMap() {
                     localStorage.setItem('syndetect-theme', 'dark');
                   }
                 }}
-                className="flex items-center justify-center w-8 h-8 rounded-md dark:hover:bg-blue-600/20 hover:bg-yellow-600/20 dark:text-white text-yellow-800"
+                className="flex items-center justify-center w-8 h-8 rounded-md dark:hover:bg-blue-600/20 hover:bg-blue-600/20 dark:text-white text-blue-800"
                 aria-label="Toggle theme"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden dark:block">
@@ -446,15 +446,15 @@ export default function GalacticMap() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="w-10 h-10 border-2 dark:border-blue-600 border-yellow-600 dark:border-t-transparent border-t-transparent rounded-full animate-spin"></div>
-            <span className="ml-3 dark:text-blue-300 text-yellow-700">Loading galactic maps...</span>
+            <div className="w-10 h-10 border-2 dark:border-blue-600 border-blue-600 dark:border-t-transparent border-t-transparent rounded-full animate-spin"></div>
+            <span className="ml-3 dark:text-blue-300 text-blue-700">Loading galactic maps...</span>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {mapSources.map((map) => (
               <motion.div
                 key={map.id}
-                className="dark:bg-[#1a1f2c]/70 bg-card/70 backdrop-blur-md rounded-xl dark:border-[#2a3348] border-border border overflow-hidden dark:hover:border-blue-500/50 hover:border-yellow-500/50 transition-colors cursor-pointer"
+                className="dark:bg-[#1a1f2c]/70 bg-card/70 backdrop-blur-md rounded-xl dark:border-[#2a3348] border-border border overflow-hidden dark:hover:border-blue-500/50 hover:border-blue-500/50 transition-colors cursor-pointer"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: map.id * 0.1 }}
@@ -532,7 +532,7 @@ export default function GalacticMap() {
               href="https://science.nasa.gov/astrophysics/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="px-4 py-2 bg-gradient-to-r dark:from-blue-600 dark:to-purple-600 from-yellow-500 to-amber-600 rounded-lg text-white font-medium shadow-lg dark:shadow-blue-500/10 shadow-yellow-500/10 hover:shadow-yellow-500/30 dark:hover:shadow-blue-500/30 transition-all dark:hover:from-blue-500 dark:hover:to-purple-500 hover:from-yellow-400 hover:to-amber-500"
+              className="px-4 py-2 bg-gradient-to-r dark:from-blue-600 dark:to-purple-600 from-blue-500 to-blue-600 rounded-lg text-white font-medium shadow-lg dark:shadow-blue-500/10 shadow-blue-500/10 hover:shadow-blue-500/30 dark:hover:shadow-blue-500/30 transition-all dark:hover:from-blue-500 dark:hover:to-purple-500 hover:from-blue-400 hover:to-blue-700"
             >
               Explore More NASA Resources
             </a>
@@ -542,20 +542,20 @@ export default function GalacticMap() {
 
       <footer className="relative z-10 dark:bg-[#1a1f2c]/70 bg-card/70 backdrop-blur-md dark:border-[#2a3348] border-border border-t py-4 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
-          <div className="text-sm dark:text-blue-300/70 text-yellow-700/70 mb-4 sm:mb-0 flex items-center">
+          <div className="text-sm dark:text-blue-300/70 text-blue-700/70 mb-4 sm:mb-0 flex items-center">
             <span className="mr-2">🚀</span>
-            <p className="font-semibold bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 from-yellow-500 to-amber-600 bg-clip-text text-transparent">
+            <p className="font-semibold bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 from-blue-500 to-blue-600 bg-clip-text text-transparent">
               POWERED BY SYNDETECT AI
             </p>
           </div>
           <div className="flex items-center space-x-6">
-            <Link href="/mission-control" className="dark:text-blue-300/70 text-yellow-700/70 dark:hover:text-blue-300 hover:text-yellow-700 transition-colors text-sm flex items-center">
+            <Link href="/mission-control" className="dark:text-blue-300/70 text-blue-700/70 dark:hover:text-blue-300 hover:text-blue-700 transition-colors text-sm flex items-center">
               <span className="mr-1">🛰️</span> Mission Control
             </Link>
-            <Link href="/galactic-map" className="dark:text-blue-300/70 text-yellow-700/70 dark:hover:text-blue-300 hover:text-yellow-700 transition-colors text-sm flex items-center">
+            <Link href="/galactic-map" className="dark:text-blue-300/70 text-blue-700/70 dark:hover:text-blue-300 hover:text-blue-700 transition-colors text-sm flex items-center">
               <span className="mr-1">🪐</span> Galactic Map
             </Link>
-            <Link href="/archives" className="dark:text-blue-300/70 text-yellow-700/70 dark:hover:text-blue-300 hover:text-yellow-700 transition-colors text-sm flex items-center">
+            <Link href="/archives" className="dark:text-blue-300/70 text-blue-700/70 dark:hover:text-blue-300 hover:text-blue-700 transition-colors text-sm flex items-center">
               <span className="mr-1">🔭</span> Stellar Archives
             </Link>
           </div>
