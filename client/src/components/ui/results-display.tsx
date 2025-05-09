@@ -157,7 +157,7 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
             `Total objects detected: ${detectedObjects.length}`,
             `High confidence detections: ${highConfidence} (${Math.round(highConfidence/detectedObjects.length*100)}%)`,
             `Objects with issues: ${criticalIssues.length}`,
-            `Detection model: YOLO v9.0`,
+            `Detection model: YOLOv8`,
           ];
           
           let yPos = 140;
@@ -255,7 +255,7 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
       `Total objects detected: ${detectedObjects.length}`,
       `High confidence detections: ${highConfidence} (${Math.round(highConfidence/detectedObjects.length*100)}%)`,
       `Objects with issues: ${criticalIssues.length}`,
-      `Detection model: YOLO v9.0`,
+      `Detection model: YOLOv8`,
     ];
     
     let yPos = 140;
