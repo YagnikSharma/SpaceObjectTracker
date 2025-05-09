@@ -128,9 +128,15 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
     }
   };
 
-  // Simple check for browser camera support
+  // Check for browser camera support and secure context
   const isCameraSupported = () => {
-    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    // Check if we're in a secure context (HTTPS or localhost)
+    const isSecureContext = window.isSecureContext;
+    
+    // Check if the browser supports camera access
+    const hasMediaDevices = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    
+    return isSecureContext && hasMediaDevices;
   };
 
   return (
@@ -218,9 +224,28 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-red-400 mb-2">Camera Not Supported</h3>
-                  <p className="text-blue-200/70 mb-3">Your browser does not support camera access.</p>
-                  <p className="text-blue-200/50 text-sm">Try using a modern browser or check your camera permissions.</p>
+                  <h3 className="text-lg font-semibold text-red-400 mb-2">Camera Access Unavailable</h3>
+                  <p className="text-blue-200/70 mb-3">
+                    {!window.isSecureContext 
+                      ? "Camera access requires a secure connection (HTTPS). You're currently on HTTP."
+                      : "Your browser does not support camera access or permission was denied."}
+                  </p>
+                  
+                  <div className="mb-6 p-4 bg-[#2a3348]/50 rounded-lg text-sm text-blue-200/80">
+                    <p className="font-medium mb-1">Try the following:</p>
+                    <ul className="list-disc list-inside text-left space-y-1">
+                      {!window.isSecureContext && (
+                        <li>Access this site using HTTPS instead of HTTP</li>
+                      )}
+                      <li>Use a modern browser like Chrome, Firefox, or Edge</li>
+                      <li>Check your camera permissions in browser settings</li>
+                      <li>Connect a camera to your device if you don't have one</li>
+                    </ul>
+                  </div>
+                  
+                  <p className="text-blue-200/50 text-sm">
+                    You can still use the file upload tab to analyze existing images.
+                  </p>
                 </div>
               )}
             </TabsContent>
