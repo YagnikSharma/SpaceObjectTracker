@@ -360,9 +360,9 @@ export default function Home() {
                 <div className="bg-card/80 backdrop-blur-md rounded-xl border border-border shadow-lg overflow-hidden">
                   <div className="p-4 border-b border-border">
                     <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
                       <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                       <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                      <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
                       <h2 className="text-md font-semibold ml-2 text-primary dark:text-blue-300">Advanced Space Station Analysis</h2>
                     </div>
                   </div>
@@ -442,8 +442,7 @@ export default function Home() {
             }}
             style={{ 
               width: Math.random() * 3 + 1 + "px",
-              height: Math.random() * 3 + 1 + "px",
-              boxShadow: "0 0 3px 1px rgba(100, 200, 255, 0.2)" // Subtle glow for particles
+              height: Math.random() * 3 + 1 + "px"
             }}
           />
         ))}
