@@ -257,6 +257,9 @@ export function enhanceDetectionWithContext(
   });
 }
 
+// Export SPACE_STATION_ELEMENTS directly
+export { SPACE_STATION_ELEMENTS };
+
 export default {
   generateComponentAnalysis,
   generateSyntheticTrainingImages,

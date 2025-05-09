@@ -5,7 +5,7 @@ import multer from "multer";
 import { chatCompletionRequestSchema, DetectedObject } from "@shared/schema";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
-import { generateComponentAnalysis, enhanceDetectionWithContext } from "./services/falcon-service";
+import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
 import { detectSpaceStationObjects } from "./services/yolo-service";
 import { randomUUID } from "crypto";
 import * as fs from "fs";
@@ -89,6 +89,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Falcon synthetic image generator endpoint
+  app.post("/api/generate-synthetic", async (req: Request, res: Response) => {
+    try {
+      // Validate request
+      const { category, count } = req.body;
+      
+      // Check if category is valid
+      if (!SPACE_STATION_ELEMENTS[category]) {
+        return res.status(400).json({ 
+          error: "Invalid category. Valid categories are: TOOLS, GAUGES, STRUCTURAL, EMERGENCY" 
+        });
+      }
+      
+      const imageCount = parseInt(count) || 5;
+      if (imageCount < 1 || imageCount > 10) {
+        return res.status(400).json({ error: "Count must be between 1 and 10" });
+      }
+      
+      console.log(`Generating ${imageCount} synthetic ${category} images with Falcon AI...`);
+      
+      // Generate synthetic images using Falcon AI
+      const imagePaths = await generateSyntheticTrainingImages(category, imageCount);
+      
+      // Return image URLs
+      const imageUrls = imagePaths.map(p => {
+        // Convert absolute path to relative URL
+        const fileName = path.basename(p);
+        return `/uploads/${fileName}`;
+      });
+      
+      res.status(200).json({
+        success: true,
+        category,
+        imageCount,
+        imageUrls
+      });
+    } catch (error) {
+      console.error("Error generating synthetic images:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to generate synthetic images" 
+      });
+    }
+  });
+  
+  // Endpoint for retrieving available categories for Falcon generator
+  app.get("/api/synthetic-categories", async (req: Request, res: Response) => {
+    try {
+      const categories = Object.keys(SPACE_STATION_ELEMENTS);
+      res.status(200).json({
+        categories
+      });
+    } catch (error) {
+      console.error("Error retrieving categories:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to retrieve categories" 
+      });
+    }
+  });
+  
+  // Export detection result as PDF
+  app.get("/api/export-pdf/:detectionId", async (req: Request, res: Response) => {
+    try {
+      const detectionId = parseInt(req.params.detectionId);
+      if (isNaN(detectionId)) {
+        return res.status(400).json({ error: "Invalid detection ID" });
+      }
+      
+      // Retrieve detection from storage
+      const detection = await storage.getDetection(detectionId);
+      if (!detection) {
+        return res.status(404).json({ error: "Detection not found" });
+      }
+      
+      // Generate PDF file with detection results
+      const pdfFileName = `space_station_detection_${detectionId}.pdf`;
+      const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
+      
+      // We'll use streams to avoid loading the full file into memory
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=${pdfFileName}`);
+      
+      // Send the PDF data directly to the response
+      // Note: actual PDF generation happens in the frontend with jsPDF
+      res.status(200).json({
+        detectionId,
+        objects: detection.objects,
+        imageUrl: detection.imageUrl
+      });
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to export PDF" 
+      });
+    }
+  });
+  
   // Chat completion endpoint
   app.post("/api/chat", async (req: Request, res: Response) => {
     try {
