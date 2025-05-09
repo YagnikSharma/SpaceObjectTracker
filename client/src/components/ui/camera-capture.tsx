@@ -326,18 +326,18 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
   const CameraInterface = () => (
     <div className="relative">
       {/* Camera feed */}
-      <div className="relative overflow-hidden rounded-t-lg aspect-video flex items-center justify-center bg-[#0a0e17]">
+      <div className="relative overflow-hidden rounded-t-lg aspect-video flex items-center justify-center dark:bg-[#0a0e17] bg-black/80">
         <video 
           ref={videoRef} 
           autoPlay 
           playsInline 
           muted 
-          className={`w-full h-full object-cover ${isCameraReady ? 'opacity-100' : 'opacity-0'}`}
+          className={`w-full h-full object-contain ${isCameraReady ? 'opacity-100' : 'opacity-0'}`}
         />
         
         {!isCameraReady && permissionStatus === "granted" && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-4 dark:border-blue-500 border-yellow-500 dark:border-t-transparent border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
         

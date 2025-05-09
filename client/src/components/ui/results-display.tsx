@@ -92,46 +92,124 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
           canvas.width = img.width;
           canvas.height = img.height;
           
-          // Draw the image onto the canvas
-          ctx.drawImage(img, 0, 0, img.width, img.height);
-          
-          // Draw detection boxes on the image
-          detectedObjects.forEach(obj => {
-            const x = obj.x * img.width;
-            const y = obj.y * img.height;
-            const width = obj.width * img.width;
-            const height = obj.height * img.height;
+          if (ctx) {
+            // Draw the image onto the canvas
+            ctx.drawImage(img, 0, 0, img.width, img.height);
             
-            // Draw box
-            ctx.strokeStyle = obj.color;
-            ctx.lineWidth = 3;
-            ctx.strokeRect(x, y, width, height);
+            // Draw detection boxes on the image
+            detectedObjects.forEach(obj => {
+              const x = obj.x * img.width;
+              const y = obj.y * img.height;
+              const width = obj.width * img.width;
+              const height = obj.height * img.height;
+              
+              // Draw box
+              ctx.strokeStyle = obj.color;
+              ctx.lineWidth = 3;
+              ctx.strokeRect(x, y, width, height);
+              
+              // Draw label background
+              ctx.fillStyle = obj.color;
+              const labelText = `${obj.label} (${(obj.confidence * 100).toFixed(0)}%)`;
+              const labelWidth = ctx.measureText(labelText).width + 10;
+              ctx.fillRect(x, y - 20, labelWidth, 20);
+              
+              // Draw label text
+              ctx.fillStyle = '#FFFFFF';
+              ctx.font = '14px Arial';
+              ctx.fillText(labelText, x + 5, y - 5);
+            });
             
-            // Draw label background
-            ctx.fillStyle = obj.color;
-            const labelText = `${obj.label} (${(obj.confidence * 100).toFixed(0)}%)`;
-            const labelWidth = ctx.measureText(labelText).width + 10;
-            ctx.fillRect(x, y - 20, labelWidth, 20);
+            // Get the processed image as data URL
+            const processedImageUrl = canvas.toDataURL('image/jpeg');
             
-            // Draw label text
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = '14px Arial';
-            ctx.fillText(labelText, x + 5, y - 5);
-          });
-          
-          // Get the processed image as data URL
-          const processedImageUrl = canvas.toDataURL('image/jpeg');
-          
-          // Add the processed image to PDF
-          doc.addImage(processedImageUrl, 'JPEG', 15, 25, 180, 100);
-          
-          // Draw a border around the image
-          doc.setDrawColor(40, 60, 100);
-          doc.setLineWidth(0.5);
-          doc.rect(15, 25, 180, 100);
+            // Add the processed image to PDF
+            doc.addImage(processedImageUrl, 'JPEG', 15, 25, 180, 100);
+            
+            // Draw a border around the image
+            doc.setDrawColor(40, 60, 100);
+            doc.setLineWidth(0.5);
+            doc.rect(15, 25, 180, 100);
+          } else {
+            // Fallback if canvas context is null
+            doc.addImage(imageUrl, 'JPEG', 15, 25, 180, 100);
+            doc.setDrawColor(40, 60, 100);
+            doc.setLineWidth(0.5);
+            doc.rect(15, 25, 180, 100);
+          }
           
           // Continue with the rest of PDF generation
-          addPDFContent();
+          // Add detection summary
+          doc.setFontSize(14);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(40, 60, 100);
+          doc.text("Detection Summary", 15, 135);
+          
+          // Add summary text
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(60, 60, 60);
+          
+          const criticalIssues = detectedObjects.filter(obj => obj.issue);
+          const highConfidence = detectedObjects.filter(obj => obj.confidence > 0.7).length;
+          
+          const summaryTexts = [
+            `Total objects detected: ${detectedObjects.length}`,
+            `High confidence detections: ${highConfidence} (${Math.round(highConfidence/detectedObjects.length*100)}%)`,
+            `Objects with issues: ${criticalIssues.length}`,
+            `Detection model: YOLO v9.0`,
+          ];
+          
+          let yPos = 140;
+          summaryTexts.forEach(text => {
+            doc.text(text, 15, yPos);
+            yPos += 6;
+          });
+          
+          // Create table of detections
+          doc.setFontSize(14);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(40, 60, 100);
+          doc.text("Detected Components", 15, 170);
+          
+          const tableColumn = ["Component", "Confidence", "Category", "Issue"];
+          const tableRows: Array<[string, string, string, string]> = [];
+          
+          detectedObjects.forEach(obj => {
+            const confidencePercent = Math.round(obj.confidence * 100) + '%';
+            tableRows.push([
+              obj.label,
+              confidencePercent,
+              obj.context || "Uncategorized",
+              obj.issue || "None"
+            ]);
+          });
+          
+          // Add table
+          (doc as any).autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: 175,
+            theme: 'grid',
+            styles: { fontSize: 10, cellPadding: 2 },
+            headStyles: { fillColor: [60, 90, 150], textColor: [255, 255, 255] },
+            columnStyles: {
+              0: { cellWidth: 50 }, // Component
+              1: { cellWidth: 25, halign: 'center' }, // Confidence
+              2: { cellWidth: 40 }, // Category
+              3: { cellWidth: 'auto' } // Issue
+            },
+            alternateRowStyles: { fillColor: [240, 245, 255] },
+            rowStyles: { minCellHeight: 10 }
+          });
+          
+          // Add footer
+          const finalY = (doc as any).lastAutoTable.finalY + 10;
+          
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "italic");
+          doc.setTextColor(100, 100, 100);
+          doc.text("This report was automatically generated by the Syndetect Space Station Monitoring System.", 105, finalY, { align: 'center' });
           
           // Save the PDF
           doc.save("syndetect-report.pdf");
