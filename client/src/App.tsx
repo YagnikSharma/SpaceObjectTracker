@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import MissionControl from "@/pages/mission-control";
 import GalacticMap from "@/pages/galactic-map";
 import StellarArchives from "@/pages/archives";
+import ImageGenerator from "@/pages/image-generator";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/mission-control" component={MissionControl} />
       <Route path="/galactic-map" component={GalacticMap} />
       <Route path="/archives" component={StellarArchives} />
+      <Route path="/image-generator" component={ImageGenerator} />
       <Route component={NotFound} />
     </Switch>
   );

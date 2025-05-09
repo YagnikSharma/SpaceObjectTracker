@@ -14,17 +14,16 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { apiRequest, useQueryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 
 export default function ImageGenerator() {
   const [selectedCategory, setSelectedCategory] = useState("TOOLS");
   const [imageCount, setImageCount] = useState("5");
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  const [_, setLocation] = useLocation();
 
   // Fetch categories for synthetic image generation
   const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
@@ -89,7 +88,7 @@ export default function ImageGenerator() {
         description: `Detected ${data.detectedObjects.length} space station components`,
       });
       // Navigate to the mission control page with the detection data
-      navigate("/mission-control");
+      setLocation("/mission-control");
     },
     onError: (error) => {
       toast({
