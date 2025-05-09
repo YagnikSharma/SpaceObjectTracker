@@ -12,7 +12,11 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-b", className)}
+    className={cn(
+      "border-b border-border/40 hover:border-border transition-colors duration-200 hover-glow",
+      "dark:data-[state=open]:border-yellow-500/30 data-[state=open]:border-primary/40",
+      className
+    )}
     {...props}
   />
 ))
@@ -26,13 +30,15 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
+        "flex flex-1 items-center justify-between py-4 font-medium transition-all relative [&[data-state=open]>svg]:rotate-180 group",
+        "after:absolute after:bottom-3 after:left-0 after:h-[2px] after:w-0 after:bg-primary dark:after:bg-yellow-500 after:transition-all after:duration-300",
+        "hover:after:w-full focus:after:w-full",
         className
       )}
       {...props}
     >
       {children}
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-300 text-muted-foreground group-hover:text-primary dark:group-hover:text-yellow-500" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ))
@@ -47,7 +53,11 @@ const AccordionContent = React.forwardRef<
     className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
     {...props}
   >
-    <div className={cn("pb-4 pt-0", className)}>{children}</div>
+    <div className={cn(
+      "pb-4 pt-0 border-l-2 pl-4 ml-2 border-transparent dark:data-[state=open]:border-yellow-500/30 data-[state=open]:border-primary/30 transition-all duration-300 relative",
+      "dark:data-[state=open]:after:absolute dark:data-[state=open]:after:left-0 dark:data-[state=open]:after:top-0 dark:data-[state=open]:after:w-full dark:data-[state=open]:after:h-full dark:data-[state=open]:after:bg-yellow-500/5 dark:data-[state=open]:after:rounded-md dark:data-[state=open]:after:-z-10",
+      className
+    )}>{children}</div>
   </AccordionPrimitive.Content>
 ))
 
