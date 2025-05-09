@@ -27,47 +27,78 @@ export const SPACE_OBJECT_COLORS: Record<string, string> = {
   default: "#EF4444",               // red
 };
 
-// Enhanced YOLO to space object mapping
+// Enhanced YOLO to space object mapping with spacecraft components
 const DETECTED_TO_SPACE: Record<string, string> = {
-  // Original COCO mappings
+  // Human and astronaut mappings
   person: "astronaut",
-  bicycle: "small satellite",
-  car: "space probe",
+  human: "astronaut",
+  man: "astronaut",
+  woman: "astronaut",
+  child: "astronaut cadet",
+  
+  // Spacecraft components and equipment
+  bicycle: "orbital gear",
+  car: "lunar rover",
   motorcycle: "space probe",
   airplane: "space shuttle",
-  bus: "space station",
-  train: "space station",
-  truck: "satellite",
-  boat: "space debris",
-  bird: "small satellite",
-  cat: "space debris",
-  dog: "space debris",
+  bus: "habitat module",
+  train: "space station segment",
+  truck: "cargo module",
+  boat: "landing module",
+  backpack: "life support system",
+  laptop: "navigation computer",
+  keyboard: "control panel",
+  mouse: "targeting system",
+  remote: "thruster control",
+  umbrella: "thermal shield",
+  bottle: "oxygen tank",
+  cup: "water recycler",
+  phone: "communication device",
   
-  // Enhanced space mappings for YOLO
-  "cell tower": "communication satellite",
-  tower: "satellite",
-  antenna: "communication satellite",
+  // Solar equipment
+  "cell phone": "solar panel controller",
+  "solar panel": "solar array",
+  panel: "solar array",
+  glass: "solar cell",
+  window: "observation port",
+  door: "airlock",
+  fence: "radiation shield",
+  
+  // Enhanced space objects
+  "cell tower": "communication antenna",
+  tower: "docking tower",
+  antenna: "communication array",
   star: "star cluster",
-  light: "star cluster",
+  light: "distant galaxy",
   moon: "planetary body",
-  sun: "planetary body",
+  sun: "main sequence star",
   cloud: "nebula fragment",
-  rock: "space debris",
-  meteor: "space debris",
+  rock: "asteroid",
+  meteor: "meteor",
   aircraft: "space shuttle",
-  rocket: "rocket",
-  satellite: "satellite",
-  drone: "small satellite",
+  rocket: "propulsion system",
+  satellite: "orbital satellite",
+  drone: "maintenance drone",
   ufo: "alien spacecraft",
-  disk: "alien spacecraft",
+  disk: "alien technology",
   unknown: "cosmic anomaly",
-  bright: "star cluster",
+  bright: "stellar formation",
   dark: "black hole",
-  streak: "cosmic anomaly",
-  flare: "star cluster",
+  streak: "comet tail",
+  flare: "solar flare",
+  
+  // Cosmic objects
+  ring: "planetary ring",
+  sphere: "gas giant",
+  circle: "wormhole aperture",
+  line: "gravitational lensing",
+  curve: "spacetime distortion",
+  box: "quantum containment field",
+  cube: "alien artifact",
+  triangle: "deep space probe",
   
   // Fallback for any unclassified object
-  default: "space debris"
+  default: "unidentified space object"
 };
 
 // Cache for the loaded model
@@ -165,20 +196,24 @@ export async function detectObjectsWithYolo(imageBuffer: Buffer): Promise<Detect
     const classesArray = await result[3].arraySync() as number[][];
     const numDetections = Math.min(20, await result[5].dataSync()[0]); // Limit to 20 detections max
     
-    // Process detections
+    // Process detections - use lower threshold to detect more objects
     const detectedObjects: DetectedObject[] = [];
-    const confidenceThreshold = 0.3;
+    const confidenceThreshold = 0.15; // Reduced threshold to detect more space objects
     
     for (let i = 0; i < numDetections; i++) {
       const score = scoresArray[0][i];
       if (score > confidenceThreshold) {
         // Get class and map to space object
         const classId = Math.floor(classesArray[0][i]);
-        // Class names would come from the model; here we're simulating
+        // Class names would come from the model; here we're simulating with expanded space classes
         const simulatedClasses = [
           'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
           'train', 'truck', 'boat', 'satellite', 'star', 'cosmic anomaly',
-          'rocket', 'space station', 'spacecraft', 'meteor', 'planet'
+          'rocket', 'space station', 'spacecraft', 'meteor', 'planet',
+          'human', 'astronaut', 'solar panel', 'antenna', 'satellite dish',
+          'telescope', 'camera', 'robot', 'rover', 'lander', 'module',
+          'airlock', 'window', 'hatch', 'door', 'panel', 'thruster',
+          'engine', 'fuel tank', 'habitat', 'laboratory', 'docking port'
         ];
         const detectedClass = simulatedClasses[classId % simulatedClasses.length];
         const spaceObjectClass = DETECTED_TO_SPACE[detectedClass] || DETECTED_TO_SPACE.default;

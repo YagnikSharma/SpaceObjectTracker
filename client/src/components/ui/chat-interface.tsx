@@ -168,11 +168,7 @@ export function ChatInterface({ messages, isLoading, detectedObjects, onSendMess
           </button>
         </form>
         
-        <div className="mt-2 flex justify-center">
-          <span className="text-xs text-blue-400/50 flex items-center">
-            <span className="mr-1.5">⚡</span> Powered by OpenAI GPT
-          </span>
-        </div>
+        {/* No powered by text */}
       </div>
     </div>
   );

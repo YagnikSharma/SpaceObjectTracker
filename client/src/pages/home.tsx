@@ -121,9 +121,9 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                  Galactic Object Detection
+                  Galactic Cop
                 </h1>
-                <p className="text-xs text-blue-300/80">Powered by YOLO Advanced Analysis</p>
+                <p className="text-xs text-blue-300/80">Space Object Detection System</p>
               </div>
             </motion.div>
 
@@ -299,7 +299,9 @@ export default function Home() {
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
           <div className="text-sm text-blue-300/70 mb-4 sm:mb-0 flex items-center">
             <span className="mr-2">🚀</span>
-            <p>Galactic Object Detection powered by Falcon API</p>
+            <p className="font-semibold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+              POWERED BY TECH TITANS
+            </p>
           </div>
           <div className="flex items-center space-x-6">
             <a href="#" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
