@@ -272,3 +272,55 @@
 :root:not(.dark) .hover-glow:hover {
   box-shadow: 0 0 12px 1px hsla(45, 100%, 50%, 0.25);
 }
+
+/* Pulse animation for yellow buttons */
+@keyframes yellow-pulse {
+  0% {
+    box-shadow: 0 0 0 0 hsla(45, 100%, 50%, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px hsla(45, 100%, 50%, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsla(45, 100%, 50%, 0);
+  }
+}
+
+@keyframes yellow-pulse-dark {
+  0% {
+    box-shadow: 0 0 0 0 hsla(45, 100%, 60%, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px hsla(45, 100%, 60%, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsla(45, 100%, 60%, 0);
+  }
+}
+
+.yellow-pulse {
+  animation: yellow-pulse 1.5s infinite;
+}
+
+.dark .yellow-pulse {
+  animation: yellow-pulse-dark 1.5s infinite;
+}
+
+/* Glow effect for important cards */
+.dark .card-glow {
+  box-shadow: 0 0 15px 2px hsla(45, 100%, 50%, 0.15);
+  transition: all 0.5s ease;
+}
+
+.dark .card-glow:hover {
+  box-shadow: 0 0 25px 5px hsla(45, 100%, 50%, 0.25);
+}
+
+:root:not(.dark) .card-glow {
+  box-shadow: 0 0 12px 1px hsla(45, 100%, 50%, 0.1);
+  transition: all 0.5s ease;
+}
+
+:root:not(.dark) .card-glow:hover {
+  box-shadow: 0 0 18px 3px hsla(45, 100%, 50%, 0.2);
+}
