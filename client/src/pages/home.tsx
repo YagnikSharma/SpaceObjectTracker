@@ -14,6 +14,7 @@ import { Link, useLocation } from "wouter";
 const NAV_LINKS = [
   { name: "Home", href: "/", icon: "🏠" },
   { name: "Mission Control", href: "/mission-control", icon: "🛰️" },
+  { name: "Image Generator", href: "/image-generator", icon: "🖼️" },
   { name: "Galactic Map", href: "/galactic-map", icon: "🌌" },
   { name: "Stellar Archives", href: "/archives", icon: "📚" }
 ];
@@ -121,9 +122,9 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                  Galactic Cop
+                  Syndetect
                 </h1>
-                <p className="text-xs text-blue-300/80">Space Object Detection System</p>
+                <p className="text-xs text-blue-300/80">Space Station Monitoring System</p>
               </div>
             </motion.div>
 
@@ -302,12 +303,15 @@ export default function Home() {
           <div className="text-sm text-blue-300/70 mb-4 sm:mb-0 flex items-center">
             <span className="mr-2">🚀</span>
             <p className="font-semibold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              POWERED BY TECH TITANS
+              POWERED BY SYNDETECT AI
             </p>
           </div>
           <div className="flex items-center space-x-6">
             <Link href="/mission-control" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
               <span className="mr-1">👨‍🚀</span> Mission Control
+            </Link>
+            <Link href="/image-generator" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              <span className="mr-1">🖼️</span> Image Generator
             </Link>
             <Link href="/galactic-map" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
               <span className="mr-1">🌌</span> Galactic Map

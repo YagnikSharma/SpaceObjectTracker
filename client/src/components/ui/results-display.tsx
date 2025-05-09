@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useSpeech } from "@/hooks/use-speech";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 export interface DetectedObject {
   id: string;
@@ -28,6 +31,17 @@ interface ResultsDisplayProps {
 
 export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, onRetry }: ResultsDisplayProps) {
   const [showLabels, setShowLabels] = useState(true);
+  const { speaking, supported, speakResults, stopSpeaking, playAlertSound } = useSpeech();
+  
+  // Check for critical issues and play alert sound
+  useEffect(() => {
+    if (detectedObjects.length > 0) {
+      const criticalIssues = detectedObjects.filter(obj => obj.issue);
+      if (criticalIssues.length > 0) {
+        playAlertSound('critical');
+      }
+    }
+  }, [detectedObjects, playAlertSound]);
 
   const handleDownloadResults = () => {
     if (!detectedObjects.length) return;
@@ -35,10 +49,124 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(detectedObjects, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "detection-results.json");
+    downloadAnchorNode.setAttribute("download", "syndetect-results.json");
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
+  };
+  
+  const handleExportPDF = () => {
+    if (!detectedObjects.length || !imageUrl) return;
+    
+    // Create a new jsPDF instance
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+    
+    // Add header
+    doc.setFillColor(20, 30, 50);
+    doc.rect(0, 0, 210, 20, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("SYNDETECT - Space Station Monitoring Report", 105, 10, { align: 'center' });
+    
+    // Add date and time
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    const now = new Date();
+    doc.text(`Generated: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`, 105, 15, { align: 'center' });
+    
+    // Add image if available
+    if (imageUrl) {
+      try {
+        doc.addImage(imageUrl, 'JPEG', 15, 25, 180, 100);
+        
+        // Draw a border around the image
+        doc.setDrawColor(40, 60, 100);
+        doc.setLineWidth(0.5);
+        doc.rect(15, 25, 180, 100);
+      } catch (error) {
+        console.error("Failed to add image to PDF:", error);
+      }
+    }
+    
+    // Add detection summary
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(40, 60, 100);
+    doc.text("Detection Summary", 15, 135);
+    
+    // Add summary text
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(60, 60, 60);
+    
+    const criticalIssues = detectedObjects.filter(obj => obj.issue);
+    const highConfidence = detectedObjects.filter(obj => obj.confidence > 0.7).length;
+    
+    const summaryTexts = [
+      `Total objects detected: ${detectedObjects.length}`,
+      `High confidence detections: ${highConfidence} (${Math.round(highConfidence/detectedObjects.length*100)}%)`,
+      `Objects with issues: ${criticalIssues.length}`,
+      `Detection model: YOLO v9.0`,
+    ];
+    
+    let yPos = 140;
+    summaryTexts.forEach(text => {
+      doc.text(text, 15, yPos);
+      yPos += 6;
+    });
+    
+    // Create table of detections
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(40, 60, 100);
+    doc.text("Detected Components", 15, 170);
+    
+    const tableColumn = ["Component", "Confidence", "Category", "Issue"];
+    const tableRows = [];
+    
+    detectedObjects.forEach(obj => {
+      const confidencePercent = Math.round(obj.confidence * 100) + '%';
+      tableRows.push([
+        obj.label,
+        confidencePercent,
+        obj.context || "Uncategorized",
+        obj.issue || "None"
+      ]);
+    });
+    
+    // Add table
+    (doc as any).autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 175,
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 2 },
+      headStyles: { fillColor: [60, 90, 150], textColor: [255, 255, 255] },
+      columnStyles: {
+        0: { cellWidth: 50 }, // Component
+        1: { cellWidth: 25, halign: 'center' }, // Confidence
+        2: { cellWidth: 40 }, // Category
+        3: { cellWidth: 'auto' } // Issue
+      },
+      alternateRowStyles: { fillColor: [240, 245, 255] },
+      rowStyles: { minCellHeight: 10 }
+    });
+    
+    // Add footer
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(100, 100, 100);
+    doc.text("This report was automatically generated by the Syndetect Space Station Monitoring System.", 105, finalY, { align: 'center' });
+    
+    // Save the PDF
+    doc.save("syndetect-report.pdf");
   };
 
   const renderBoundingBox = (object: DetectedObject) => {
@@ -187,19 +315,54 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
           <h2 className="text-md font-semibold ml-2 text-blue-300">YOLO Detection Results</h2>
         </div>
         <div className="flex space-x-3">
+          {supported && (
+            <button 
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center transition-colors ${
+                speaking 
+                  ? 'bg-green-500/30 text-green-400' 
+                  : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400'
+              }`}
+              onClick={() => speaking ? stopSpeaking() : speakResults(detectedObjects)}
+              disabled={!detectedObjects.length}
+              title={speaking ? "Stop Speaking" : "Speak Detection Results"}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {speaking ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z M10 9v6m4-6v6" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                )}
+              </svg>
+              {speaking ? 'Stop' : 'Speak Results'}
+            </button>
+          )}
+          
+          <button 
+            className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg text-purple-400 text-xs font-medium flex items-center transition-colors"
+            onClick={handleExportPDF}
+            disabled={!detectedObjects.length}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export PDF
+          </button>
+          
           <button 
             className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg text-blue-400 text-xs font-medium flex items-center transition-colors" 
             onClick={handleDownloadResults}
+            disabled={!detectedObjects.length}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Export Data
+            Export JSON
           </button>
+          
           <button 
             className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center transition-colors ${
               showLabels 
-                ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400' 
+                ? 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400' 
                 : 'bg-gray-500/20 hover:bg-gray-500/30 text-gray-400'
             }`}
             onClick={() => setShowLabels(!showLabels)}
