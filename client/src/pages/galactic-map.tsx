@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
 
 interface MapSource {
@@ -9,11 +9,20 @@ interface MapSource {
   imageUrl: string;
   link: string;
   agency: string;
+  facts?: string[];
+  scientificData?: {
+    wavelength?: string;
+    distance?: string;
+    discoveryDate?: string;
+    size?: string;
+  };
 }
 
 export default function GalacticMap() {
   const [mapSources, setMapSources] = useState<MapSource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedMap, setSelectedMap] = useState<MapSource | null>(null);
+  const [detailPosition, setDetailPosition] = useState({ x: 0, y: 0 });
   
   useEffect(() => {
     // NASA and space agencies map data
@@ -24,7 +33,18 @@ export default function GalacticMap() {
         description: "NASA's James Webb Space Telescope has produced the deepest and sharpest infrared image of the distant universe to date. Known as Webb's First Deep Field, this image of galaxy cluster SMACS 0723 is overflowing with detail.",
         imageUrl: "https://stsci-opo.org/STScI-01G8H49Z5K1HGKVT64AYZEG8DY.png",
         link: "https://science.nasa.gov/missions/webb/webbs-first-images/",
-        agency: "NASA/ESA/CSA/STScI"
+        agency: "NASA/ESA/CSA/STScI",
+        facts: [
+          "This image covers a patch of sky approximately the size of a grain of sand held at arm's length.",
+          "The combined mass of this galaxy cluster acts as a gravitational lens, magnifying much more distant galaxies behind it.",
+          "Some of the galaxies shown are seen as they were more than 13 billion years ago, shortly after the Big Bang."
+        ],
+        scientificData: {
+          wavelength: "Infrared",
+          distance: "4.6 billion light-years (cluster)",
+          discoveryDate: "July 12, 2022",
+          size: "Approximately 2 arcminutes"
+        }
       },
       {
         id: 2,
@@ -32,7 +52,18 @@ export default function GalacticMap() {
         description: "NASA's James Webb Space Telescope has captured a lush, highly detailed landscape – the iconic Pillars of Creation – where new stars are forming within dense clouds of gas and dust.",
         imageUrl: "https://stsci-opo.org/STScI-01GK2KMYS2JYST8YW2KTQY3ZXT.png",
         link: "https://science.nasa.gov/missions/webb/nasa-james-webb-space-telescope-just-revealed-universe-whole-new-light/",
-        agency: "NASA/ESA/CSA/STScI"
+        agency: "NASA/ESA/CSA/STScI",
+        facts: [
+          "The pillars are actually columns of cool interstellar gas and dust that are incubators for new stars.",
+          "The tallest pillar in this image is about 4 light-years long, roughly the distance from our Sun to the next nearest star.",
+          "The reddish lava-like areas are ejections from stars that are still forming."
+        ],
+        scientificData: {
+          wavelength: "Near and mid-infrared",
+          distance: "6,500 light-years",
+          discoveryDate: "October 19, 2022 (Webb), First imaged by Hubble in 1995",
+          size: "Approximately 5-light-years tall"
+        }
       },
       {
         id: 3,
@@ -40,7 +71,18 @@ export default function GalacticMap() {
         description: "The Hubble eXtreme Deep Field (XDF) is an image of a small area of space in the center of the Hubble Ultra Deep Field, combining data from Hubble programs from 2002 to 2012.",
         imageUrl: "https://cdn.spacetelescope.org/archives/images/screen/heic1214a.jpg",
         link: "https://esahubble.org/images/heic1214a/",
-        agency: "NASA/ESA/STScI"
+        agency: "NASA/ESA/STScI",
+        facts: [
+          "This image contains approximately 5,500 galaxies.",
+          "The faintest galaxies are one ten-billionth the brightness of what the human eye can see.",
+          "This represents a view of the universe that reaches back about 13.2 billion years."
+        ],
+        scientificData: {
+          wavelength: "Ultraviolet, visible, and near-infrared",
+          distance: "13.2 billion light-years (farthest objects)",
+          discoveryDate: "September 25, 2012",
+          size: "2.3 arcminutes"
+        }
       },
       {
         id: 4,
@@ -48,7 +90,18 @@ export default function GalacticMap() {
         description: "This landscape of 'mountains' and 'valleys' speckled with glittering stars is actually the edge of a nearby, young, star-forming region called NGC 3324 in the Carina Nebula.",
         imageUrl: "https://stsci-opo.org/STScI-01G77PB54JD1D218PG476W6D7M.png",
         link: "https://science.nasa.gov/missions/webb/nasas-webb-delivers-deepest-infrared-image-universe-yet/",
-        agency: "NASA/ESA/CSA/STScI"
+        agency: "NASA/ESA/CSA/STScI",
+        facts: [
+          "The 'mountains' in this image are actually the edge of a nearby stellar nursery called NGC 3324.",
+          "The tallest 'peaks' in this image are about 7 light-years high.",
+          "This nebula appears to be a gigantic gaseous cavity with the appearance of a cliff-like structure."
+        ],
+        scientificData: {
+          wavelength: "Near-infrared",
+          distance: "7,600 light-years",
+          discoveryDate: "July 12, 2022",
+          size: "Approximately 8 light-years wide (visible portion)"
+        }
       },
       {
         id: 5,
@@ -56,7 +109,18 @@ export default function GalacticMap() {
         description: "The Southern Ring Nebula is a planetary nebula – an expanding cloud of gas surrounding a dying star. Webb revealed previously hidden details in this colorful display.",
         imageUrl: "https://stsci-opo.org/STScI-01G8H15NQKF8HKXESJYGPJ6H7A.png",
         link: "https://science.nasa.gov/missions/webb/webbs-first-images/",
-        agency: "NASA/ESA/CSA/STScI"
+        agency: "NASA/ESA/CSA/STScI",
+        facts: [
+          "This nebula is nearly half a light-year in diameter.",
+          "Webb's observations revealed for the first time that the star that created this nebula was part of a binary system.",
+          "The gases expelled by the dying star form concentric layers that record its periodic ejections."
+        ],
+        scientificData: {
+          wavelength: "Near and mid-infrared",
+          distance: "2,000 light-years",
+          discoveryDate: "July 12, 2022 (Webb image)",
+          size: "0.4 light-years in diameter"
+        }
       },
       {
         id: 6,
@@ -64,7 +128,18 @@ export default function GalacticMap() {
         description: "The most detailed map ever created of the cosmic microwave background – the relic radiation from the Big Bang.",
         imageUrl: "https://cdn.sci.esa.int/documents/36233/36291/1567214818447-Planck_CMB_2018_1237.jpg",
         link: "https://www.esa.int/Science_Exploration/Space_Science/Planck",
-        agency: "ESA/Planck Collaboration"
+        agency: "ESA/Planck Collaboration",
+        facts: [
+          "This map shows temperature fluctuations that correspond to regions of slightly different densities in the early universe.",
+          "These tiny fluctuations in temperature were imprinted on the sky when the universe was just 380,000 years old.",
+          "The patterns in this map led to the formation of galaxies."
+        ],
+        scientificData: {
+          wavelength: "Microwave",
+          distance: "13.8 billion light-years (edge of observable universe)",
+          discoveryDate: "March 21, 2013 (final map in 2018)",
+          size: "Full sky survey"
+        }
       },
       {
         id: 7,
@@ -72,7 +147,18 @@ export default function GalacticMap() {
         description: "Webb's detailed observation of this hot, puffy exoplanet revealed the presence of specific gas molecules based on tiny decreases in the brightness of precise colors of light.",
         imageUrl: "https://stsci-opo.org/STScI-01G7DDBW1BQYSDNJHJGQCP8ZTZ.png",
         link: "https://science.nasa.gov/missions/webb/",
-        agency: "NASA/ESA/CSA/STScI"
+        agency: "NASA/ESA/CSA/STScI",
+        facts: [
+          "WASP-96 b is a gas giant planet that orbits a Sun-like star about 1,150 light-years away.",
+          "This spectrum revealed the unambiguous signature of water, evidence of clouds, and haze in the atmosphere.",
+          "The planet is much puffier than any in our solar system, with a diameter 1.2 times Jupiter's but less than half its mass."
+        ],
+        scientificData: {
+          wavelength: "Near-infrared spectroscopy",
+          distance: "1,150 light-years",
+          discoveryDate: "July 12, 2022 (Webb observation)",
+          size: "Approximately 1.2x Jupiter diameter"
+        }
       },
       {
         id: 8,
@@ -80,7 +166,18 @@ export default function GalacticMap() {
         description: "Webb captured this group of five galaxies that appear close to each other in the sky: two in the middle of merging, with the others distorted by their gravitational interactions.",
         imageUrl: "https://stsci-opo.org/STScI-01G8H1B5GTFJCYYAC42T3NACEH.png",
         link: "https://science.nasa.gov/missions/webb/",
-        agency: "NASA/ESA/CSA/STScI"
+        agency: "NASA/ESA/CSA/STScI",
+        facts: [
+          "This compact group of galaxies was discovered in 1877, the first compact galaxy group ever discovered.",
+          "Four of the five galaxies are locked in a cosmic dance of repeated close encounters.",
+          "The image reveals never-before-seen details of how interacting galaxies trigger star formation in each other."
+        ],
+        scientificData: {
+          wavelength: "Near and mid-infrared",
+          distance: "290 million light-years",
+          discoveryDate: "July 12, 2022 (Webb image)",
+          size: "Approximately 500,000 light-years across"
+        }
       },
       {
         id: 9,
@@ -88,7 +185,18 @@ export default function GalacticMap() {
         description: "Webb's powerful infrared vision captured this detailed image of the Cartwheel and two smaller companion galaxies against a backdrop of many other galaxies.",
         imageUrl: "https://stsci-opo.org/STScI-01G97DZCC51T4H1YV4J9BHR78H.png",
         link: "https://www.nasa.gov/image-feature/goddard/2022/nasas-webb-captures-cartwheel-galaxys-cosmic-dance/",
-        agency: "NASA/ESA/CSA/STScI"
+        agency: "NASA/ESA/CSA/STScI",
+        facts: [
+          "The Cartwheel Galaxy got its shape from a high-speed collision with another smaller galaxy about 400 million years ago.",
+          "The collision caused two ring-like structures to expand outward from the galaxy's center like ripples in a pond.",
+          "The outer ring has been expanding for about 440 million years and contains many star-forming regions."
+        ],
+        scientificData: {
+          wavelength: "Near and mid-infrared",
+          distance: "500 million light-years",
+          discoveryDate: "August 2, 2022 (Webb image)",
+          size: "Approximately 150,000 light-years in diameter"
+        }
       }
     ];
 
