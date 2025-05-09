@@ -30,19 +30,7 @@ export interface ResultsDisplayProps {
 
 export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, onRetry }: ResultsDisplayProps) {
   const [showLabels, setShowLabels] = useState(true);
-  const { supported, speaking, speak, cancel: stopSpeaking } = useSpeech();
-
-  // Speak results using browser's speech synthesis
-  const speakResults = (objects: DetectedObject[]) => {
-    if (!supported || objects.length === 0) return;
-    
-    const intro = `Detected ${objects.length} objects in space station image.`;
-    const detections = objects
-      .map(obj => `${obj.label} with ${Math.round(obj.confidence * 100)}% confidence.${obj.issue ? ' Issue detected: ' + obj.issue : ''}`)
-      .join(' ');
-
-    speak(`${intro} ${detections}`);
-  };
+  const { supported, speaking, speakResults, stopSpeaking } = useSpeech();
 
   // Generate and download JSON of detection results
   const handleDownloadResults = () => {
@@ -217,17 +205,17 @@ export function ResultsDisplay({ isLoading, imageUrl, detectedObjects, error, on
         style={style}
       >
         {showLabels && (
-          <div className="absolute -mt-14 z-10">
-            <span className="block px-1.5 py-0.5 mb-1 text-xs rounded text-white font-medium" style={{ backgroundColor: object.color }}>
+          <div className="absolute top-0 left-0 z-10 transform -translate-y-full">
+            <span className="block px-1.5 py-0.5 mb-1 text-xs rounded text-white font-medium whitespace-nowrap" style={{ backgroundColor: object.color }}>
               {object.label} ({(object.confidence * 100).toFixed(0)}%)
             </span>
             {object.issue && (
-              <span className="block px-1.5 py-0.5 mb-1 text-xs rounded font-medium text-white bg-red-500/90">
+              <span className="block px-1.5 py-0.5 mb-1 text-xs rounded font-medium text-white bg-red-500/90 whitespace-nowrap">
                 ⚠️ {object.issue}
               </span>
             )}
             {object.context && (
-              <span className="block px-1.5 py-0.5 text-xs rounded text-white bg-blue-700/80">
+              <span className="block px-1.5 py-0.5 text-xs rounded text-white bg-blue-700/80 whitespace-nowrap">
                 {object.context}
               </span>
             )}
