@@ -100,8 +100,8 @@ export default function Home() {
         }}
       >
         <div className="relative w-full h-full">
-          <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
-          <div className="absolute inset-4 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full flex items-center justify-center">
+          <div className="absolute inset-0 bg-yellow-500/20 blur-xl rounded-full"></div>
+          <div className="absolute inset-4 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full flex items-center justify-center">
             <span className="text-4xl">🛰️</span>
           </div>
         </div>
@@ -118,16 +118,16 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="bg-gradient-to-r dark:from-blue-500 dark:to-purple-600 from-yellow-400 to-yellow-600 p-2 rounded-lg shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-gradient-to-r from-yellow-400 to-amber-600 p-2 rounded-lg shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-amber-600 bg-clip-text text-transparent">
                   Syndetect
                 </h1>
-                <p className="text-xs dark:text-blue-300/80 text-yellow-700/90">Space Station Monitoring System</p>
+                <p className="text-xs dark:text-yellow-300/80 text-yellow-700/90">Space Station Monitoring System</p>
               </div>
             </motion.div>
 
@@ -139,8 +139,8 @@ export default function Home() {
                   href={link.href}
                   className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-1 ${
                     location === link.href 
-                      ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30' 
-                      : 'hover:bg-[#2a3348]/70 hover:text-blue-300'
+                      ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-500/30' 
+                      : 'hover:bg-yellow-500/10 hover:text-yellow-300'
                   }`}
                 >
                   <span>{link.icon}</span>
@@ -160,7 +160,7 @@ export default function Home() {
               </span>
               
               {/* Theme Toggle */}
-              <div className="dark:bg-blue-500/30 bg-yellow-500/30 p-1.5 rounded-lg border dark:border-blue-400/50 border-yellow-500/50">
+              <div className="bg-yellow-500/30 p-1.5 rounded-lg border border-yellow-500/50">
                 <button
                   onClick={() => {
                     const html = document.documentElement;
@@ -175,7 +175,7 @@ export default function Home() {
                       localStorage.setItem('syndetect-theme', 'dark');
                     }
                   }}
-                  className="flex items-center justify-center w-8 h-8 rounded-md dark:hover:bg-blue-600/20 hover:bg-yellow-600/20 dark:text-white text-yellow-800"
+                  className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-yellow-600/20 dark:text-yellow-300 text-yellow-800 transition-colors"
                   aria-label="Toggle theme"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden dark:block">
@@ -227,8 +227,8 @@ export default function Home() {
                       href={link.href}
                       className={`px-4 py-3 rounded-lg flex items-center space-x-3 ${
                         location === link.href 
-                          ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30' 
-                          : 'hover:bg-[#2a3348]/70 hover:text-blue-300'
+                          ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-500/30' 
+                          : 'hover:bg-yellow-500/10 hover:text-yellow-300'
                       }`}
                       onClick={() => setIsMenuOpen(false)}
                     >
