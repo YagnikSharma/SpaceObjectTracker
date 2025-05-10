@@ -9,7 +9,6 @@ import Landing from "@/pages/landing";
 import MissionControl from "@/pages/mission-control";
 import GalacticMap from "@/pages/galactic-map";
 import StellarArchives from "@/pages/archives";
-import YoloTest from "@/pages/yolo-test";
 import { useEffect } from "react";
 
 function Router() {
@@ -20,7 +19,6 @@ function Router() {
       <Route path="/mission-control" component={MissionControl} />
       <Route path="/galactic-map" component={GalacticMap} />
       <Route path="/archives" component={StellarArchives} />
-      <Route path="/yolo-test" component={YoloTest} />
       <Route component={NotFound} />
     </Switch>
   );

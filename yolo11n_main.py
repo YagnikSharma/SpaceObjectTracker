@@ -3,13 +3,13 @@
 Space Station Object Detection Demo with YOLOv11n Model
 
 This script provides a simple way to test the detection of space station objects
-using the specialized YOLOv11n model:
+using the specialized YOLOv11n model with Python 3.10:
 - Fire extinguisher (red labels)
 - Oxygen tank (blue labels)
 - Toolbox (yellow labels)
 
 Usage:
-    python yolo11n_main.py [image_path]
+    python3.10 yolo11n_main.py [image_path]
 
 If no image path is provided, it will process all images in the 'uploads' folder.
 """
@@ -42,8 +42,8 @@ def run_detection(image_path, output_folder="results"):
     print(f"Attempting YOLOv11n detection...")
     
     # Command to run the detector script
-    detector_script = "yolo11n_detector.py"
-    cmd = f"python {detector_script} --image {image_path} --model {model_path} --output {output_file} --conf 0.25"
+    detector_script = "server/python/basic_detector.py"
+    cmd = f"python3.10 {detector_script} --image {image_path} --model {model_path} --output {output_file} --conf 0.25"
     
     print(f"Running YOLOv11n detection: {cmd}")
     exit_code = os.system(cmd)
