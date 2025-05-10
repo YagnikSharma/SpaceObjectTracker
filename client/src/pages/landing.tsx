@@ -20,15 +20,22 @@ export default function Landing() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black text-white flex flex-col">
       {/* Video Background */}
-      <div className="fixed inset-0 z-0">
+      <div className="fixed inset-0 z-0 w-full h-screen">
         <ReactPlayer 
-          url="https://assets.mixkit.co/videos/preview/mixkit-animation-of-stars-in-space-32809-large.mp4"
+          url="https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-1610-large.mp4"
           playing
           loop
           muted
-          width="100%"
-          height="100%"
-          style={{ objectFit: 'cover' }}
+          width="100vw"
+          height="100vh"
+          style={{ 
+            objectFit: 'cover',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh'
+          }}
         />
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80"></div>
