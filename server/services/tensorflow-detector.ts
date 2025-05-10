@@ -31,45 +31,54 @@ const OBJECT_CONTEXT: Record<string, string> = {
 // We'll use separate mappings to avoid duplication issues
 const TOOLBOX_MAPPINGS = new Set([
   'suitcase', 'handbag', 'backpack', 'briefcase', 'cell phone', 
-  'remote', 'sports ball', 'keyboard', 'book', 'laptop', 'tv'
+  'remote', 'sports ball', 'keyboard', 'book', 'laptop', 'tv',
+  'orange', 'banana', 'apple', 'sandwich', 'carrot' // Yellow/orange objects
 ]);
 
 const OXYGEN_TANK_MAPPINGS = new Set([
-  'vase', 'wine glass', 'cup'
+  'vase', 'wine glass', 'cup', 'bottle',
+  'broccoli', 'potted plant', 'traffic light' // Green-tinged objects
 ]);
 
 const FIRE_EXTINGUISHER_MAPPINGS = new Set([
-  'hair drier', 'bottle', 'baseball bat', 'umbrella'
+  'hair drier', 'bottle', 'baseball bat', 'umbrella',
+  'apple', 'sports ball', 'stop sign', 'hot dog' // Red objects
 ]);
 
 // Helper function to map a class to a priority object
 function mapClassToPriorityObject(className: string, filename: string = ''): string | null {
+  const lowerClassName = className.toLowerCase();
   const lowerFilename = filename.toLowerCase();
   
-  // Rule 1: If the file indicates a fire extinguisher and the class could be one, prioritize that
-  if ((lowerFilename.includes('fire') || lowerFilename.includes('extinguisher')) && 
-       FIRE_EXTINGUISHER_MAPPINGS.has(className)) {
+  // First prioritize based on precise detection order:
+  // 1. Fire extinguishers (safety critical)
+  // 2. Oxygen tanks (life support)
+  // 3. Toolboxes (maintenance)
+  
+  // Check for red items (fire extinguishers) - highest priority
+  if (FIRE_EXTINGUISHER_MAPPINGS.has(className) || 
+      lowerClassName.includes('red') || 
+      lowerClassName.includes('fire') ||
+      lowerFilename.includes('extinguisher')) {
+    console.log(`Found general object (${className}) treating as potential fire extinguisher`);
     return 'fire extinguisher';
   }
   
-  // Rule 2: If the file indicates an oxygen tank and the class could be one, prioritize that
-  if ((lowerFilename.includes('oxygen') || lowerFilename.includes('tank')) && 
-      OXYGEN_TANK_MAPPINGS.has(className)) {
+  // Check for green-tinged items (oxygen tanks) - medium priority
+  if (OXYGEN_TANK_MAPPINGS.has(className) || 
+      lowerClassName.includes('green') || 
+      lowerClassName.includes('oxygen') ||
+      lowerFilename.includes('tank')) {
+    console.log(`Found general object (${className}) treating as potential oxygen tank`);
     return 'oxygen tank';
   }
   
-  // Rule 3: Check for fire extinguisher (highest priority)
-  if (FIRE_EXTINGUISHER_MAPPINGS.has(className)) {
-    return 'fire extinguisher';
-  }
-  
-  // Rule 4: Check for oxygen tank (medium priority)
-  if (OXYGEN_TANK_MAPPINGS.has(className)) {
-    return 'oxygen tank';
-  }
-  
-  // Rule 5: Check for toolbox (lowest priority)
-  if (TOOLBOX_MAPPINGS.has(className)) {
+  // Check for yellow/orange items (toolboxes) - lowest priority
+  if (TOOLBOX_MAPPINGS.has(className) || 
+      lowerClassName.includes('yellow') || 
+      lowerClassName.includes('orange') ||
+      lowerClassName.includes('tool')) {
+    console.log(`Found general object (${className}) treating as potential toolbox`);
     return 'toolbox';
   }
   

@@ -7,6 +7,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { randomUUID } from "crypto";
 import { tensorflowDetector } from "./services/tensorflow-detector";
+import { opencvDetector } from "./services/opencv-bridge";
 import { enhanceObjectsWithContext, generateComponentAnalysis } from "./services/context-service";
 import OpenAI from "openai";
 
@@ -62,8 +63,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Processing image at path: ${filePath}`);
       
-      // Use TensorFlow COCO-SSD model for detection
-      const result = await tensorflowDetector.detectObjects(filePath);
+      // First try using TensorFlow COCO-SSD model for detection
+      let result = await tensorflowDetector.detectObjects(filePath);
+      
+      // If no objects detected or very few, try OpenCV color detection as fallback
+      if (result.detectedObjects.length < 1) {
+        try {
+          console.log("TensorFlow detected no objects, trying OpenCV color detection as fallback");
+          result = await opencvDetector.detectObjects(filePath);
+          console.log(`OpenCV detected ${result.detectedObjects.length} objects by color`);
+        } catch (opencvError) {
+          console.error("OpenCV fallback detection failed:", opencvError);
+          // Continue with TensorFlow results if OpenCV fails
+        }
+      }
       
       // Enhance objects with contextual information
       const enhancedObjects = await enhanceObjectsWithContext(result.detectedObjects);
