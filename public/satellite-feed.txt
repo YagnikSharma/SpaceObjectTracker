@@ -1,0 +1,9 @@
+This is a placeholder for the satellite feed videos.
+
+For actual implementation, the following files would be created:
+- satellite-feed.mp4
+- satellite-feed.webm
+- satellite-feed.ogv
+- satellite-feed.mkv
+
+These video files would show a satellite feed of Earth from space.

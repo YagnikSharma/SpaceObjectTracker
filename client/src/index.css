@@ -231,6 +231,25 @@
   border-radius: 0 0.375rem 0.375rem 0;
 }
 
+/* Satellite video scanner animation */
+@keyframes scan {
+  0% {
+    top: 0;
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0.5;
+  }
+}
+
+.animate-scan {
+  animation: scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 /* Add beautiful tab animations */
 .tab-button {
   position: relative;

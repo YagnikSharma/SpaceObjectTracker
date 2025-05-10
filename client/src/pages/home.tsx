@@ -11,6 +11,7 @@ import { useChat } from "@/hooks/use-chat";
 import { apiRequest } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "wouter";
+import { SatellitePlayer } from "@/components/ui/satellite-player";
 
 // Navigation links
 const NAV_LINKS = [
