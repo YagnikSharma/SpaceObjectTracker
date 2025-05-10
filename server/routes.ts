@@ -1,15 +1,13 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
-import { chatCompletionRequestSchema, DetectedObject } from "@shared/schema";
-import { ParamsDictionary } from "express-serve-static-core";
-import { ParsedQs } from "qs";
-import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
-import { spaceStationDetector, PRIORITY_CATEGORIES } from "./services/space-station-detector";
-import { randomUUID } from "crypto";
+import { chatCompletionRequestSchema } from "@shared/schema";
 import * as fs from "fs";
 import * as path from "path";
+import { randomUUID } from "crypto";
+import { tensorflowDetector } from "./services/tensorflow-detector";
+import { enhanceObjectsWithContext, generateComponentAnalysis } from "./services/context-service";
 import OpenAI from "openai";
 
 // Configure multer for file uploads
@@ -27,7 +25,20 @@ const upload = multer({
   },
 });
 
+// Define our priority objects
+const PRIORITY_OBJECTS = [
+  'toolbox',
+  'oxygen tank',
+  'fire extinguisher'
+];
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Ensure uploads directory exists
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
   // API status endpoint
   app.get("/api/status", async (req: Request, res: Response) => {
     try {
@@ -37,40 +48,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Simple detection endpoint (GET method) for testing YOLOv8 model
-  app.get("/api/detect", async (req: Request, res: Response) => {
-    try {
-      const imagePath = req.query.imagePath as string;
-      
-      if (!imagePath) {
-        return res.status(400).json({ error: "No image path provided" });
-      }
-      
-      if (!fs.existsSync(imagePath)) {
-        return res.status(404).json({ error: "Image file not found" });
-      }
-      
-      console.log(`Processing image at path: ${imagePath}`);
-      
-      // Always use YOLOv8 detector
-      console.log("Using YOLOv8 detector model...");
-      const result = await spaceStationDetector.detectObjectsFromPath(imagePath);
-      
-      res.status(200).json({
-        success: true,
-        detections: result.detectedObjects,
-        detectionMethod: result.detectionMethod,
-        count: result.detectedObjects.length
-      });
-    } catch (error) {
-      console.error("Error processing image:", error);
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to process image" 
-      });
-    }
-  });
-
-  // Space object detection endpoint with YOLOv8 only
+  // Object detection endpoint
   app.post("/api/detect", upload.single("image"), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
@@ -82,30 +60,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filePath = path.join('uploads', filename);
       fs.writeFileSync(filePath, req.file.buffer);
       
-      // Always use YOLOv8
-      console.log("Processing image with YOLOv8 space station detector...");
+      console.log(`Processing image at path: ${filePath}`);
       
-      // Detect objects using our comprehensive detector
-      const result = await spaceStationDetector.detectObjectsFromPath(filePath);
+      // Use TensorFlow COCO-SSD model for detection
+      const result = await tensorflowDetector.detectObjects(filePath);
+      
+      // Enhance objects with contextual information
+      const enhancedObjects = await enhanceObjectsWithContext(result.detectedObjects);
       
       // Count priority objects
-      const priorityObjects = result.detectedObjects.filter(obj => 
-        PRIORITY_CATEGORIES.some(category => 
+      const priorityObjects = enhancedObjects.filter(obj => 
+        PRIORITY_OBJECTS.some(category => 
           obj.label.toLowerCase().includes(category.toLowerCase())
         )
       );
       
-      // Count human objects
-      const humanObjects = result.detectedObjects.filter(obj => 
-        obj.label.toLowerCase().includes('astronaut') || 
-        obj.label.toLowerCase().includes('person')
-      );
-      
       // Log detection results
       console.log(`Space Station Detection Results:`);
-      console.log(`- Total Objects: ${result.detectedObjects.length}`);
+      console.log(`- Total Objects: ${enhancedObjects.length}`);
       console.log(`- Priority Objects: ${priorityObjects.length}`);
-      console.log(`- Humans Detected: ${humanObjects.length}`);
       console.log(`- Detection Method: ${result.detectionMethod}`);
       
       // Generate image URL
@@ -114,18 +87,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store detection in database
       const detection = await storage.createDetection({
         imageUrl: imageUrl,
-        objects: result.detectedObjects,
+        objects: enhancedObjects,
       });
       
       // Return detection results
       res.status(200).json({
         imageUrl: imageUrl,
-        detectedObjects: result.detectedObjects,
+        detectedObjects: enhancedObjects,
         detectionId: detection.id,
         source: result.detectionMethod,
         stats: {
+          objectsDetected: enhancedObjects.length,
           priorityObjectsDetected: priorityObjects.length,
-          humansDetected: humanObjects.length,
           detectionMethod: result.detectionMethod
         }
       });
@@ -137,95 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Model training statistics endpoint
-  app.get("/api/training-stats", async (req: Request, res: Response) => {
-    try {
-      // Always get training statistics for YOLOv8 model only
-      const stats = spaceStationDetector.getStats();
-      
-      res.status(200).json({
-        success: true,
-        statistics: {
-          totalSamples: stats.totalSamples,
-          objectCounts: stats.objectCounts,
-          modelLoaded: stats.modelLoaded,
-          modelPath: stats.modelPath
-        },
-        modelInfo: {
-          name: "Space Station Object Detector (YOLOv8)",
-          priorityCategories: stats.priorityCategories,
-          colorMap: stats.colorMap,
-          detectionMethods: stats.detectionMethods
-        }
-      });
-    } catch (error) {
-      console.error("Error retrieving training statistics:", error);
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to retrieve training statistics" 
-      });
-    }
-  });
-
-  // Falcon synthetic image generator endpoint
-  app.post("/api/generate-synthetic", async (req: Request, res: Response) => {
-    try {
-      // Validate request
-      const { category, count } = req.body;
-      
-      // Check if category is valid
-      if (!SPACE_STATION_ELEMENTS[category]) {
-        return res.status(400).json({ 
-          error: "Invalid category. Valid categories are: TOOLS, GAUGES, STRUCTURAL, EMERGENCY" 
-        });
-      }
-      
-      const imageCount = parseInt(count) || 5;
-      if (imageCount < 1 || imageCount > 10) {
-        return res.status(400).json({ error: "Count must be between 1 and 10" });
-      }
-      
-      console.log(`Generating ${imageCount} synthetic ${category} images with Falcon AI...`);
-      
-      // Generate synthetic images using Falcon AI
-      const imagePaths = await generateSyntheticTrainingImages(category, imageCount);
-      
-      // Return image URLs
-      const imageUrls = imagePaths.map(p => {
-        // Convert absolute path to relative URL
-        const fileName = path.basename(p);
-        return `/uploads/${fileName}`;
-      });
-      
-      res.status(200).json({
-        success: true,
-        category,
-        imageCount,
-        imageUrls
-      });
-    } catch (error) {
-      console.error("Error generating synthetic images:", error);
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to generate synthetic images" 
-      });
-    }
-  });
-  
-  // Endpoint for retrieving available categories for Falcon generator
-  app.get("/api/synthetic-categories", async (req: Request, res: Response) => {
-    try {
-      const categories = Object.keys(SPACE_STATION_ELEMENTS);
-      res.status(200).json({
-        categories
-      });
-    } catch (error) {
-      console.error("Error retrieving categories:", error);
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to retrieve categories" 
-      });
-    }
-  });
-  
-  // Export detection result as PDF
+  // Export detection result as PDF (stub)
   app.get("/api/export-pdf/:detectionId", async (req: Request, res: Response) => {
     try {
       const detectionId = parseInt(req.params.detectionId);
@@ -239,15 +124,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Detection not found" });
       }
       
-      // Generate PDF file with detection results
-      const pdfFileName = `space_station_detection_${detectionId}.pdf`;
-      const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
-      
       // We'll use streams to avoid loading the full file into memory
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=${pdfFileName}`);
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename=detection_${detectionId}.json`);
       
-      // Send the PDF data directly to the response
+      // Send the data directly to the response
       // Note: actual PDF generation happens in the frontend with jsPDF
       res.status(200).json({
         detectionId,
@@ -255,9 +136,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageUrl: detection.imageUrl
       });
     } catch (error) {
-      console.error("Error exporting PDF:", error);
+      console.error("Error exporting data:", error);
       res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to export PDF" 
+        error: error instanceof Error ? error.message : "Failed to export data" 
       });
     }
   });
@@ -273,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Transform data for front-end consumption
       const formattedData = detections.map(detection => {
-        const objects = detection.objects as DetectedObject[];
+        const objects = detection.objects;
         
         // Get summary statistics
         const totalObjects = objects.length;
@@ -290,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ? objects.reduce((sum, obj) => sum + obj.confidence, 0) / objects.length
           : 0;
         
-        // Find critical issues
+        // Find issues
         const issues = objects
           .filter(obj => obj.issue)
           .map(obj => ({
@@ -364,44 +245,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-
-  // Upload custom YOLOv8 model endpoint
-  app.post("/api/upload-model", upload.single("model"), async (req: Request, res: Response) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: "No model file provided" });
-      }
-      
-      console.log(`Uploading custom model: ${req.file.originalname}`);
-      
-      // Get original filename or use default
-      const originalFilename = req.file.originalname || 'custom_model.pt';
-      const modelName = path.basename(originalFilename);
-      
-      // Import model using the space station detector
-      const success = spaceStationDetector.importModel(req.file.buffer, modelName);
-      
-      if (!success) {
-        return res.status(500).json({ error: "Failed to import model" });
-      }
-      
-      res.status(200).json({
-        success: true,
-        message: `Model ${modelName} imported successfully`,
-        modelInfo: spaceStationDetector.getStats()
-      });
-    } catch (error) {
-      console.error("Error uploading model:", error);
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to upload model" 
-      });
-    }
-  });
   
   // Chat completion endpoint
   app.post("/api/chat", async (req: Request, res: Response) => {
     try {
       const validatedData = chatCompletionRequestSchema.parse(req.body);
+      
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(400).json({ 
+          error: "OpenAI API key not configured. Please set OPENAI_API_KEY environment variable."
+        });
+      }
       
       // Initialize OpenAI client
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -414,21 +269,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const message = validatedData.message.toLowerCase();
       
       // Try to find component mentioned in the message
-      if (message.includes("oxygen")) componentName = "oxygen level gauge";
-      else if (message.includes("pressure")) componentName = "pressure gauge";
-      else if (message.includes("temperature")) componentName = "temperature gauge";
-      else if (message.includes("airlock")) componentName = "airlock";
-      else if (message.includes("hatch")) componentName = "hatch seal";
-      else if (message.includes("filter") || message.includes("air quality")) componentName = "air filtration unit";
-      else if (message.includes("wrench")) componentName = "torque wrench";
-      else if (message.includes("drill")) componentName = "power drill";
+      if (message.includes("oxygen")) componentName = "oxygen tank";
+      else if (message.includes("fire") || message.includes("extinguisher")) componentName = "fire extinguisher";
+      else if (message.includes("tool") || message.includes("toolbox")) componentName = "toolbox";
       
       // Try to identify issue in message
       if (message.includes("leak")) detectedIssue = "air leakage detected";
       else if (message.includes("malfunction")) detectedIssue = "control panel malfunction";
       else if (message.includes("error")) detectedIssue = "calibration error";
       else if (message.includes("reading") && message.includes("fluctuat")) detectedIssue = "fluctuating readings";
-      else if (message.includes("crack")) detectedIssue = "gauge glass cracked";
+      else if (message.includes("crack")) detectedIssue = "structural damage detected";
       
       // If no component explicitly mentioned, try to extract from detected objects
       if (!componentName && validatedData.detectedObjects && validatedData.detectedObjects.length > 0) {
@@ -446,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Generate component analysis using Falcon AI
+      // Generate component analysis
       const analysis = await generateComponentAnalysis(
         componentName,
         detectedIssue,
@@ -485,22 +335,24 @@ Component analysis: ${analysis}
         max_tokens: 450,
       });
       
-      // Store message and response in database
-      try {
-        await storage.createChatMessage({
-          detectionId: validatedData.detectionId,
-          role: "user",
-          content: validatedData.message,
-        });
-        
-        await storage.createChatMessage({
-          detectionId: validatedData.detectionId,
-          role: "assistant",
-          content: completion.choices[0].message.content,
-        });
-      } catch (dbError) {
-        console.error("Failed to store chat messages:", dbError);
-        // Continue even if storage fails
+      // Store message and response in database if detection ID is provided
+      if (validatedData.detectionId) {
+        try {
+          await storage.createChatMessage({
+            detectionId: validatedData.detectionId,
+            role: "user",
+            content: validatedData.message,
+          });
+          
+          await storage.createChatMessage({
+            detectionId: validatedData.detectionId,
+            role: "assistant",
+            content: completion.choices[0].message.content || "",
+          });
+        } catch (dbError) {
+          console.error("Failed to store chat messages:", dbError);
+          // Continue even if storage fails
+        }
       }
       
       // Return the chat response

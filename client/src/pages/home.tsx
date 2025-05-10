@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { FileUploader } from "@/components/ui/file-uploader";
-import { ResultsDisplay, DetectedObject } from "@/components/ui/results-display";
+import { ResultsDisplay } from "@/components/ui/results-display";
+import { DetectedObject } from "@shared/schema";
 import { ChatInterface, ChatMessage } from "@/components/ui/chat-interface";
 import { FeedbackForm } from "@/components/ui/feedback-form";
 import { ThemeToggle } from "@/components/theme-toggle";

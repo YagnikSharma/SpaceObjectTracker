@@ -1,89 +1,95 @@
-import { users, type User, type InsertUser, type Detection, type InsertDetection, type DetectedObject, type Feedback, type InsertFeedback, detections, feedback, chatMessages, type ChatMessage, type InsertChatMessage } from "@shared/schema";
-import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { Detection, User, InsertUser, InsertDetection, ChatMessage, InsertChatMessage } from "@shared/schema";
 
-// Storage interface with CRUD methods
+// Define the storage interface
 export interface IStorage {
+  // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
   // Detection methods
   getDetection(id: number): Promise<Detection | undefined>;
-  createDetection(detection: InsertDetection): Promise<Detection>;
   listDetections(limit?: number): Promise<Detection[]>;
+  createDetection(detection: InsertDetection): Promise<Detection>;
   
-  // Feedback methods
-  createFeedback(feedback: InsertFeedback): Promise<Feedback>;
-  listFeedback(limit?: number): Promise<Feedback[]>;
-  
-  // Chat methods
-  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  // Chat message methods
+  getChatMessage(id: number): Promise<ChatMessage | undefined>;
   getChatMessagesByDetection(detectionId: number): Promise<ChatMessage[]>;
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
 }
 
-// Database storage implementation
-export class DatabaseStorage implements IStorage {
+// In-memory storage implementation
+export class MemStorage implements IStorage {
+  private users: User[] = [];
+  private detections: Detection[] = [];
+  private chatMessages: ChatMessage[] = [];
+  private userId = 1;
+  private detectionId = 1;
+  private chatMessageId = 1;
+  
   // User methods
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    return this.users.find(user => user.id === id);
   }
-
+  
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
+    return this.users.find(user => user.username === username);
   }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
+  
+  async createUser(user: InsertUser): Promise<User> {
+    const newUser: User = {
+      id: this.userId++,
+      ...user,
+      createdAt: new Date()
+    };
+    this.users.push(newUser);
+    return newUser;
   }
   
   // Detection methods
   async getDetection(id: number): Promise<Detection | undefined> {
-    const [detection] = await db.select().from(detections).where(eq(detections.id, id));
-    return detection || undefined;
+    return this.detections.find(detection => detection.id === id);
   }
   
-  async createDetection(insertDetection: InsertDetection): Promise<Detection> {
-    const [detection] = await db.insert(detections).values(insertDetection).returning();
-    return detection;
+  async listDetections(limit: number = 20): Promise<Detection[]> {
+    return [...this.detections]
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit);
   }
   
-  async listDetections(limit = 10): Promise<Detection[]> {
-    return await db.select()
-      .from(detections)
-      .orderBy(desc(detections.createdAt))
-      .limit(limit);
+  async createDetection(detection: InsertDetection): Promise<Detection> {
+    // Ensure objects array is properly typed
+    const newDetection: Detection = {
+      id: this.detectionId++,
+      imageUrl: detection.imageUrl,
+      objects: detection.objects,
+      createdAt: new Date()
+    };
+    this.detections.push(newDetection);
+    return newDetection;
   }
   
-  // Feedback methods
-  async createFeedback(insertFeedback: InsertFeedback): Promise<Feedback> {
-    const [feedbackItem] = await db.insert(feedback).values(insertFeedback).returning();
-    return feedbackItem;
-  }
-  
-  async listFeedback(limit = 50): Promise<Feedback[]> {
-    return await db.select()
-      .from(feedback)
-      .orderBy(desc(feedback.createdAt))
-      .limit(limit);
-  }
-  
-  // Chat methods
-  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
-    const [chatMessage] = await db.insert(chatMessages).values(message).returning();
-    return chatMessage;
+  // Chat message methods
+  async getChatMessage(id: number): Promise<ChatMessage | undefined> {
+    return this.chatMessages.find(message => message.id === id);
   }
   
   async getChatMessagesByDetection(detectionId: number): Promise<ChatMessage[]> {
-    return await db.select()
-      .from(chatMessages)
-      .where(eq(chatMessages.detectionId, detectionId))
-      .orderBy(chatMessages.createdAt);
+    return this.chatMessages
+      .filter(message => message.detectionId === detectionId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }
+  
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const newMessage: ChatMessage = {
+      id: this.chatMessageId++,
+      ...message,
+      createdAt: new Date()
+    };
+    this.chatMessages.push(newMessage);
+    return newMessage;
   }
 }
 
-// Export storage instance
-export const storage = new DatabaseStorage();
+// Export a singleton instance of the storage
+export const storage = new MemStorage();
