@@ -376,7 +376,21 @@ export default function Home() {
                       <h2 className="text-md font-semibold ml-2 text-primary dark:text-blue-300">Advanced Space Station Analysis</h2>
                     </div>
                   </div>
-                  <div className="p-6">
+                  <div className="p-6 space-y-6">
+                    {/* Satellite Feed Player */}
+                    <div className="bg-black/50 backdrop-blur-sm rounded-lg border border-blue-500/30 overflow-hidden">
+                      <div className="p-3 border-b border-blue-500/30 bg-blue-500/10">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" style={{ animationDelay: "300ms" }}></div>
+                          <h3 className="text-sm font-medium text-blue-300">LIVE SATELLITE FEED (4 FORMATS)</h3>
+                        </div>
+                      </div>
+                      <div className="h-[200px] md:h-[300px]">
+                        <SatellitePlayer className="w-full h-full" />
+                      </div>
+                    </div>
+                    
                     <ChatInterface 
                       messages={messages}
                       isLoading={isLoadingResponse}

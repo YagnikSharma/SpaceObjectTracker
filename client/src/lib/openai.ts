@@ -1,5 +1,5 @@
 import { apiRequest } from "@/lib/queryClient";
-import { DetectedObject } from "@/components/ui/results-display";
+import { DetectedObject } from "@shared/schema";
 
 export interface ChatCompletionResponse {
   id: string;
