@@ -68,7 +68,7 @@ export async function detectWithYolo11n(
   }
   
   // Path to Python detector script
-  const scriptPath = path.join('server', 'python', 'basic_detector.py');
+  const scriptPath = 'yolo11n_detector.py';
   
   if (!fs.existsSync(scriptPath)) {
     console.error(`Python detector script not found: ${scriptPath}`);
@@ -91,7 +91,7 @@ export async function detectWithYolo11n(
   
   try {
     // Build the command to run the Python script
-    const command = `python3.10 "${scriptPath}" --image "${imagePath}" --model "${modelPath}" --output "${outputPath}" --conf ${confidenceThreshold}`;
+    const command = `python "${scriptPath}" --image "${imagePath}" --model "${modelPath}" --output "${outputPath}" --conf ${confidenceThreshold}`;
     console.log(`Executing: ${command}`);
     
     // Execute the command
