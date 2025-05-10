@@ -7,7 +7,7 @@ import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
 import yoloService, { detectSpaceStationObjects, getTrainingStatistics } from "./services/yolo-service";
-import { customYOLOService, PRIORITY_CATEGORIES } from "./services/custom-yolo-service";
+import { spaceObjectDetector, PRIORITY_CATEGORIES } from "./services/custom-yolo-service";
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
@@ -59,7 +59,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       fs.writeFileSync(imagePath, req.file.buffer);
       
       // First try our specialized custom YOLO model that focuses on space station components
-      const customResult = await customYOLOService.detectObjects(imagePath);
+      const customResult = await spaceObjectDetector.detectObjects(imagePath);
       
       // If custom detection finds objects, use those results
       if (customResult.success && customResult.detections.length > 0) {
@@ -78,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           source: "custom-yolo",
           stats: {
             priorityObjectsDetected: customResult.detections.length,
-            trainingImagesCount: customYOLOService.getTrainingStats().imageCount
+            trainingImagesCount: spaceObjectDetector.getModelStats().isModelLoaded ? 1 : 0
           }
         });
       }
@@ -98,26 +98,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         obj.label.toLowerCase().includes('person')
       );
       
-      // Add priority objects to custom YOLO training dataset
+      // Log priority objects detection
       if (priorityObjects.length > 0) {
         priorityObjects.forEach(obj => {
-          console.log(`Added detection of ${obj.label} to training data. Total samples: ${customYOLOService.getTrainingStats().imageCount + 1}`);
-          
-          customYOLOService.addTrainingImage(imagePath, [{
-            class: PRIORITY_CATEGORIES.find(cat => obj.label.toLowerCase().includes(cat)) || obj.label,
-            x: obj.x,
-            y: obj.y,
-            width: obj.width,
-            height: obj.height
-          }]);
+          console.log(`Detected ${obj.label} in space station image`);
         });
-        
-        // Try to train the model if we have enough data
-        if (customYOLOService.getTrainingStats().imageCount >= 5) {
-          customYOLOService.trainModel().catch(err => 
-            console.error("Error training model:", err)
-          );
-        }
       }
       
       // Log detection results
@@ -141,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         stats: {
           priorityObjectsDetected: priorityObjects.length,
           humansDetected: humanObjects.length,
-          trainingImagesCount: customYOLOService.getTrainingStats().imageCount
+          trainingImagesCount: spaceObjectDetector.getModelStats().isModelLoaded ? 1 : 0
         }
       });
     } catch (error) {
