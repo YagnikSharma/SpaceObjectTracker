@@ -166,9 +166,9 @@ class TensorFlowDetector {
         
         // Check if the object is cylindrical and not already mapped to a priority object
         const isCylindrical = cylindricalObjects.includes(className);
-        const alreadyMapped = CLASS_MAPPING[className] === 'oxygen tank';
-        const isNotFireExtinguisher = className !== 'fire extinguisher' && 
-                                     !CLASS_MAPPING[className]?.includes('fire extinguisher');
+        const mappedPriorityObject = mapClassToPriorityObject(className, path.basename(imagePath));
+        const alreadyMapped = mappedPriorityObject === 'oxygen tank';
+        const isNotFireExtinguisher = mappedPriorityObject !== 'fire extinguisher';
         
         // If it's cylindrical but not yet mapped as oxygen tank or fire extinguisher, we'll add it
         if (isCylindrical && !alreadyMapped && isNotFireExtinguisher && score > 0.4) {
@@ -262,9 +262,10 @@ class TensorFlowDetector {
         
         // Check if the object is box-like and not already mapped to a priority object
         const isBoxLike = boxObjects.includes(className);
-        const alreadyMapped = CLASS_MAPPING[className] === 'toolbox';
-        const isNotFireOrOxygen = !CLASS_MAPPING[className]?.includes('fire extinguisher') && 
-                                 !CLASS_MAPPING[className]?.includes('oxygen tank');
+        const mappedPriorityObject = mapClassToPriorityObject(className, path.basename(imagePath));
+        const alreadyMapped = mappedPriorityObject === 'toolbox';
+        const isNotFireOrOxygen = mappedPriorityObject !== 'fire extinguisher' && 
+                                  mappedPriorityObject !== 'oxygen tank';
         
         // If it's box-like but not yet mapped as toolbox, we'll add it
         if (isBoxLike && !alreadyMapped && isNotFireOrOxygen && score > 0.4) {
@@ -361,7 +362,8 @@ class TensorFlowDetector {
         
         // Check if the object is cylindrical and not already mapped
         const isCylindrical = cylindricalObjects.includes(className);
-        const alreadyMapped = CLASS_MAPPING[className] === 'fire extinguisher';
+        const mappedPriorityObject = mapClassToPriorityObject(className, path.basename(imagePath));
+        const alreadyMapped = mappedPriorityObject === 'fire extinguisher';
         
         // If it's cylindrical with any reasonable score, consider it a fire extinguisher
         // Lowering threshold significantly for this critical safety equipment
@@ -434,23 +436,22 @@ class TensorFlowDetector {
       // Process predictions to extract our priority objects
       const detectedObjects: DetectedObject[] = [];
       
+      // Get the image filename for context
+      const imageName = path.basename(imagePath);
+      
       for (const prediction of predictions) {
         const { class: className, score, bbox } = prediction;
         const [x, y, width, height] = bbox;
         
-        // Map COCO-SSD class to our custom class if applicable
-        let mappedClass = CLASS_MAPPING[className] || className;
+        // Use our mapping function to get priority objects
+        const mappedClass = mapClassToPriorityObject(className, imageName) || className;
         
         // Check if this is one of our priority objects
-        const isPriorityObject = PRIORITY_OBJECTS.some(obj => 
-          mappedClass.toLowerCase().includes(obj.toLowerCase())
-        );
+        const isPriorityObject = PRIORITY_OBJECTS.includes(mappedClass);
         
         if (isPriorityObject) {
-          // Find exact match for proper coloring and context
-          const matchedObject = PRIORITY_OBJECTS.find(obj => 
-            mappedClass.toLowerCase().includes(obj.toLowerCase())
-          ) || mappedClass;
+          // We already have the exact match from our mapping function
+          const matchedObject = mappedClass;
           
           const color = OBJECT_COLORS[matchedObject] || OBJECT_COLORS.default;
           const context = OBJECT_CONTEXT[matchedObject] || '';
