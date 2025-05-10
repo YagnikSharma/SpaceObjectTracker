@@ -195,7 +195,14 @@ export default function Landing() {
 }
 
 // Feature Card Component
-function FeatureCard({ icon, color, title, description }) {
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  color: string;
+  title: string;
+  description: string;
+}
+
+function FeatureCard({ icon, color, title, description }: FeatureCardProps) {
   return (
     <Card className="bg-card/30 backdrop-blur-md border border-blue-900/30 p-6 rounded-xl overflow-hidden relative hover:shadow-lg transition-all duration-300 hover:scale-105 hover:border-blue-500/50 group">
       <div className={`absolute -inset-0.5 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300`}></div>
