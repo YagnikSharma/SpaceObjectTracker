@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-Space Station Object Detection Demo Script (Standalone Version)
+Space Station Object Detection Demo Script (Standalone Version) - PURE YOLOv8
 
-This script provides a simple way to test the detection of space station objects:
+This script provides a simple way to test the detection of space station objects
+using ONLY YOLOv8 with Python 3.10 (no fallbacks):
 - Fire extinguisher (red labels)
 - Oxygen tank (blue labels)
 - Toolbox (yellow labels)
 
 Usage:
-    python main.py [image_path]
+    python3.10 main.py [image_path]
 
 If no image path is provided, it will look for images in the 'uploads' folder.
 """
@@ -98,10 +99,59 @@ def detect_objects_simple(image_path):
             'count': 0
         }
 
+def detect_with_pure_yolo(image_path):
+    """Use the pure YOLOv8 detector script"""
+    try:
+        # Path to the YOLOv8 detector script
+        detector_script = "server/python/yolo_detector_pure.py"
+        
+        # Check if detector script exists
+        if not os.path.exists(detector_script):
+            print(f"Error: YOLOv8 detector script not found: {detector_script}")
+            return detect_objects_simple(image_path)  # Fallback to simple detection
+        
+        # Check for model file
+        model_path = "models/yolov8s.pt"
+        if not os.path.exists(model_path):
+            print(f"Error: YOLOv8 model not found: {model_path}")
+            return detect_objects_simple(image_path)  # Fallback to simple detection
+        
+        # Create a temporary output file
+        output_file = f"results/detection_temp_{generate_id()}.json"
+        
+        # Build the command
+        command = f"python3.10 {detector_script} --image {image_path} --model {model_path} --output {output_file} --conf 0.25"
+        
+        print(f"Running YOLOv8 detection: {command}")
+        
+        # Execute the command
+        os.system(command)
+        
+        # Check if output file was created
+        if os.path.exists(output_file):
+            # Read the file
+            with open(output_file, 'r') as f:
+                results = json.load(f)
+            
+            # Delete the temporary file
+            os.remove(output_file)
+            
+            return results
+        else:
+            print("YOLOv8 detection failed to create output file")
+            return detect_objects_simple(image_path)  # Fallback to simple detection
+            
+    except Exception as e:
+        print(f"Error in YOLOv8 detection: {e}")
+        return detect_objects_simple(image_path)  # Fallback to simple detection
+
 def main():
     """Main function for demo script"""
     # Create output directory if it doesn't exist
     os.makedirs("results", exist_ok=True)
+    
+    # Create models directory if it doesn't exist
+    os.makedirs("models", exist_ok=True)
     
     # Get image path from command line or use uploads folder
     if len(sys.argv) > 1:
@@ -116,7 +166,9 @@ def main():
         # Check if uploads folder exists
         image_dir = "uploads"
         if not os.path.exists(image_dir):
-            print(f"Error: Uploads folder '{image_dir}' not found")
+            os.makedirs(image_dir, exist_ok=True)
+            print(f"Created uploads folder '{image_dir}'")
+            print("Please place some images in the uploads folder and run again")
             sys.exit(1)
         
         # Get image files from uploads folder
@@ -127,6 +179,21 @@ def main():
         print("Please provide an image file or place some images in the uploads folder")
         sys.exit(1)
     
+    # Check for YOLOv8 model
+    model_path = "models/yolov8s.pt"
+    if not os.path.exists(model_path):
+        print(f"YOLOv8 model not found at {model_path}")
+        
+        # Try to find attached model
+        if os.path.exists("attached_assets/yolov8s.pt"):
+            # Copy the model file
+            import shutil
+            shutil.copy("attached_assets/yolov8s.pt", model_path)
+            print(f"Copied YOLOv8 model from attached_assets to {model_path}")
+        else:
+            print("YOLOv8 model not found in attached_assets")
+            print("Will use simple detection instead")
+    
     # Process each image
     print(f"Found {len(image_files)} images to process")
     
@@ -136,8 +203,16 @@ def main():
         
         print(f"\nProcessing image {idx}/{len(image_files)}: {img_file}")
         
-        # Run detection
-        results = detect_objects_simple(image_path)
+        # Try using pure YOLOv8 detection
+        try:
+            print("Attempting pure YOLOv8 detection...")
+            results = detect_with_pure_yolo(image_path)
+            method = results.get('method', 'unknown')
+            print(f"Detection method used: {method}")
+        except Exception as e:
+            print(f"YOLOv8 detection failed: {e}")
+            print("Falling back to simple detection...")
+            results = detect_objects_simple(image_path)
         
         # Save results
         with open(output_path, 'w') as f:

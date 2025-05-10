@@ -95,8 +95,8 @@ export class YoloBridge {
       // Prepare output file path
       const outputFile = path.join(process.cwd(), 'uploads', `detection_${randomUUID()}.json`);
       
-      // Build Python command
-      const pythonCommand = `python "${this.pythonScript}" --image "${imagePath}" --model "${this.modelPath}" --output "${outputFile}" --conf 0.25`;
+      // Build Python command with Python 3.10
+      const pythonCommand = `python3.10 "${this.pythonScript}" --image "${imagePath}" --model "${this.modelPath}" --output "${outputFile}" --conf 0.25`;
       
       console.log(`Executing: ${pythonCommand}`);
       
