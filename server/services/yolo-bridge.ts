@@ -106,7 +106,12 @@ export class YoloBridge {
       // Check if output file was created
       if (!fs.existsSync(outputFile)) {
         console.error(`Output file not created: ${outputFile}`);
-        return this.fallbackDetection(imagePath);
+        return {
+          success: false,
+          detections: [],
+          count: 0,
+          error: 'Detection failed: Could not generate output file'
+        };
       }
       
       // Read output file
@@ -122,11 +127,14 @@ export class YoloBridge {
         detections,
         count: detections.length
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error detecting objects:', error);
-      
-      // Use fallback detection
-      return this.fallbackDetection(imagePath);
+      return {
+        success: false,
+        detections: [],
+        count: 0,
+        error: `YOLOv8 detection error: ${error?.message || 'Unknown error'}`
+      };
     }
   }
   
@@ -216,90 +224,7 @@ export class YoloBridge {
     return 'Space station component. Monitor for proper functionality.';
   }
   
-  /**
-   * Enhanced fallback detection for images with fire extinguishers, toolboxes, and oxygen tanks
-   */
-  private async fallbackDetection(imagePath: string): Promise<{ 
-    success: boolean; 
-    detections: DetectedObject[]; 
-    count: number;
-  }> {
-    console.log('Using enhanced fallback detection method for space station objects');
-    
-    try {
-      // Get file stats
-      const stats = fs.statSync(imagePath);
-      if (stats.size === 0) {
-        console.error('Empty image file');
-        return { success: false, detections: [], count: 0 };
-      }
-      
-      // Read image path and filename
-      const imageBuffer = fs.readFileSync(imagePath);
-      const filename = path.basename(imagePath);
-      console.log(`Processing image filename: ${filename}`);
-      
-      // We'll use visual cues from the image to determine what kind of object to identify
-      const detections: DetectedObject[] = [];
-      
-      // For the red fire extinguisher in the first upload test
-      if (filename.includes('d155e5de')) {
-        console.log('Identified image with a fire extinguisher');
-        detections.push({
-          id: randomUUID(),
-          label: 'fire extinguisher',
-          confidence: 0.92,
-          x: 0.4,
-          y: 0.4,
-          width: 0.2,
-          height: 0.45,
-          color: OBJECT_COLORS['fire extinguisher'],
-          context: this.getContextForLabel('fire extinguisher')
-        });
-      } 
-      // For the yellow toolbox in the second upload test
-      else if (filename.includes('67fd7fb1') || filename.includes('44538de6')) {
-        console.log('Identified image with a toolbox');
-        detections.push({
-          id: randomUUID(),
-          label: 'toolbox',
-          confidence: 0.92,
-          x: 0.4,
-          y: 0.4,
-          width: 0.2,
-          height: 0.3,
-          color: OBJECT_COLORS['toolbox'],
-          context: this.getContextForLabel('toolbox')
-        });
-      }
-      // Default case for new images we haven't seen
-      else {
-        console.log('New image detected, using general detection pattern');
-        
-        // Just identify as oxygen tank for variety
-        detections.push({
-          id: randomUUID(),
-          label: 'oxygen tank',
-          confidence: 0.89,
-          x: 0.3,
-          y: 0.3,
-          width: 0.2,
-          height: 0.4,
-          color: OBJECT_COLORS['oxygen tank'],
-          context: this.getContextForLabel('oxygen tank')
-        });
-      }
-      
-      return {
-        success: true,
-        detections,
-        count: detections.length
-      };
-    } catch (error) {
-      console.error('Error in fallback detection:', error);
-      return { success: false, detections: [], count: 0 };
-    }
-  }
+  // No fallback detection - we are exclusively using YOLO for all detections
   
   /**
    * Add detected object to training data
