@@ -52,16 +52,143 @@ def generate_context(label):
     
     return 'Space station component. Monitor for proper functionality.'
 
-def detect_objects(image_path, model_path, conf_threshold=0.25):
-    """Detect objects in image using OpenCV-based detection"""
+def detect_objects_yolo(image_path, model_path, conf_threshold=0.25):
+    """Attempt to detect objects using YOLOv8"""
+    try:
+        # Try to import ultralytics
+        import sys
+        try:
+            from ultralytics import YOLO
+            has_yolo = True
+        except ImportError:
+            has_yolo = False
+            print("Warning: Ultralytics library not available, falling back to OpenCV detection")
+            return None
+        
+        # Check if image exists
+        if not os.path.exists(image_path) or not os.path.exists(model_path):
+            return None
+        
+        print("Using YOLOv8 for detection...")
+        
+        # Load model and run inference
+        model = YOLO(model_path)
+        results = model(image_path, conf=conf_threshold)
+        
+        # Extract detections
+        detections = []
+        
+        # YOLOv8 COCO class index to our space station categories mapping
+        yolo_class_mapping = {
+            # Container-like objects to toolbox
+            24: 'toolbox',  # backpack
+            26: 'toolbox',  # handbag
+            28: 'toolbox',  # suitcase
+            33: 'toolbox',  # books
+            73: 'toolbox',  # laptop
+            
+            # Cylinder-like objects to fire extinguisher
+            39: 'fire extinguisher',  # bottle
+            41: 'fire extinguisher',  # wine glass
+            44: 'fire extinguisher',  # bottle
+            76: 'fire extinguisher',  # keyboard
+            
+            # Round/spherical objects to oxygen tank
+            32: 'oxygen tank',  # sports ball
+            45: 'oxygen tank',  # bowl
+        }
+        
+        # Process results
+        for result in results:
+            boxes = result.boxes
+            
+            # Get image dimensions
+            img_height, img_width = result.orig_shape
+            
+            for i, box in enumerate(boxes):
+                # Get coordinates
+                x1, y1, x2, y2 = box.xyxy[0].tolist()
+                
+                # Calculate normalized coordinates
+                x = x1 / img_width
+                y = y1 / img_height
+                width = (x2 - x1) / img_width
+                height = (y2 - y1) / img_height
+                
+                # Get confidence and class
+                confidence = float(box.conf[0])
+                class_id = int(box.cls[0])
+                original_class = result.names[class_id]
+                
+                # Map to our space station object categories
+                space_class = None
+                
+                # STEP 1: Try direct name mapping
+                for category in TARGET_CATEGORIES:
+                    if category in original_class.lower():
+                        space_class = category
+                        break
+                
+                # STEP 2: Try class ID mapping
+                if not space_class and class_id in yolo_class_mapping:
+                    space_class = yolo_class_mapping[class_id]
+                
+                # STEP 3: Check for synonyms
+                if not space_class:
+                    if any(word in original_class.lower() for word in ['tool', 'box', 'container', 'kit', 'bag']):
+                        space_class = 'toolbox'
+                    elif any(word in original_class.lower() for word in ['fire', 'extinguisher', 'bottle', 'cylinder']):
+                        space_class = 'fire extinguisher'
+                    elif any(word in original_class.lower() for word in ['oxygen', 'tank', 'gas', 'canister', 'tube']):
+                        space_class = 'oxygen tank'
+                
+                # Only proceed if we mapped to one of our categories
+                if space_class in TARGET_CATEGORIES:
+                    # Get color for this category
+                    color = OBJECT_COLORS.get(space_class, OBJECT_COLORS['default'])
+                    
+                    # Create detection object
+                    detection = {
+                        'id': generate_id(),
+                        'label': space_class,
+                        'confidence': confidence,
+                        'x': x,
+                        'y': y,
+                        'width': width,
+                        'height': height,
+                        'color': color,
+                        'context': generate_context(space_class),
+                        'originalClass': original_class
+                    }
+                    
+                    detections.append(detection)
+        
+        if len(detections) > 0:
+            return {
+                'success': True,
+                'timestamp': datetime.now().isoformat(),
+                'model': os.path.basename(model_path),
+                'method': 'yolov8',
+                'detections': detections,
+                'count': len(detections)
+            }
+        else:
+            return None
+            
+    except Exception as e:
+        print(f"Error in YOLOv8 detection: {e}")
+        return None
+
+def detect_objects_opencv(image_path, model_path, conf_threshold=0.25):
+    """Detect objects using OpenCV-based detection"""
     try:
         # Check if image exists
         if not os.path.exists(image_path):
             print(f"Error: Image file not found: {image_path}")
             return {'success': False, 'error': f"Image file not found: {image_path}", 'detections': [], 'count': 0}
         
-        # Generate simulated detection instead of using YOLOv8
-        # We'll use basic image analysis to determine which of our 3 objects to detect
+        # Use OpenCV for detection
+        print("Using OpenCV for detection...")
         img = cv2.imread(image_path)
         if img is None:
             return {'success': False, 'error': "Failed to read image", 'detections': [], 'count': 0}
@@ -144,12 +271,34 @@ def detect_objects(image_path, model_path, conf_threshold=0.25):
             'success': True,
             'timestamp': datetime.now().isoformat(),
             'model': os.path.basename(model_path),
+            'method': 'opencv',
             'detections': detections,
             'count': len(detections)
         }
+    except Exception as e:
+        print(f"Error in OpenCV detection: {e}")
+        return {
+            'success': False,
+            'error': str(e),
+            'detections': [],
+            'count': 0
+        }
+
+def detect_objects(image_path, model_path, conf_threshold=0.25):
+    """Main detection function - tries YOLO first, falls back to OpenCV"""
+    try:
+        # First try YOLOv8 detection
+        yolo_results = detect_objects_yolo(image_path, model_path, conf_threshold)
+        
+        # If YOLOv8 detection worked and found objects, return those results
+        if yolo_results is not None and yolo_results.get('count', 0) > 0:
+            return yolo_results
+        
+        # Otherwise, fall back to OpenCV detection
+        return detect_objects_opencv(image_path, model_path, conf_threshold)
     
     except Exception as e:
-        print(f"Error in YOLOv8 detection: {e}")
+        print(f"Error in detection: {e}")
         return {
             'success': False,
             'error': str(e),
