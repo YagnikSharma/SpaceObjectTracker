@@ -142,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get training statistics from both YOLO services
       const generalStats = getTrainingStatistics();
-      const customStats = customYOLOService.getTrainingStats();
+      const customStats = spaceObjectDetector.getModelStats();
       
       res.status(200).json({
         success: true,
@@ -163,12 +163,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           customModel: {
             name: "Space Station Components Detector",
             targetClasses: PRIORITY_CATEGORIES,
-            isModelTrained: customStats.isModelTrained,
-            colorMapping: {
-              toolbox: "#FF4500", // orange-red
-              "fire extinguisher": "#FF0000", // red
-              "oxygen tank": "#4169E1" // royal blue
-            }
+            isModelTrained: customStats.isModelLoaded,
+            colorMapping: customStats.colorMap
           }
         }
       });
@@ -398,11 +394,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const modelName = req.body.modelName || "custom-space-objects.pt";
       const classes = req.body.classes ? JSON.parse(req.body.classes) : PRIORITY_CATEGORIES;
       
-      // Import the model using our custom YOLO service
-      const importResult = customYOLOService.importPretrainedModel(req.file.buffer, {
-        modelName,
-        classes
-      });
+      // Import the model using our new SpaceObjectDetector
+      const success = spaceObjectDetector.importModel(req.file.buffer, modelName);
+      const importResult = {
+        success,
+        message: success ? "Model imported successfully" : "Failed to import model",
+        modelPath: path.join(process.cwd(), 'models', modelName)
+      };
       
       if (importResult.success) {
         res.status(200).json({
