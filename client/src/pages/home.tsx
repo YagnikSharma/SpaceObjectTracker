@@ -16,10 +16,8 @@ import { Link, useLocation } from "wouter";
 const NAV_LINKS = [
   { name: "Home", href: "/", icon: "🚀" },
   { name: "Mission Control", href: "/mission-control", icon: "🛰️" },
-  { name: "Image Generator", href: "/image-generator", icon: "📷" },
   { name: "Galactic Map", href: "/galactic-map", icon: "🪐" },
-  { name: "Stellar Archives", href: "/archives", icon: "🔭" },
-  { name: "Model Manager", href: "/model-manager", icon: "🧠" }
+  { name: "Stellar Archives", href: "/archives", icon: "🔭" }
 ];
 
 export default function Home() {
