@@ -42,7 +42,7 @@ def run_detection(image_path, output_folder="results"):
     print(f"Attempting YOLOv11n detection...")
     
     # Command to run the detector script
-    detector_script = "server/python/yolo11n_detector.py"
+    detector_script = "server/python/basic_detector.py"
     cmd = f"python3.10 {detector_script} --image {image_path} --model {model_path} --output {output_file} --conf 0.25"
     
     print(f"Running YOLOv11n detection: {cmd}")
