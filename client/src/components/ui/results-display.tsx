@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { OBJECT_COLORS } from '@/lib/falcon-api';
 import { DetectedObject } from '@shared/schema';
 import { motion } from 'framer-motion';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 interface ResultsDisplayProps {
   isLoading: boolean;
@@ -22,8 +24,49 @@ export function ResultsDisplay({
 }: ResultsDisplayProps) {
   const [selectedObject, setSelectedObject] = useState<DetectedObject | null>(null);
   const [showAllLabels, setShowAllLabels] = useState(true);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  
+  // Generate detection summary for text-to-speech and PDF export
+  const getDetectionSummary = () => {
+    if (!detectedObjects.length) return "No objects detected in the space station image.";
+    
+    const counts = {
+      "fire extinguisher": 0,
+      "oxygen tank": 0,
+      "toolbox": 0,
+      "other": 0
+    };
+    
+    detectedObjects.forEach(obj => {
+      if (counts[obj.label as keyof typeof counts] !== undefined) {
+        counts[obj.label as keyof typeof counts]++;
+      } else {
+        counts.other++;
+      }
+    });
+    
+    const parts = [];
+    
+    if (counts["fire extinguisher"]) {
+      parts.push(`${counts["fire extinguisher"]} fire extinguisher${counts["fire extinguisher"] > 1 ? 's' : ''}`);
+    }
+    
+    if (counts["oxygen tank"]) {
+      parts.push(`${counts["oxygen tank"]} oxygen tank${counts["oxygen tank"] > 1 ? 's' : ''}`);
+    }
+    
+    if (counts["toolbox"]) {
+      parts.push(`${counts["toolbox"]} toolbox${counts["toolbox"] > 1 ? 'es' : ''}`);
+    }
+    
+    if (counts.other) {
+      parts.push(`${counts.other} other object${counts.other > 1 ? 's' : ''}`);
+    }
+    
+    return `Detection complete. Found ${detectedObjects.length} objects in the space station image: ${parts.join(", ")}.`;
+  };
   
   // Draw the detected objects on the canvas
   useEffect(() => {
@@ -114,6 +157,129 @@ export function ResultsDisplay({
       }
     });
   }, [imageUrl, detectedObjects, isLoading, selectedObject, showAllLabels]);
+  
+  // Text-to-speech function
+  const speakResults = () => {
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const summary = getDetectionSummary();
+      const utterance = new SpeechSynthesisUtterance(summary);
+      
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      // Use a more professional voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(voice => 
+        voice.name.includes('Daniel') || voice.name.includes('Google') || voice.name.includes('Male')
+      );
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+      
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+  
+  // Export to PDF function
+  const exportToPDF = () => {
+    if (!imageRef.current || !detectedObjects.length) return;
+    
+    const pdf = new jsPDF();
+    const imageData = canvasRef.current?.toDataURL('image/jpeg');
+    
+    // Add title
+    pdf.setFontSize(18);
+    pdf.setTextColor(0, 51, 102);
+    pdf.text('Space Station Detection Report', 14, 20);
+    
+    // Add timestamp
+    pdf.setFontSize(10);
+    pdf.setTextColor(100, 100, 100);
+    const dateStr = new Date().toLocaleString();
+    pdf.text(`Generated: ${dateStr}`, 14, 27);
+    
+    // Add summary
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Detection Summary:', 14, 35);
+    
+    const summary = getDetectionSummary();
+    const splitSummary = pdf.splitTextToSize(summary, 180);
+    pdf.text(splitSummary, 14, 42);
+    
+    // Add detected objects table
+    pdf.setFontSize(12);
+    pdf.text('Detected Objects:', 14, 60);
+    
+    const tableData = detectedObjects.map((obj, index) => [
+      (index + 1).toString(),
+      obj.label,
+      `${Math.round(obj.confidence * 100)}%`,
+      obj.context || 'N/A'
+    ]);
+    
+    // @ts-ignore - jspdf-autotable typings issue
+    pdf.autoTable({
+      startY: 65,
+      head: [['#', 'Object', 'Confidence', 'Context']],
+      body: tableData,
+      theme: 'grid',
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255] },
+      alternateRowStyles: { fillColor: [240, 240, 240] }
+    });
+    
+    // Add image if it fits
+    if (imageData) {
+      // @ts-ignore - jspdf-autotable typings issue
+      const finalY = pdf.lastAutoTable.finalY + 10;
+      
+      // Check if there's enough space, otherwise add new page
+      if (finalY > 180) {
+        pdf.addPage();
+        pdf.text('Detection Image:', 14, 20);
+        pdf.addImage(imageData, 'JPEG', 14, 25, 180, 180 * (imageRef.current.height / imageRef.current.width));
+      } else {
+        pdf.text('Detection Image:', 14, finalY);
+        pdf.addImage(imageData, 'JPEG', 14, finalY + 5, 180, 180 * (imageRef.current.height / imageRef.current.width));
+      }
+    }
+    
+    // Save the PDF
+    pdf.save('space-station-detection.pdf');
+  };
+  
+  // Export to JSON function
+  const exportToJSON = () => {
+    if (!detectedObjects.length) return;
+    
+    const jsonData = {
+      timestamp: new Date().toISOString(),
+      imageUrl: imageUrl,
+      detectedObjects: detectedObjects,
+      summary: getDetectionSummary()
+    };
+    
+    const jsonString = JSON.stringify(jsonData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'space-station-detection.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
   
   // If there's an error, show the error message
   if (error) {
@@ -232,10 +398,65 @@ export function ResultsDisplay({
         )}
       </CardContent>
       
+      {/* Actions panel with export and TTS buttons */}
+      {!isLoading && detectedObjects.length > 0 && (
+        <div className="border-t border-border p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold">Detected Space Objects:</h3>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8 flex items-center gap-1"
+                onClick={speakResults}
+                disabled={isSpeaking}
+              >
+                {isSpeaking ? (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Stop Reading
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 010-7.072m12.728 2.828a9 9 0 000-12.728M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    </svg>
+                    Read Results
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8 flex items-center gap-1"
+                onClick={exportToPDF}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Export PDF
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8 flex items-center gap-1"
+                onClick={exportToJSON}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+                Export JSON
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Object details panel */}
       {!isLoading && detectedObjects.length > 0 && (
         <div className="border-t border-border p-4">
-          <h3 className="text-sm font-semibold mb-3">Detected Space Objects:</h3>
           <div className="grid gap-2 max-h-40 overflow-y-auto pr-2">
             {detectedObjects.map(obj => (
               <div 
