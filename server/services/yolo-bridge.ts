@@ -135,23 +135,47 @@ export class YoloBridge {
    */
   private processDetections(rawDetections: any[]): DetectedObject[] {
     return rawDetections.map(detection => {
-      // Create proper DetectedObject
+      // Ensure we only use our specific object labels
+      const labelLower = detection.label.toLowerCase();
+      let standardizedLabel = labelLower;
+      
+      // Map to our standard three object types if needed
+      if (!PRIORITY_CATEGORIES.includes(labelLower)) {
+        if (labelLower.includes('fire') || labelLower.includes('extinguisher')) {
+          standardizedLabel = 'fire extinguisher';
+        } else if (labelLower.includes('tool') || labelLower.includes('box')) {
+          standardizedLabel = 'toolbox';
+        } else if (labelLower.includes('oxygen') || labelLower.includes('tank')) {
+          standardizedLabel = 'oxygen tank';
+        } else {
+          // If we can't map to one of our categories, use the first one as default
+          standardizedLabel = PRIORITY_CATEGORIES[0];
+        }
+      }
+      
+      // Get the appropriate color for the label
+      const color = OBJECT_COLORS[standardizedLabel as keyof typeof OBJECT_COLORS] || OBJECT_COLORS.default;
+      
+      // Create proper DetectedObject with standardized label and color
       const detectedObject: DetectedObject = {
         id: detection.id || randomUUID(),
-        label: detection.label,
+        label: standardizedLabel,
         confidence: detection.confidence,
         x: detection.x,
         y: detection.y,
         width: detection.width,
         height: detection.height,
-        color: detection.color || this.getColorForLabel(detection.label),
-        context: detection.context || this.getContextForLabel(detection.label)
+        color: color,
+        context: detection.context || this.getContextForLabel(standardizedLabel),
+        originalClass: detection.originalClass || undefined
       };
       
       // Add to training data if confidence is high
-      if (detection.confidence >= 0.7) {
+      if (detection.confidence >= 0.6) {
         this.addToTrainingData(detectedObject);
       }
+      
+      console.log(`Processed detection: ${standardizedLabel} with color ${color}`);
       
       return detectedObject;
     });
