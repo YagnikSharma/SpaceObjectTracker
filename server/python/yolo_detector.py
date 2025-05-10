@@ -7,6 +7,8 @@ This script processes images to detect only specific objects:
 - Oxygen tank (blue labels)
 - Toolbox (yellow labels)
 
+The detector tries to use YOLOv8 via Python 3.9 if available, otherwise falls back to OpenCV.
+
 Usage:
     python yolo_detector.py --image [IMAGE_PATH] --model [MODEL_PATH] --output [OUTPUT_PATH] --conf [CONFIDENCE]
 
@@ -21,6 +23,8 @@ import os
 import sys
 import uuid
 import cv2
+import subprocess
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -51,6 +55,51 @@ def generate_context(label):
         return 'Equipment storage. Ensure proper organization and inventory completion.'
     
     return 'Space station component. Monitor for proper functionality.'
+
+def map_to_target_category(original_class, class_id=None):
+    """Map a detected class to one of our target categories"""
+    # YOLOv8 COCO class index to our space station categories mapping
+    yolo_class_mapping = {
+        # Container-like objects to toolbox
+        24: 'toolbox',  # backpack
+        26: 'toolbox',  # handbag
+        28: 'toolbox',  # suitcase
+        33: 'toolbox',  # books
+        73: 'toolbox',  # laptop
+        
+        # Cylinder-like objects to fire extinguisher
+        39: 'fire extinguisher',  # bottle
+        41: 'fire extinguisher',  # wine glass
+        44: 'fire extinguisher',  # bottle
+        76: 'fire extinguisher',  # keyboard
+        
+        # Round/spherical objects to oxygen tank
+        32: 'oxygen tank',  # sports ball
+        45: 'oxygen tank',  # bowl
+    }
+    
+    # Convert original class to lowercase for comparison
+    original_lower = original_class.lower()
+    
+    # STEP 1: Try direct name mapping
+    for category in TARGET_CATEGORIES:
+        if category in original_lower:
+            return category
+    
+    # STEP 2: Try class ID mapping
+    if class_id is not None and class_id in yolo_class_mapping:
+        return yolo_class_mapping[class_id]
+    
+    # STEP 3: Check for synonyms
+    if any(word in original_lower for word in ['tool', 'box', 'container', 'kit', 'bag']):
+        return 'toolbox'
+    elif any(word in original_lower for word in ['fire', 'extinguisher', 'bottle', 'cylinder']):
+        return 'fire extinguisher'
+    elif any(word in original_lower for word in ['oxygen', 'tank', 'gas', 'canister', 'tube']):
+        return 'oxygen tank'
+    
+    # Default to none if no mapping found
+    return None
 
 def detect_objects_yolo(image_path, model_path, conf_threshold=0.25):
     """Attempt to detect objects using YOLOv8"""
@@ -224,51 +273,6 @@ def detect_objects_yolo(image_path, model_path, conf_threshold=0.25):
     except Exception as e:
         print(f"Error in YOLOv8 detection: {e}")
         return None
-
-def map_to_target_category(original_class, class_id=None):
-    """Map a detected class to one of our target categories"""
-    # YOLOv8 COCO class index to our space station categories mapping
-    yolo_class_mapping = {
-        # Container-like objects to toolbox
-        24: 'toolbox',  # backpack
-        26: 'toolbox',  # handbag
-        28: 'toolbox',  # suitcase
-        33: 'toolbox',  # books
-        73: 'toolbox',  # laptop
-        
-        # Cylinder-like objects to fire extinguisher
-        39: 'fire extinguisher',  # bottle
-        41: 'fire extinguisher',  # wine glass
-        44: 'fire extinguisher',  # bottle
-        76: 'fire extinguisher',  # keyboard
-        
-        # Round/spherical objects to oxygen tank
-        32: 'oxygen tank',  # sports ball
-        45: 'oxygen tank',  # bowl
-    }
-    
-    # Convert original class to lowercase for comparison
-    original_lower = original_class.lower()
-    
-    # STEP 1: Try direct name mapping
-    for category in TARGET_CATEGORIES:
-        if category in original_lower:
-            return category
-    
-    # STEP 2: Try class ID mapping
-    if class_id is not None and class_id in yolo_class_mapping:
-        return yolo_class_mapping[class_id]
-    
-    # STEP 3: Check for synonyms
-    if any(word in original_lower for word in ['tool', 'box', 'container', 'kit', 'bag']):
-        return 'toolbox'
-    elif any(word in original_lower for word in ['fire', 'extinguisher', 'bottle', 'cylinder']):
-        return 'fire extinguisher'
-    elif any(word in original_lower for word in ['oxygen', 'tank', 'gas', 'canister', 'tube']):
-        return 'oxygen tank'
-    
-    # Default to none if no mapping found
-    return None
 
 def detect_objects_opencv(image_path, model_path, conf_threshold=0.25):
     """Detect objects using OpenCV-based detection"""
