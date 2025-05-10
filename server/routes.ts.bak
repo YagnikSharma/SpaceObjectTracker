@@ -7,10 +7,12 @@ import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
 import { spaceStationDetector, PRIORITY_CATEGORIES } from "./services/space-station-detector";
+import { spaceStationDetectorV2 } from "./services/space-station-detector-v2";
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 import OpenAI from "openai";
+import { yolov5IntegratedBridge } from './services/yolov5-integrated-bridge';
 
 // Configure multer for file uploads
 const upload = multer({
@@ -453,77 +455,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         validatedData.detectedObjects
       );
       
-      // Generate prompt with technical context
-      const systemPrompt = `
-You are ASTROSCAN, the International Space Station's AI assistant.
-Respond in a professional technical tone using space terminology when appropriate.
-Always limit responses to 2-3 short paragraphs.
-Include technical details when responding to astronaut's questions about station equipment.
-Focus primarily on addressing safety concerns, operational issues, and maintenance protocols.
-
-Current component being discussed: ${componentName || "Unknown component"}
-${detectedIssue ? `Detected issue: ${detectedIssue}` : ""}
-Component analysis: ${analysis}
-`;
-
-      // Create a response ID for this chat
+      // Generate a unique ID for the response
       const responseId = `chatcmpl-${randomUUID()}`;
       
-      // Make API call to OpenAI
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // The newest OpenAI model is "gpt-4o" which was released May 13, 2024
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: validatedData.message,
-          },
-        ],
-        max_tokens: 450,
-      });
-      
-      // Store message and response in database
-      try {
-        await storage.createChatMessage({
-          detectionId: validatedData.detectionId,
-          role: "user",
-          content: validatedData.message,
-        });
-        
-        await storage.createChatMessage({
-          detectionId: validatedData.detectionId,
-          role: "assistant",
-          content: completion.choices[0].message.content,
-        });
-      } catch (dbError) {
-        console.error("Failed to store chat messages:", dbError);
-        // Continue even if storage fails
+      // Check if a detectionId was provided to save the chat message
+      if (req.body.detectionId) {
+        try {
+          const detectionId = parseInt(req.body.detectionId);
+          
+          // Save user message
+          await storage.createChatMessage({
+            detectionId,
+            role: 'user',
+            content: validatedData.message
+          });
+          
+          // Save assistant message
+          await storage.createChatMessage({
+            detectionId,
+            role: 'assistant',
+            content: analysis
+          });
+        } catch (dbError) {
+          console.error("Error saving chat message:", dbError);
+          // Continue execution even if saving fails
+        }
       }
       
-      // Return the chat response
       res.status(200).json({
         id: responseId,
-        object: "chat.completion",
-        created: Math.floor(Date.now() / 1000),
-        model: "gpt-4o",
-        choices: [
-          {
-            message: {
-              role: "assistant",
-              content: completion.choices[0].message.content,
-            },
-            finish_reason: "stop",
-            index: 0,
-          },
-        ],
+        content: analysis,
       });
     } catch (error) {
-      console.error("Error generating chat response:", error);
-      res.status(500).json({
-        error: error instanceof Error ? error.message : "Failed to generate response",
+      console.error("Error generating chat completion:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to generate chat completion" 
       });
     }
   });

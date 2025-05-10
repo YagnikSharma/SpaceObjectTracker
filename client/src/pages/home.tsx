@@ -306,8 +306,6 @@ export default function Home() {
                         isLoading={isUploading}
                         isProcessed={isProcessed}
                         setIsProcessed={setIsProcessed}
-                        onModelChange={setSelectedModel}
-                        selectedModel={selectedModel}
                       />
                     </div>
                   </div>
