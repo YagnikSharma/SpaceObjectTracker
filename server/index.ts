@@ -41,7 +41,7 @@ registerRoutes(app).then(server => {
     vite.setupVite(app, server).then(() => {
       // Start the server
       const PORT = process.env.PORT || 5000;
-      server.listen(PORT, () => {
+      server.listen(PORT, '0.0.0.0', () => {
         vite.log(`serving on port ${PORT}`);
       });
     }).catch(err => {
@@ -52,7 +52,7 @@ registerRoutes(app).then(server => {
     vite.serveStatic(app);
     // Start the server
     const PORT = process.env.PORT || 5000;
-    server.listen(PORT, () => {
+    server.listen(PORT, '0.0.0.0', () => {
       vite.log(`serving on port ${PORT}`);
     });
   }
