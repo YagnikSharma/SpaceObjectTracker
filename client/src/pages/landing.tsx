@@ -21,24 +21,25 @@ export default function Landing() {
     <div className="relative min-h-screen w-full overflow-hidden bg-black text-white flex flex-col">
       {/* Video Background */}
       <div className="fixed inset-0 z-0 w-full h-screen">
-        <ReactPlayer 
-          url="https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-1610-large.mp4"
-          playing
-          loop
-          muted
-          width="100vw"
-          height="100vh"
-          style={{ 
-            objectFit: 'cover',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh'
-          }}
-        />
+        {/* Static background fallback */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#090d18] via-[#111827] to-[#0a101e]"></div>
+        
+        {/* Star background pattern */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-10 left-[10%] w-1 h-1 bg-blue-100 rounded-full"></div>
+          <div className="absolute top-20 left-[25%] w-1.5 h-1.5 bg-blue-100 rounded-full"></div>
+          <div className="absolute top-[15%] left-[40%] w-1 h-1 bg-blue-100 rounded-full"></div>
+          <div className="absolute top-[40%] left-[10%] w-2 h-2 bg-blue-100 rounded-full"></div>
+          <div className="absolute top-[75%] left-[20%] w-1 h-1 bg-blue-100 rounded-full"></div>
+          <div className="absolute top-[30%] left-[80%] w-1.5 h-1.5 bg-blue-100 rounded-full"></div>
+          <div className="absolute top-[65%] left-[85%] w-1 h-1 bg-blue-100 rounded-full"></div>
+          <div className="absolute top-[10%] left-[75%] w-2 h-2 bg-blue-100 rounded-full"></div>
+          <div className="absolute top-[50%] left-[60%] w-1 h-1 bg-blue-100 rounded-full"></div>
+          <div className="absolute top-[85%] left-[50%] w-1.5 h-1.5 bg-blue-100 rounded-full"></div>
+        </div>
+        
         {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/60"></div>
       </div>
       
       {/* Main Content */}
