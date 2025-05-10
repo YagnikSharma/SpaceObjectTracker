@@ -211,9 +211,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
       } else {
-        console.log("Processing image with YOLOv8 space station detector...");
+        // Default to YOLOv8
+        console.log(`Processing image with YOLOv8 space station detector (model: ${modelType})...`);
         
         // Detect objects using our comprehensive detector
+        // This will use YOLOv8 under the hood
         const result = await spaceStationDetector.detectObjectsFromPath(filePath);
         
         // Count priority objects
