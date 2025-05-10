@@ -58,7 +58,7 @@ export class SpaceObjectDetector {
     this.setupDirectories();
     
     // Initialize model path
-    this.modelPath = path.join(process.cwd(), 'models', 'yolov8s.pt');
+    this.modelPath = path.join(process.cwd(), 'models', 'space-objects-model.pt');
     
     // Initialize class mapping
     this.classMap = {};
@@ -68,7 +68,7 @@ export class SpaceObjectDetector {
     
     // Check if model exists
     if (fs.existsSync(this.modelPath)) {
-      log('AI model found at: ' + this.modelPath, 'yolo');
+      log('AI model found at: ' + this.modelPath, 'ai');
       this.isModelLoaded = true;
     }
   }
@@ -96,7 +96,7 @@ export class SpaceObjectDetector {
     try {
       // Save model to disk
       fs.writeFileSync(this.modelPath, modelBuffer);
-      log(`AI model saved to ${this.modelPath}`, 'yolo');
+      log(`AI model saved to ${this.modelPath}`, 'ai');
       
       // Update model status
       this.isModelLoaded = true;
@@ -104,7 +104,7 @@ export class SpaceObjectDetector {
       
       return true;
     } catch (error: any) {
-      log(`Error loading AI model: ${error.message}`, 'yolo');
+      log(`Error loading AI model: ${error.message}`, 'ai');
       return false;
     }
   }
@@ -118,18 +118,18 @@ export class SpaceObjectDetector {
       if (fs.existsSync(this.modelPath)) {
         this.isModelLoaded = true;
       } else {
-        log('AI model not loaded, using fallback detection', 'yolo');
+        log('AI model not loaded, using fallback detection', 'ai');
         return this.performFallbackDetection(imagePath);
       }
     }
     
     try {
       // Process the image with our AI model
-      log(`Processing image with AI detection: ${imagePath}`, 'yolo');
+      log(`Processing image with AI detection: ${imagePath}`, 'ai');
       
       // Get detections from our precise model
       const detections = this.analyzeImage(imagePath);
-      log(`AI model detected ${detections.length} objects`, 'yolo');
+      log(`AI model detected ${detections.length} objects`, 'ai');
       
       return {
         success: true,
@@ -137,7 +137,7 @@ export class SpaceObjectDetector {
         count: detections.length
       };
     } catch (error: any) {
-      log(`Error detecting objects: ${error.message}`, 'yolo');
+      log(`Error detecting objects: ${error.message}`, 'ai');
       return {
         success: false,
         detections: [],
