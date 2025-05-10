@@ -25,10 +25,16 @@ export async function uploadImageToFalcon(file: File): Promise<FalconApiResponse
   formData.append('image', file);
 
   try {
+    // Optimize fetch with higher priority and no caching
     const response = await fetch('/api/detect', {
       method: 'POST',
       body: formData,
       credentials: 'include',
+      priority: 'high', // Set high priority for faster processing
+      cache: 'no-store', // Don't cache the response
+      headers: {
+        'X-Priority': 'high', // Custom header for priority processing on server
+      }
     });
 
     if (!response.ok) {

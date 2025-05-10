@@ -5,7 +5,8 @@ import { OBJECT_COLORS } from '@/lib/falcon-api';
 import { DetectedObject } from '@shared/schema';
 import { motion } from 'framer-motion';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+// @ts-ignore
+import autoTable from 'jspdf-autotable';
 
 interface ResultsDisplayProps {
   isLoading: boolean;
@@ -226,8 +227,8 @@ export function ResultsDisplay({
       obj.context || 'N/A'
     ]);
     
-    // @ts-ignore - jspdf-autotable typings issue
-    pdf.autoTable({
+    // Use autoTable function from imported module
+    autoTable(pdf, {
       startY: 65,
       head: [['#', 'Object', 'Confidence', 'Context']],
       body: tableData,
@@ -239,8 +240,8 @@ export function ResultsDisplay({
     
     // Add image if it fits
     if (imageData) {
-      // @ts-ignore - jspdf-autotable typings issue
-      const finalY = pdf.lastAutoTable.finalY + 10;
+      // Get the final Y position after the table
+      const finalY = (pdf as any).lastAutoTable.finalY + 10;
       
       // Check if there's enough space, otherwise add new page
       if (finalY > 180) {
