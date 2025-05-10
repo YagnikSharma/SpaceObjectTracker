@@ -12,6 +12,7 @@ import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 import OpenAI from "openai";
+import { yolov5IntegratedBridge } from './services/yolov5-integrated-bridge';
 
 // Configure multer for file uploads
 const upload = multer({
@@ -38,7 +39,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Simple detection endpoint (GET method) for testing the pure YOLOv8 detector
+  // Simple detection endpoint (GET method) for testing all detector models
   app.get("/api/detect", async (req: Request, res: Response) => {
     try {
       const imagePath = req.query.imagePath as string;
@@ -53,12 +54,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Processing image at path: ${imagePath}`);
       
-      // Check if we should use the yolo11n detector
-      const useYolo11n = req.query.model === 'yolo11n';
+      // Check which model to use
+      const modelType = req.query.model as string || 'yolov8';
       
-      if (useYolo11n) {
+      if (modelType === 'yolo11n') {
         console.log("Using YOLOv11n detector model...");
-        // Process with the new YOLOv11n detector
+        // Process with the YOLOv11n detector
         const result = await spaceStationDetectorV2.processImage(imagePath);
         
         res.status(200).json({
@@ -67,8 +68,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           detectionMethod: 'yolo11n',
           count: result.detectedObjects.length
         });
+      } else if (modelType === 'yolov5') {
+        console.log("Using YOLOv5 detector model...");
+        // Process with the YOLOv5 detector
+        const result = await yolov5IntegratedBridge.detectObjects(imagePath);
+        
+        // Transform detections to match our format
+        const detectedObjects = result.detections.map(d => ({
+          id: d.id,
+          label: d.label,
+          confidence: d.confidence,
+          x: d.x,
+          y: d.y,
+          width: d.width,
+          height: d.height,
+          color: d.color,
+          context: d.context
+        }));
+        
+        res.status(200).json({
+          success: true,
+          detections: detectedObjects,
+          detectionMethod: 'yolov5',
+          count: detectedObjects.length
+        });
       } else {
-        // Use the original detector
+        // Default to YOLOv8 detector
+        console.log("Using YOLOv8 detector model...");
         const result = await spaceStationDetector.detectObjectsFromPath(imagePath);
         
         res.status(200).json({
@@ -86,23 +112,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Space object detection endpoint with YOLOv8 model
+  // Space object detection endpoint with multiple model support
   app.post("/api/detect", upload.single("image"), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No image file provided" });
       }
 
-      // Check if we should use the yolo11n model
-      const useYolo11n = req.query.model === 'yolo11n' || req.body.model === 'yolo11n';
+      // Check which model to use
+      const modelType = (req.query.model as string) || (req.body.model as string) || 'yolov8';
       
-      if (useYolo11n) {
+      // Save the uploaded image to disk first (all detectors need this)
+      const filename = `space_station_scan_${randomUUID().substring(0, 8)}.jpg`;
+      const filePath = path.join('uploads', filename);
+      fs.writeFileSync(filePath, req.file.buffer);
+      
+      if (modelType === 'yolo11n') {
         console.log("Processing image with YOLOv11n space station detector...");
-        
-        // Save the uploaded image to disk first
-        const filename = `temp_${randomUUID()}.jpg`;
-        const filePath = path.join('uploads', filename);
-        fs.writeFileSync(filePath, req.file.buffer);
         
         // Process with the YOLOv11n detector
         const result = await spaceStationDetectorV2.processImage(filePath);
@@ -131,14 +157,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
             detectionMethod: 'yolo11n'
           }
         });
+      } else if (modelType === 'yolov5') {
+        console.log("Processing image with YOLOv5 space station detector...");
+        
+        // Process with YOLOv5 detector
+        const result = await yolov5IntegratedBridge.detectObjects(filePath);
+        
+        // Transform the detections to match our format
+        const detectedObjects = result.detections.map(d => ({
+          id: d.id,
+          label: d.label,
+          confidence: d.confidence,
+          x: d.x,
+          y: d.y,
+          width: d.width,
+          height: d.height,
+          color: d.color,
+          context: d.context
+        }));
+        
+        // All objects in YOLOv5 detector are priority for space station
+        const priorityObjects = detectedObjects;
+        
+        // Count human objects (none in this specialized detector)
+        const humanObjects = [];
+        
+        // Generate image URL
+        const imageUrl = `/uploads/${filename}`;
+        
+        // Store detection in database
+        const detection = await storage.createDetection({
+          imageUrl: imageUrl,
+          objects: detectedObjects,
+        });
+        
+        // Log detection results
+        console.log(`YOLOv5 Space Station Detection Results:`);
+        console.log(`- Total Objects: ${detectedObjects.length}`);
+        console.log(`- Priority Objects: ${priorityObjects.length}`);
+        console.log(`- Humans Detected: ${humanObjects.length}`);
+        console.log(`- Detection Method: 'yolov5'`);
+        
+        // Return detection results
+        res.status(200).json({
+          imageUrl: imageUrl,
+          detectedObjects: detectedObjects,
+          detectionId: detection.id,
+          source: 'yolov5',
+          stats: {
+            priorityObjectsDetected: priorityObjects.length,
+            humansDetected: 0,
+            detectionMethod: 'yolov5'
+          }
+        });
       } else {
         console.log("Processing image with YOLOv8 space station detector...");
         
         // Detect objects using our comprehensive detector
-        const result = await spaceStationDetector.detectObjectsInImage(
-          req.file.buffer, 
-          req.file.originalname || 'unknown.jpg'
-        );
+        const result = await spaceStationDetector.detectObjectsFromPath(filePath);
         
         // Count priority objects
         const priorityObjects = result.detectedObjects.filter(obj => 
@@ -160,15 +236,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`- Humans Detected: ${humanObjects.length}`);
         console.log(`- Detection Method: ${result.detectionMethod}`);
         
+        // Generate image URL
+        const imageUrl = `/uploads/${filename}`;
+        
         // Store detection in database
         const detection = await storage.createDetection({
-          imageUrl: result.imageUrl,
+          imageUrl: imageUrl,
           objects: result.detectedObjects,
         });
         
         // Return detection results
         res.status(200).json({
-          imageUrl: result.imageUrl,
+          imageUrl: imageUrl,
           detectedObjects: result.detectedObjects,
           detectionId: detection.id,
           source: result.detectionMethod,
@@ -190,10 +269,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Model training statistics endpoint
   app.get("/api/training-stats", async (req: Request, res: Response) => {
     try {
-      // Check if we should return yolo11n info
-      const useYolo11n = req.query.model === 'yolo11n';
+      // Check which model to get statistics for
+      const modelType = req.query.model as string || 'yolov8';
       
-      if (useYolo11n) {
+      if (modelType === 'yolo11n') {
         // Return yolo11n model info
         res.status(200).json({
           success: true,
@@ -216,6 +295,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
               'toolbox': '#ffc107',            // Yellow
             },
             detectionMethods: ['yolo11n']
+          }
+        });
+      } else if (modelType === 'yolov5') {
+        // Return yolov5 model info
+        res.status(200).json({
+          success: true,
+          statistics: {
+            totalSamples: 3, // Fixed sample count for the 3 object types
+            objectCounts: {
+              'toolbox': 1,
+              'fire extinguisher': 1,
+              'oxygen tank': 1
+            },
+            modelLoaded: true,
+            modelPath: 'yolov5/weights/yolov5s.pt'
+          },
+          modelInfo: {
+            name: "Space Station Object Detector (YOLOv5)",
+            priorityCategories: ['toolbox', 'fire extinguisher', 'oxygen tank'],
+            colorMap: {
+              'fire extinguisher': '#f44336',  // Red
+              'oxygen tank': '#2196f3',        // Blue
+              'toolbox': '#ffc107',            // Yellow
+            },
+            detectionMethods: ['yolov5']
           }
         });
       } else {
