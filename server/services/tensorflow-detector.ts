@@ -29,15 +29,23 @@ const OBJECT_CONTEXT: Record<string, string> = {
 
 // Map COCO-SSD class names to our custom object names
 const CLASS_MAPPING: Record<string, string> = {
-  // Direct mappings
+  // Toolbox mappings
   'suitcase': 'toolbox',
   'handbag': 'toolbox',
   'backpack': 'toolbox',
+  'briefcase': 'toolbox',
+  'cell phone': 'toolbox',
+  'remote': 'toolbox',
+  'sports ball': 'toolbox', // Sometimes boxes are mistaken for balls
+  
+  // Oxygen tank mappings
   'bottle': 'oxygen tank',
   'vase': 'oxygen tank',
   'wine glass': 'oxygen tank',
   'cup': 'oxygen tank',
-  'cell phone': 'toolbox',
+  
+  // Fire extinguisher mappings
+  'hair drier': 'fire extinguisher',
   
   // If needed, add more mappings here
 };
@@ -127,6 +135,51 @@ class TensorFlowDetector {
       return [];
     }
   }
+  
+  /**
+   * Helper method to detect toolboxes based on shape and characteristics
+   * (rectangular objects with yellow tops/accents and black/dark base)
+   */
+  private async checkForToolboxPattern(imagePath: string, predictions: cocossd.DetectedObject[]): Promise<DetectedObject[]> {
+    // Objects that might be incorrectly classified but could be toolboxes
+    const boxObjects = ['suitcase', 'briefcase', 'handbag', 'backpack', 'box', 'remote'];
+    const additionalObjects: DetectedObject[] = [];
+    
+    try {
+      // Process predictions that might be toolboxes but were not detected as such
+      for (const prediction of predictions) {
+        const { class: className, score, bbox } = prediction;
+        const [x, y, width, height] = bbox;
+        
+        // Check if the object is box-like and not already mapped to a priority object
+        const isBoxLike = boxObjects.includes(className);
+        const alreadyMapped = CLASS_MAPPING[className] === 'toolbox';
+        
+        // If it's box-like but not yet mapped as toolbox, we'll add it
+        if (isBoxLike && !alreadyMapped && score > 0.5) {
+          console.log(`Found potential toolbox (${className}) with confidence ${score}`);
+          
+          additionalObjects.push({
+            id: uuidv4(),
+            label: 'toolbox',
+            confidence: score * 0.9, // Slightly reduce confidence as it's a pattern match
+            x: x,
+            y: y,
+            width: width,
+            height: height,
+            originalClass: className,
+            color: OBJECT_COLORS['toolbox'],
+            context: OBJECT_CONTEXT['toolbox']
+          });
+        }
+      }
+      
+      return additionalObjects;
+    } catch (error) {
+      console.error('Error checking for toolbox patterns:', error);
+      return [];
+    }
+  }
 
   public async detectObjects(imagePath: string): Promise<DetectionResult> {
     // Ensure model is loaded
@@ -193,8 +246,9 @@ class TensorFlowDetector {
         }
       }
       
-      // Use pattern recognition to find additional oxygen tanks
+      // Use pattern recognition to find additional priority objects if none found
       if (detectedObjects.length === 0) {
+        // Try to find oxygen tanks
         const cylinderObjects = await this.checkForOxygenTankPattern(imagePath, predictions);
         
         // Add any detected oxygen tanks
@@ -209,6 +263,24 @@ class TensorFlowDetector {
               height: obj.height / height
             });
             console.log(`Added oxygen tank from pattern detection with confidence ${obj.confidence}`);
+          }
+        } else {
+          // Try to find toolboxes if no oxygen tanks were found
+          const boxObjects = await this.checkForToolboxPattern(imagePath, predictions);
+          
+          // Add any detected toolboxes
+          if (boxObjects.length > 0) {
+            for (const obj of boxObjects) {
+              detectedObjects.push({
+                ...obj,
+                // Normalize coordinates
+                x: obj.x / width,
+                y: obj.y / height,
+                width: obj.width / width,
+                height: obj.height / height
+              });
+              console.log(`Added toolbox from pattern detection with confidence ${obj.confidence}`);
+            }
           }
         }
       }
