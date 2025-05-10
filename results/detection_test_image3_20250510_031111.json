@@ -1,0 +1,42 @@
+{
+  "success": true,
+  "timestamp": "2025-05-10T03:11:11.640567",
+  "model": "yolo11n_simplified",
+  "method": "color_shape_detection",
+  "detections": [
+    {
+      "id": "99926538-735a-4b91-a82d-66082335c24d",
+      "label": "oxygen tank",
+      "confidence": 0.5214666666666666,
+      "x": 0.0649546827794562,
+      "y": 0.05041246562786435,
+      "width": 0.015105740181268883,
+      "height": 0.01924839596700275,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "603c5823-efd1-4537-9324-e1db1785d228",
+      "label": "oxygen tank",
+      "confidence": 0.9,
+      "x": 0.01812688821752266,
+      "y": 0.0,
+      "width": 0.9516616314199395,
+      "height": 0.9945004582951421,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "6e2b2cc1-3d8a-494f-ac9e-3e03043544a9",
+      "label": "toolbox",
+      "confidence": 0.7434583333333333,
+      "x": 0.47583081570996977,
+      "y": 0.47296058661778184,
+      "width": 0.07628398791540786,
+      "height": 0.08524289642529789,
+      "color": "#ffc107",
+      "context": "Equipment storage. Ensure proper organization and inventory completion."
+    }
+  ],
+  "count": 3
+}

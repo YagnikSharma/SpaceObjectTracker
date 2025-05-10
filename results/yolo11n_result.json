@@ -1,0 +1,64 @@
+{
+  "success": true,
+  "timestamp": "2025-05-10T03:10:33.390484",
+  "model": "yolo11n_simplified",
+  "method": "color_shape_detection",
+  "detections": [
+    {
+      "id": "7272a868-9f1b-41b7-a0ac-87a5fd15baa2",
+      "label": "oxygen tank",
+      "confidence": 0.5207666666666667,
+      "x": 0.22157434402332363,
+      "y": 0.980269989615784,
+      "width": 0.02040816326530612,
+      "height": 0.01973001038421599,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "48e26928-4d2a-4a5b-af18-ed7cb0806d6b",
+      "label": "oxygen tank",
+      "confidence": 0.5228,
+      "x": 0.11078717201166181,
+      "y": 0.4164070612668744,
+      "width": 0.015306122448979591,
+      "height": 0.021806853582554516,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "d2d339b3-fefb-4745-b20f-3704fb456614",
+      "label": "oxygen tank",
+      "confidence": 0.5228,
+      "x": 0.08527696793002916,
+      "y": 0.4164070612668744,
+      "width": 0.015306122448979591,
+      "height": 0.021806853582554516,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "608a33e4-58bc-460e-8986-df60987ac3ce",
+      "label": "oxygen tank",
+      "confidence": 0.7443333333333333,
+      "x": 0.05393586005830904,
+      "y": 0.04880581516095535,
+      "width": 0.04008746355685131,
+      "height": 0.07268951194184839,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "9e2f4f9c-10ae-4023-94f7-5c39186b1b8d",
+      "label": "oxygen tank",
+      "confidence": 0.5214666666666666,
+      "x": 0.16326530612244897,
+      "y": 0.029075804776739357,
+      "width": 0.013848396501457727,
+      "height": 0.02699896157840083,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    }
+  ],
+  "count": 5
+}

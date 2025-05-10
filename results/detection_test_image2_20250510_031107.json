@@ -1,0 +1,42 @@
+{
+  "success": true,
+  "timestamp": "2025-05-10T03:11:07.648001",
+  "model": "yolo11n_simplified",
+  "method": "color_shape_detection",
+  "detections": [
+    {
+      "id": "4bfd240e-71e3-412f-b61b-18d7ed7f6619",
+      "label": "oxygen tank",
+      "confidence": 0.5268333333333334,
+      "x": 0.06964809384164222,
+      "y": 0.9012738853503185,
+      "width": 0.01466275659824047,
+      "height": 0.025477707006369428,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "8a473eff-2e83-414e-bebe-0aabdfdd8930",
+      "label": "oxygen tank",
+      "confidence": 0.5244,
+      "x": 0.07624633431085044,
+      "y": 0.7653927813163482,
+      "width": 0.015395894428152493,
+      "height": 0.022292993630573247,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "19688249-b98a-490c-ae0d-9dd05ebabc21",
+      "label": "oxygen tank",
+      "confidence": 0.9,
+      "x": 0.024193548387096774,
+      "y": 0.014861995753715499,
+      "width": 0.9237536656891495,
+      "height": 0.9851380042462845,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    }
+  ],
+  "count": 3
+}
