@@ -7,7 +7,7 @@ import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
 import yoloService, { detectSpaceStationObjects, getTrainingStatistics } from "./services/yolo-service";
-import { spaceObjectDetector, PRIORITY_CATEGORIES } from "./services/custom-yolo-service";
+import { spaceObjectDetector, PRIORITY_CATEGORIES } from "./services/space-object-detector";
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
@@ -58,7 +58,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const imagePath = path.join(uploadsDir, imageName);
       fs.writeFileSync(imagePath, req.file.buffer);
       
-      // First try our specialized custom YOLO model that focuses on space station components
+      // First try our specialized custom AI model that focuses on space station components
       const customResult = await spaceObjectDetector.detectObjects(imagePath);
       
       // If custom detection finds objects, use those results
@@ -83,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // If custom model didn't find anything, try the general YOLO model
+      // If custom model didn't find anything, try the general AI model
       const detectedObjects = await detectSpaceStationObjects(req.file.buffer, 800, 600);
             
       // Log priority and human detections
@@ -106,7 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Log detection results
-      console.log(`YOLOv8 Detection Results:`);
+      console.log(`AI Detection Results:`);
       console.log(`- Total Objects: ${detectedObjects.length}`);
       console.log(`- Priority Objects: ${priorityObjects.length}`);
       console.log(`- Humans Detected: ${humanObjects.length}`);
@@ -122,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageUrl: `/uploads/${imageName}`,
         detectedObjects,
         detectionId: detection.id,
-        source: "yolo",
+        source: "ai-model",
         stats: {
           priorityObjectsDetected: priorityObjects.length,
           humansDetected: humanObjects.length,
@@ -137,10 +137,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // YOLOv8 training statistics endpoint
+  // Model training statistics endpoint
   app.get("/api/training-stats", async (req: Request, res: Response) => {
     try {
-      // Get training statistics from both YOLO services
+      // Get training statistics from both AI services
       const generalStats = getTrainingStatistics();
       const customStats = spaceObjectDetector.getModelStats();
       
@@ -152,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         modelInfo: {
           generalModel: {
-            name: "YOLOv8 General",
+            name: "Space Object Detection AI",
             priorityObjects: yoloService.PRIORITY_OBJECTS,
             colorMapping: {
               humans: "#4caf50", // green
@@ -375,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload trained YOLO model endpoint
+  // Upload trained AI model endpoint
   app.post("/api/upload-model", upload.single("model"), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
