@@ -68,7 +68,7 @@ export async function detectWithYolo11n(
   }
   
   // Path to Python detector script
-  const scriptPath = 'yolo11n_detector.py';
+  const scriptPath = path.join('server', 'python', 'yolo11n_detector.py');
   
   if (!fs.existsSync(scriptPath)) {
     console.error(`Python detector script not found: ${scriptPath}`);
