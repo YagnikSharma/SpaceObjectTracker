@@ -44,7 +44,7 @@ export function ResultsDisplay({
     // Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw the bounding boxes
+    // Draw the bounding boxes with precise labels
     detectedObjects.forEach(obj => {
       const { x, y, width, height } = obj;
       const color = obj.color || OBJECT_COLORS[obj.label.toLowerCase()] || OBJECT_COLORS.default;
@@ -55,36 +55,62 @@ export function ResultsDisplay({
       const boxWidth = width * image.width;
       const boxHeight = height * image.height;
       
-      // Draw rectangle
-      ctx.strokeStyle = color;
+      // Draw rectangle with more pronounced border
       ctx.lineWidth = 3;
+      ctx.strokeStyle = color;
+      ctx.setLineDash([]);
       ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+      
+      // Add subtle highlight effect
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(boxX - 2, boxY - 2, boxWidth + 4, boxHeight + 4);
+      ctx.setLineDash([]);
       
       // Draw background for text
       if (showAllLabels || selectedObject?.id === obj.id) {
-        ctx.fillStyle = color + 'CC'; // Add some transparency to the color
-        const textMetrics = ctx.measureText(obj.label);
-        const padding = 5;
+        const displayText = obj.label;
+        const confidenceText = `${Math.round(obj.confidence * 100)}%`;
+        
+        // Measure text width for background
+        ctx.font = 'bold 14px Arial';
+        const labelWidth = ctx.measureText(displayText).width;
+        ctx.font = '10px Arial';
+        const confidenceWidth = ctx.measureText(confidenceText).width;
+        const totalTextWidth = Math.max(labelWidth, confidenceWidth) + 16;
         
         // Draw the text background with rounded corners
+        const padding = 5;
+        const textX = boxX;
+        const textY = Math.max(boxY - 40, 10); // Ensure label is visible even if box is at top edge
+        const textHeight = 35;
+        
+        // Create background for label
+        ctx.fillStyle = color + 'E6'; // More opaque color
         ctx.beginPath();
         ctx.roundRect(
-          boxX - 1, 
-          boxY - 25, 
-          textMetrics.width + 14, 
-          25, 
+          textX - 1, 
+          textY, 
+          totalTextWidth, 
+          textHeight, 
           [5]
         );
         ctx.fill();
         
+        // Add subtle border around label background
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
         // Draw text
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 14px Arial';
-        ctx.fillText(obj.label, boxX + padding, boxY - 10);
+        ctx.fillText(displayText, textX + padding, textY + 15);
         
-        // Draw confidence
-        ctx.font = '10px Arial';
-        ctx.fillText(`${Math.round(obj.confidence * 100)}%`, boxX + padding + textMetrics.width - 20, boxY - 10);
+        // Draw confidence with smaller font
+        ctx.font = '11px Arial';
+        ctx.fillText(confidenceText, textX + padding, textY + 30);
       }
     });
   }, [imageUrl, detectedObjects, isLoading, selectedObject, showAllLabels]);
