@@ -8,8 +8,8 @@ packages = ["ffmpeg", "freetype", "lcms2", "libGL", "libGLU", "libimagequant", "
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["npm", "run", "build"]
-run = ["npm", "run", "start"]
+build = ["sh", "-c", "pip install -e ."]
+run = ["sh", "-c", "python -m server.index"]
 
 [workflows]
 runButton = "Project"
