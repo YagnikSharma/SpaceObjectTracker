@@ -22,8 +22,8 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-# Priority categories for space station monitoring
-PRIORITY_CATEGORIES = ['toolbox', 'fire extinguisher', 'oxygen tank', 'astronaut', 'person']
+# Priority categories for space station monitoring (limited to only these three)
+PRIORITY_CATEGORIES = ['toolbox', 'fire extinguisher', 'oxygen tank']
 
 # Color mapping for detections
 OBJECT_COLORS = {

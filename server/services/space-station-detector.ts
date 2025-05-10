@@ -96,8 +96,10 @@ export class SpaceStationDetector {
         messages: [
           {
             role: 'system',
-            content: `You are a space station object detection system. Identify objects in the image, focusing on: 
-            toolboxes, fire extinguishers, oxygen tanks, and astronauts. 
+            content: `You are a space station object detection system. Identify ONLY these three specific objects in the image: 
+            - toolboxes
+            - fire extinguishers
+            - oxygen tanks
             
             Output a JSON array of objects with the key 'objects'. For each object include:
             - label (string)
@@ -112,7 +114,7 @@ export class SpaceStationDetector {
             content: [
               {
                 type: 'text',
-                text: 'Identify space station objects in this image. Focus on safety equipment, tools, and people.'
+                text: 'Identify only toolboxes, fire extinguishers, and oxygen tanks in this image.'
               },
               {
                 type: 'image_url',
@@ -208,7 +210,7 @@ export class SpaceStationDetector {
     'default': '#ff9800'             // Orange
   };
   
-  private PRIORITY_CATEGORIES = ['toolbox', 'fire extinguisher', 'oxygen tank', 'astronaut', 'person'];
+  private PRIORITY_CATEGORIES = ['toolbox', 'fire extinguisher', 'oxygen tank'];
   
   /**
    * Upload and import a custom YOLOv8 model
@@ -234,7 +236,7 @@ export class SpaceStationDetector {
 export const spaceStationDetector = new SpaceStationDetector();
 
 // Export priority categories directly
-export const PRIORITY_CATEGORIES = ['toolbox', 'fire extinguisher', 'oxygen tank', 'astronaut', 'person'];
+export const PRIORITY_CATEGORIES = ['toolbox', 'fire extinguisher', 'oxygen tank'];
 export const OBJECT_COLORS = {
   'fire extinguisher': '#f44336',  // Red
   'oxygen tank': '#2196f3',        // Blue

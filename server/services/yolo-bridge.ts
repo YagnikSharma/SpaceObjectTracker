@@ -18,8 +18,8 @@ export const OBJECT_COLORS = {
   'default': '#ff9800'            // Orange
 };
 
-// Priority categories for space station monitoring
-export const PRIORITY_CATEGORIES = ['toolbox', 'fire extinguisher', 'oxygen tank', 'astronaut', 'person'];
+// Priority categories for space station monitoring - Limit to only these three objects
+export const PRIORITY_CATEGORIES = ['toolbox', 'fire extinguisher', 'oxygen tank'];
 
 /**
  * YOLO Bridge Service
@@ -32,8 +32,7 @@ export class YoloBridge {
   private trainingData: Record<string, { count: number, samples: any[] }> = {
     'toolbox': { count: 0, samples: [] },
     'fire extinguisher': { count: 0, samples: [] },
-    'oxygen tank': { count: 0, samples: [] },
-    'astronaut': { count: 0, samples: [] }
+    'oxygen tank': { count: 0, samples: [] }
   };
 
   constructor() {
@@ -58,6 +57,19 @@ export class YoloBridge {
   }
   
   /**
+   * Reset training data and counters
+   */
+  public resetTrainingData(): void {
+    // Reset training data to initial state
+    this.trainingData = {
+      'toolbox': { count: 0, samples: [] },
+      'fire extinguisher': { count: 0, samples: [] },
+      'oxygen tank': { count: 0, samples: [] }
+    };
+    console.log('Training data has been reset');
+  }
+
+  /**
    * Detect objects in an image using YOLOv8
    */
   public async detectObjects(imagePath: string): Promise<{ 
@@ -66,6 +78,8 @@ export class YoloBridge {
     count: number;
     error?: string;
   }> {
+    // Reset training data before each detection to ensure fresh start
+    this.resetTrainingData();
     try {
       console.log(`Detecting objects in image: ${imagePath}`);
       
