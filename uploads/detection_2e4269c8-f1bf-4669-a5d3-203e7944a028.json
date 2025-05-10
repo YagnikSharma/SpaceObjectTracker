@@ -1,0 +1,141 @@
+{
+  "success": true,
+  "timestamp": "2025-05-10T03:16:44.080894",
+  "model": "yolo11n_simplified",
+  "method": "color_shape_detection",
+  "detections": [
+    {
+      "id": "16bde968-99b1-42eb-94a2-064114d40075",
+      "label": "oxygen tank",
+      "confidence": 0.5209666666666667,
+      "x": 0.29322916666666665,
+      "y": 0.6953703703703704,
+      "width": 0.013020833333333334,
+      "height": 0.04259259259259259,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "94ae4306-cb7c-4610-9bc7-c43ab974e9f7",
+      "label": "oxygen tank",
+      "confidence": 0.5986666666666667,
+      "x": 0.3484375,
+      "y": 0.028703703703703703,
+      "width": 0.0515625,
+      "height": 0.10833333333333334,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "f2dbb8c5-a254-4fdd-9a2f-c1555c00237b",
+      "label": "oxygen tank",
+      "confidence": 0.9,
+      "x": 0.2833333333333333,
+      "y": 0.026851851851851852,
+      "width": 0.06145833333333333,
+      "height": 0.10648148148148148,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "5915ab0d-4741-45dd-8877-785a4c20def3",
+      "label": "oxygen tank",
+      "confidence": 0.9,
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.3375,
+      "height": 0.8935185185185185,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    },
+    {
+      "id": "c2ca2488-63f3-45ba-a384-a4567b1eda27",
+      "label": "toolbox",
+      "confidence": 0.8147916666666667,
+      "x": 0.4088541666666667,
+      "y": 0.44537037037037036,
+      "width": 0.04479166666666667,
+      "height": 0.08796296296296297,
+      "color": "#ffc107",
+      "context": "Equipment storage. Ensure proper organization and inventory completion."
+    },
+    {
+      "id": "6aa26e96-f768-421e-9217-5e37ad2bfea6",
+      "label": "toolbox",
+      "confidence": 0.92,
+      "x": 0.503125,
+      "y": 0.33240740740740743,
+      "width": 0.1078125,
+      "height": 0.1388888888888889,
+      "color": "#ffc107",
+      "context": "Equipment storage. Ensure proper organization and inventory completion."
+    },
+    {
+      "id": "d557a9fd-b8cd-4fe3-9b78-ba721ce3cea3",
+      "label": "toolbox",
+      "confidence": 0.7030000000000001,
+      "x": 0.40625,
+      "y": 0.32037037037037036,
+      "width": 0.03125,
+      "height": 0.062037037037037036,
+      "color": "#ffc107",
+      "context": "Equipment storage. Ensure proper organization and inventory completion."
+    },
+    {
+      "id": "fb16015b-d364-4fa2-ac36-2370377c7d79",
+      "label": "toolbox",
+      "confidence": 0.92,
+      "x": 0.6625,
+      "y": 0.29444444444444445,
+      "width": 0.05260416666666667,
+      "height": 0.08703703703703704,
+      "color": "#ffc107",
+      "context": "Equipment storage. Ensure proper organization and inventory completion."
+    },
+    {
+      "id": "11603a09-834d-4ef2-8563-46797175d138",
+      "label": "toolbox",
+      "confidence": 0.92,
+      "x": 0.40260416666666665,
+      "y": 0.28888888888888886,
+      "width": 0.10208333333333333,
+      "height": 0.20185185185185187,
+      "color": "#ffc107",
+      "context": "Equipment storage. Ensure proper organization and inventory completion."
+    },
+    {
+      "id": "f78e15f1-0f32-4474-be54-77eaaa58836b",
+      "label": "toolbox",
+      "confidence": 0.5965416666666666,
+      "x": 0.5067708333333333,
+      "y": 0.2564814814814815,
+      "width": 0.06458333333333334,
+      "height": 0.04351851851851852,
+      "color": "#ffc107",
+      "context": "Equipment storage. Ensure proper organization and inventory completion."
+    },
+    {
+      "id": "c458c697-f04c-4c2f-bb3f-2d4c67eaeba7",
+      "label": "toolbox",
+      "confidence": 0.92,
+      "x": 0.58125,
+      "y": 0.20925925925925926,
+      "width": 0.11666666666666667,
+      "height": 0.1962962962962963,
+      "color": "#ffc107",
+      "context": "Equipment storage. Ensure proper organization and inventory completion."
+    },
+    {
+      "id": "870515d6-115f-4d31-bea4-ac9076b84263",
+      "label": "toolbox",
+      "confidence": 0.7752916666666667,
+      "x": 0.6317708333333333,
+      "y": 0.19074074074074074,
+      "width": 0.04635416666666667,
+      "height": 0.05555555555555555,
+      "color": "#ffc107",
+      "context": "Equipment storage. Ensure proper organization and inventory completion."
+    }
+  ],
+  "count": 12
+}
