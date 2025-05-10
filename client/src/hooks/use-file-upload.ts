@@ -32,8 +32,8 @@ export function useFileUpload() {
     setUploadError(null);
 
     try {
-      // Always use YOLOv8 as the model
-      const response = await uploadImageToFalcon(selectedFile, "yolov8");
+      // Use YOLOv8 detection (default on server)
+      const response = await uploadImageToFalcon(selectedFile);
       
       setImageUrl(response.imageUrl);
       
