@@ -148,7 +148,7 @@ export default function ModelManagement() {
           >
             <h2 className="text-2xl font-bold dark:text-white text-blue-700 mb-2">AI Model Management</h2>
             <p className="dark:text-blue-300/70 text-blue-700/80">
-              Upload your custom trained YOLOv8 model for space object detection
+              Upload your custom trained AI model for space object detection
             </p>
           </motion.div>
         </div>
@@ -241,7 +241,7 @@ export default function ModelManagement() {
 
                 <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-sm">
                   <p className="text-blue-800 dark:text-blue-200">
-                    <strong>Instructions:</strong> Upload your trained YOLOv8 model file (.pt format) to integrate it with the Syndetect system. Ensure your model is trained to detect toolbox, fire extinguisher, and oxygen tank objects.
+                    <strong>Instructions:</strong> Upload your trained AI model file (.pt format) to integrate it with the Syndetect system. Ensure your model is trained to detect toolbox, fire extinguisher, and oxygen tank objects.
                   </p>
                 </div>
               </div>

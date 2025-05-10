@@ -146,7 +146,7 @@ export default function ImageGenerator() {
           Falcon Synthetic Image Generator
         </h1>
         <p className="text-gray-400">
-          Generate synthetic images of space station components for YOLO training and detection
+          Generate synthetic images of space station components for AI training and detection
         </p>
       </div>
 
@@ -216,7 +216,7 @@ export default function ImageGenerator() {
             <div className="space-y-3 text-sm text-gray-400">
               <p>
                 Falcon AI generates photorealistic synthetic images of space station components
-                for training YOLO object detection models.
+                for training AI object detection models.
               </p>
               <p>
                 These images simulate various lighting conditions, angles, and positions to
@@ -225,7 +225,7 @@ export default function ImageGenerator() {
               <p>
                 <span className="text-blue-400 font-medium">Use cases:</span>
                 <ul className="list-disc pl-5 mt-1 space-y-1">
-                  <li>Training custom YOLO models</li>
+                  <li>Training custom AI models</li>
                   <li>Testing object detection accuracy</li>
                   <li>Augmenting existing datasets</li>
                   <li>Simulating rare component conditions</li>

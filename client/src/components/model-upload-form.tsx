@@ -84,7 +84,7 @@ export function ModelUploadForm() {
       <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
         <CardTitle className="text-xl">Upload Trained Model</CardTitle>
         <CardDescription className="text-blue-100">
-          Upload your YOLOv8 model trained for space object detection
+          Upload your AI model trained for space object detection
         </CardDescription>
       </CardHeader>
       
