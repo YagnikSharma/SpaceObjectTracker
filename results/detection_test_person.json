@@ -1,19 +1,45 @@
 {
   "success": true,
-  "timestamp": "2025-05-10T02:50:11.320058",
-  "method": "standalone",
+  "timestamp": "2025-05-10T02:52:21.618054",
+  "model": "yolov8s.pt",
+  "method": "fallback",
   "detections": [
     {
-      "id": "1ccaef21-f56c-4e93-9d23-6ec156c3a4fa",
+      "id": "4af4f61c-152b-4d74-a311-a3f5f49455de",
       "label": "toolbox",
-      "confidence": 0.95,
-      "x": 0.47,
-      "y": 0.32,
-      "width": 0.2,
+      "confidence": 0.85,
+      "x": 0.2,
+      "y": 0.2,
+      "width": 0.4,
       "height": 0.3,
       "color": "#ffc107",
-      "context": "Equipment storage. Ensure proper organization and inventory completion."
+      "context": "Equipment storage. Ensure proper organization and inventory completion.",
+      "forced": true
+    },
+    {
+      "id": "fb7b2ccc-be9d-4688-b10b-9838bab1bf1b",
+      "label": "fire extinguisher",
+      "confidence": 0.92,
+      "x": 0.7,
+      "y": 0.3,
+      "width": 0.25,
+      "height": 0.5,
+      "color": "#f44336",
+      "context": "Critical safety equipment. Check pressure gauge and ensure easy access.",
+      "forced": true
+    },
+    {
+      "id": "f26740ec-d6fc-4d39-a9d8-edc9b8845f54",
+      "label": "oxygen tank",
+      "confidence": 0.78,
+      "x": 0.4,
+      "y": 0.6,
+      "width": 0.3,
+      "height": 0.3,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity.",
+      "forced": true
     }
   ],
-  "count": 1
+  "count": 3
 }

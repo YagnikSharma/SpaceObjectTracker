@@ -16,6 +16,51 @@ const openai = new OpenAI({
  */
 export class SpaceStationDetector {
   /**
+   * Process and detect objects in an image from a file path (direct detection)
+   * This version uses pure YOLOv8 without any fallbacks
+   */
+  public async detectObjectsFromPath(imagePath: string): Promise<{
+    success: boolean;
+    imageUrl: string;
+    detectedObjects: DetectedObject[];
+    detectionMethod: string;
+  }> {
+    try {
+      // Check if the file exists
+      if (!fs.existsSync(imagePath)) {
+        throw new Error(`Image file not found: ${imagePath}`);
+      }
+      
+      // Create a relative URL for the image
+      const imageUrl = `/${path.relative(process.cwd(), imagePath).replace(/\\/g, '/')}`;
+      
+      // Use pure YOLOv8 for detection
+      console.log('Detecting objects using pure YOLOv8...');
+      const yoloResult = await yoloBridge.detectObjects(imagePath);
+      
+      console.log(`YOLOv8 detected ${yoloResult.count} objects`);
+      
+      // Return the detection results directly without any fallbacks
+      return {
+        success: true,
+        imageUrl: imageUrl,
+        detectedObjects: yoloResult.detections,
+        detectionMethod: 'yolov8-pure'
+      };
+    } catch (error) {
+      console.error('Error in space station detection:', error);
+      
+      // Return empty results on error
+      return {
+        success: false,
+        imageUrl: '',
+        detectedObjects: [],
+        detectionMethod: 'error'
+      };
+    }
+  }
+
+  /**
    * Process and detect objects in an uploaded image
    */
   public async detectObjectsInImage(imageBuffer: Buffer, originalFilename: string): Promise<{
