@@ -1,75 +1,62 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express from "express";
+import session from "express-session";
+import cors from "cors";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
+import * as vite from "./vite";
+import * as fs from "fs";
 
+// Create Express server
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
-// Serve uploaded files
+// Enable CORS for development
+app.use(cors());
+
+// Configure session
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "syndetect-secret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: process.env.NODE_ENV === "production" },
+  })
+);
+
+// Parse incoming JSON payloads
+app.use(express.json());
+
+// Create uploads directory if it doesn't exist
 const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Serve static files from the uploads directory
 app.use('/uploads', express.static(uploadsDir));
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
-    }
-  });
-
-  next();
-});
-
-(async () => {
-  const server = await registerRoutes(app);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
+// Register API routes
+registerRoutes(app).then(server => {
+  // Start Vite dev server in development mode
+  if (process.env.NODE_ENV === "development") {
+    vite.setupVite(app, server).then(() => {
+      // Start the server
+      const PORT = process.env.PORT || 5000;
+      server.listen(PORT, () => {
+        vite.log(`serving on port ${PORT}`);
+      });
+    }).catch(err => {
+      console.error("Error setting up Vite:", err);
+      process.exit(1);
+    });
   } else {
-    serveStatic(app);
+    vite.serveStatic(app);
+    // Start the server
+    const PORT = process.env.PORT || 5000;
+    server.listen(PORT, () => {
+      vite.log(`serving on port ${PORT}`);
+    });
   }
-
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
-})();
+}).catch(err => {
+  console.error("Error registering routes:", err);
+  process.exit(1);
+});

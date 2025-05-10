@@ -1,8 +1,7 @@
 import { useState, useCallback } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { useToast } from "./use-toast";
 import { uploadImageToFalcon, OBJECT_COLORS } from "@/lib/falcon-api";
-import { DetectedObject } from "@/components/ui/results-display";
+import { DetectedObject } from "@shared/schema";
 
 export function useFileUpload() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -37,15 +36,8 @@ export function useFileUpload() {
       
       setImageUrl(response.imageUrl);
       
-      // Process detected objects and assign colors
-      const processedObjects = response.detectedObjects.map(obj => {
-        const color = OBJECT_COLORS[obj.label.toLowerCase()] || OBJECT_COLORS.default;
-        return {
-          ...obj,
-          id: uuidv4(),
-          color
-        };
-      });
+      // The objects already have their IDs and contexts from the backend
+      const processedObjects = response.detectedObjects;
       
       setDetectedObjects(processedObjects);
       setIsProcessed(true);
@@ -60,7 +52,7 @@ export function useFileUpload() {
       
       toast({
         title: "Processing Error",
-        description: "Failed to process the image with Falcon API",
+        description: "Failed to process the image with TensorFlow",
         variant: "destructive",
       });
     } finally {
