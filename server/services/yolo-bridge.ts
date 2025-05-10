@@ -38,7 +38,7 @@ export class YoloBridge {
   constructor() {
     // Set paths
     this.modelPath = path.join(process.cwd(), 'models', 'yolov8s.pt');
-    this.pythonScript = path.join(process.cwd(), 'server', 'python', 'yolo_detector.py');
+    this.pythonScript = path.join(process.cwd(), 'server', 'python', 'yolo_detector_pure.py');
     
     // Check if model exists
     if (fs.existsSync(this.modelPath)) {
