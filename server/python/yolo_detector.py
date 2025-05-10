@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-YOLOv8 Space Station Object Detector (Pure YOLO Implementation)
+Space Station Object Detector
 
-This script processes images using YOLOv8 to detect only specific objects:
+This script processes images to detect only specific objects:
 - Fire extinguisher (red labels)
 - Oxygen tank (blue labels)
 - Toolbox (yellow labels)
@@ -20,6 +20,7 @@ import numpy as np
 import os
 import sys
 import uuid
+import cv2
 from datetime import datetime
 from pathlib import Path
 
@@ -32,29 +33,6 @@ OBJECT_COLORS = {
     'oxygen tank': '#2196f3',        # Blue
     'toolbox': '#ffc107',            # Yellow
     'default': '#9c27b0'             # Purple (fallback)
-}
-
-# YOLOv8 COCO class index to our space station categories mapping
-YOLO_CLASS_MAPPING = {
-    # Container-like objects to toolbox
-    24: 'toolbox',  # backpack
-    26: 'toolbox',  # handbag
-    28: 'toolbox',  # suitcase
-    33: 'toolbox',  # books
-    73: 'toolbox',  # laptop
-    
-    # Cylinder-like objects to fire extinguisher
-    39: 'fire extinguisher',  # bottle
-    41: 'fire extinguisher',  # wine glass
-    44: 'fire extinguisher',  # bottle
-    76: 'fire extinguisher',  # keyboard
-    
-    # Round/spherical objects to oxygen tank
-    32: 'oxygen tank',  # sports ball
-    45: 'oxygen tank',  # bowl
-    
-    # Default fallback mapping (as a last resort)
-    0: 'oxygen tank'   # default to oxygen tank if no mapping found
 }
 
 def generate_id():
