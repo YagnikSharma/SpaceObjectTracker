@@ -17,6 +17,18 @@ interface TrainingImage {
   }[];
 }
 
+interface Detection {
+  id: string;
+  label: string;
+  confidence: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  context: string;
+}
+
 export class CustomYOLOService {
   private datasetPath: string;
   private modelPath: string;
@@ -56,6 +68,12 @@ export class CustomYOLOService {
     
     // Load any existing training images
     this.loadTrainingImages();
+    
+    // Check if model exists and set flag
+    if (fs.existsSync(this.modelPath)) {
+      log('Found pre-trained YOLOv8 model at ' + this.modelPath, 'yolo');
+      this.isModelLoaded = true;
+    }
     
     log('CustomYOLOService initialized', 'yolo');
   }
@@ -163,7 +181,7 @@ export class CustomYOLOService {
       
       log(`Added new training image: ${filename} with ${labels.length} labels`, 'yolo');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       log(`Error adding training image: ${error.message}`, 'yolo');
       return false;
     }
@@ -242,10 +260,10 @@ names:
     classes?: string[]
   }) {
     try {
-      log('Importing pre-trained model...', 'yolo');
+      log('Importing pre-trained YOLOv8 model...', 'yolo');
       
       // Save the model to the models directory
-      const modelName = options?.modelName || 'imported-space-components.pt';
+      const modelName = options?.modelName || 'space-components.pt';
       const modelPath = path.join(process.cwd(), 'models', modelName);
       
       // Save the model file
@@ -255,7 +273,9 @@ names:
       this.modelPath = modelPath;
       this.isModelLoaded = true;
       
-      log(`Pre-trained model imported successfully to ${modelPath}`, 'yolo');
+      log(`YOLOv8 model imported successfully to ${modelPath}`, 'yolo');
+      console.log('YOLOv8 model loaded successfully!');
+      
       return { 
         success: true, 
         message: 'Model imported successfully',
@@ -317,7 +337,7 @@ names:
     // we'll simulate a detection
     const filename = path.basename(imagePath).toLowerCase();
     
-    const detections = [];
+    const detections: Detection[] = [];
     PRIORITY_CATEGORIES.forEach(category => {
       if (filename.includes(category.replace(' ', '_')) || 
           filename.includes(category.replace(' ', ''))) {
@@ -347,10 +367,10 @@ names:
   /**
    * Simulate detections for demonstration purposes
    */
-  private simulateDetections(imagePath: string) {
+  private simulateDetections(imagePath: string): Detection[] {
     const filename = path.basename(imagePath).toLowerCase();
     
-    let detections = [];
+    const detections: Detection[] = [];
     
     // If the file contains 'toolbox', add a toolbox detection
     if (filename.includes('toolbox') || Math.random() < 0.3) {
