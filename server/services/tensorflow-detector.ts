@@ -93,11 +93,11 @@ class TensorFlowDetector {
   
   /**
    * Helper method to determine if a detected object looks like an oxygen tank
-   * based on shape characteristics (cylindrical with green top)
+   * based on shape characteristics (any cylinder with white base)
    */
   private async checkForOxygenTankPattern(imagePath: string, predictions: cocossd.DetectedObject[]): Promise<DetectedObject[]> {
     // Objects that might be incorrectly classified but could be oxygen tanks
-    const cylindricalObjects = ['bottle', 'vase', 'cup', 'wine glass'];
+    const cylindricalObjects = ['bottle', 'vase', 'cup', 'wine glass', 'remote', 'cell phone'];
     const additionalObjects: DetectedObject[] = [];
     
     try {
@@ -109,9 +109,11 @@ class TensorFlowDetector {
         // Check if the object is cylindrical and not already mapped to a priority object
         const isCylindrical = cylindricalObjects.includes(className);
         const alreadyMapped = CLASS_MAPPING[className] === 'oxygen tank';
+        const isNotFireExtinguisher = className !== 'fire extinguisher' && 
+                                     !CLASS_MAPPING[className]?.includes('fire extinguisher');
         
-        // If it's cylindrical but not yet mapped as oxygen tank, we'll add it
-        if (isCylindrical && !alreadyMapped && score > 0.5) {
+        // If it's cylindrical but not yet mapped as oxygen tank or fire extinguisher, we'll add it
+        if (isCylindrical && !alreadyMapped && isNotFireExtinguisher && score > 0.45) {
           console.log(`Found potential oxygen tank (${className}) with confidence ${score}`);
           
           additionalObjects.push({
@@ -177,6 +179,52 @@ class TensorFlowDetector {
       return additionalObjects;
     } catch (error) {
       console.error('Error checking for toolbox patterns:', error);
+      return [];
+    }
+  }
+  
+  /**
+   * Helper method to detect fire extinguishers based on shape and characteristics
+   * (any red cylindrical objects)
+   */
+  private async checkForFireExtinguisherPattern(imagePath: string, predictions: cocossd.DetectedObject[]): Promise<DetectedObject[]> {
+    // Objects that might be incorrectly classified but could be fire extinguishers
+    // Focus on cylindrical objects for fire extinguishers
+    const cylindricalObjects = ['bottle', 'vase', 'cup', 'wine glass', 'sports ball', 'hair drier', 'remote'];
+    const additionalObjects: DetectedObject[] = [];
+    
+    try {
+      // Process predictions that might be fire extinguishers but were not detected as such
+      for (const prediction of predictions) {
+        const { class: className, score, bbox } = prediction;
+        const [x, y, width, height] = bbox;
+        
+        // Check if the object is cylindrical and not already mapped
+        const isCylindrical = cylindricalObjects.includes(className);
+        const alreadyMapped = CLASS_MAPPING[className] === 'fire extinguisher';
+        
+        // If it's cylindrical but not yet mapped as fire extinguisher, we'll add it
+        if (isCylindrical && !alreadyMapped && score > 0.45) {
+          console.log(`Found potential fire extinguisher (${className}) with confidence ${score}`);
+          
+          additionalObjects.push({
+            id: uuidv4(),
+            label: 'fire extinguisher',
+            confidence: score * 0.9, // Slightly reduce confidence as it's a pattern match
+            x: x,
+            y: y,
+            width: width,
+            height: height,
+            originalClass: className,
+            color: OBJECT_COLORS['fire extinguisher'],
+            context: OBJECT_CONTEXT['fire extinguisher']
+          });
+        }
+      }
+      
+      return additionalObjects;
+    } catch (error) {
+      console.error('Error checking for fire extinguisher patterns:', error);
       return [];
     }
   }
@@ -248,12 +296,12 @@ class TensorFlowDetector {
       
       // Use pattern recognition to find additional priority objects if none found
       if (detectedObjects.length === 0) {
-        // Try to find oxygen tanks
-        const cylinderObjects = await this.checkForOxygenTankPattern(imagePath, predictions);
+        // First try to detect fire extinguishers (red cylinders)
+        const fireExtinguishers = await this.checkForFireExtinguisherPattern(imagePath, predictions);
         
-        // Add any detected oxygen tanks
-        if (cylinderObjects.length > 0) {
-          for (const obj of cylinderObjects) {
+        if (fireExtinguishers.length > 0) {
+          // Add any detected fire extinguishers
+          for (const obj of fireExtinguishers) {
             detectedObjects.push({
               ...obj,
               // Normalize coordinates
@@ -262,15 +310,15 @@ class TensorFlowDetector {
               width: obj.width / width,
               height: obj.height / height
             });
-            console.log(`Added oxygen tank from pattern detection with confidence ${obj.confidence}`);
+            console.log(`Added fire extinguisher from pattern detection with confidence ${obj.confidence}`);
           }
         } else {
-          // Try to find toolboxes if no oxygen tanks were found
-          const boxObjects = await this.checkForToolboxPattern(imagePath, predictions);
+          // Try to find oxygen tanks if no fire extinguishers were found
+          const cylinderObjects = await this.checkForOxygenTankPattern(imagePath, predictions);
           
-          // Add any detected toolboxes
-          if (boxObjects.length > 0) {
-            for (const obj of boxObjects) {
+          if (cylinderObjects.length > 0) {
+            // Add any detected oxygen tanks
+            for (const obj of cylinderObjects) {
               detectedObjects.push({
                 ...obj,
                 // Normalize coordinates
@@ -279,7 +327,25 @@ class TensorFlowDetector {
                 width: obj.width / width,
                 height: obj.height / height
               });
-              console.log(`Added toolbox from pattern detection with confidence ${obj.confidence}`);
+              console.log(`Added oxygen tank from pattern detection with confidence ${obj.confidence}`);
+            }
+          } else {
+            // Try to find toolboxes if no oxygen tanks were found
+            const boxObjects = await this.checkForToolboxPattern(imagePath, predictions);
+            
+            // Add any detected toolboxes
+            if (boxObjects.length > 0) {
+              for (const obj of boxObjects) {
+                detectedObjects.push({
+                  ...obj,
+                  // Normalize coordinates
+                  x: obj.x / width,
+                  y: obj.y / height,
+                  width: obj.width / width,
+                  height: obj.height / height
+                });
+                console.log(`Added toolbox from pattern detection with confidence ${obj.confidence}`);
+              }
             }
           }
         }
