@@ -150,18 +150,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate synthetic images using Falcon AI
       const imagePaths = await generateSyntheticTrainingImages(category, imageCount);
       
-      // Return image URLs
+      // Map paths to URLs
       const imageUrls = imagePaths.map(p => {
-        // Convert absolute path to relative URL
-        const fileName = path.basename(p);
-        return `/uploads/${fileName}`;
+        const relativePath = p.replace(process.cwd(), '');
+        return `/${relativePath.startsWith('/') ? relativePath.substring(1) : relativePath}`;
       });
       
       res.status(200).json({
         success: true,
         category,
         imageCount,
-        imageUrls
+        imageUrls,
+        message: `Generated ${imageCount} synthetic ${category} images`
       });
     } catch (error) {
       console.error("Error generating synthetic images:", error);
@@ -171,161 +171,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Endpoint for retrieving available categories for Falcon generator
+  // Get synthetic image categories endpoint
   app.get("/api/synthetic-categories", async (req: Request, res: Response) => {
     try {
-      const categories = Object.keys(SPACE_STATION_ELEMENTS);
+      // Return available categories
       res.status(200).json({
-        categories
+        success: true,
+        categories: Object.keys(SPACE_STATION_ELEMENTS),
+        examples: {
+          TOOLS: SPACE_STATION_ELEMENTS.TOOLS.slice(0, 3),
+          GAUGES: SPACE_STATION_ELEMENTS.GAUGES.slice(0, 3),
+          STRUCTURAL: SPACE_STATION_ELEMENTS.STRUCTURAL.slice(0, 3),
+          EMERGENCY: SPACE_STATION_ELEMENTS.EMERGENCY.slice(0, 3)
+        }
       });
     } catch (error) {
-      console.error("Error retrieving categories:", error);
+      console.error("Error retrieving synthetic categories:", error);
       res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to retrieve categories" 
+        error: error instanceof Error ? error.message : "Failed to retrieve synthetic categories" 
       });
     }
   });
   
-  // Export detection result as PDF
+  // Generate PDF report endpoint
   app.get("/api/export-pdf/:detectionId", async (req: Request, res: Response) => {
     try {
-      const detectionId = parseInt(req.params.detectionId);
-      if (isNaN(detectionId)) {
-        return res.status(400).json({ error: "Invalid detection ID" });
-      }
+      const { detectionId } = req.params;
       
-      // Retrieve detection from storage
-      const detection = await storage.getDetection(detectionId);
+      // Check if detectionId is valid
+      const detection = await storage.getDetection(parseInt(detectionId));
       if (!detection) {
         return res.status(404).json({ error: "Detection not found" });
       }
       
-      // Generate PDF file with detection results
-      const pdfFileName = `space_station_detection_${detectionId}.pdf`;
-      const pdfPath = path.join(process.cwd(), 'uploads', pdfFileName);
+      // Create PDF filename
+      const pdfFilename = `space_detection_report_${detectionId}.pdf`;
+      const pdfPath = path.join(process.cwd(), 'uploads', pdfFilename);
       
-      // We'll use streams to avoid loading the full file into memory
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=${pdfFileName}`);
+      // Generate PDF (imported from client-side in a real implementation)
+      // Here we're just creating a simple file for demonstration
+      const content = `SPACE STATION DETECTION REPORT #${detectionId}\n\n` +
+                      `Date: ${new Date().toISOString()}\n` +
+                      `Image: ${detection.imageUrl}\n` +
+                      `Objects Detected: ${detection.objects.length}\n\n` +
+                      `DETECTED OBJECTS:\n` +
+                      detection.objects.map(obj => 
+                        `- ${obj.label} (Confidence: ${(obj.confidence * 100).toFixed(1)}%)\n  ${obj.context || 'No context'}`
+                      ).join('\n\n');
       
-      // Send the PDF data directly to the response
-      // Note: actual PDF generation happens in the frontend with jsPDF
-      res.status(200).json({
-        detectionId,
-        objects: detection.objects,
-        imageUrl: detection.imageUrl
+      fs.writeFileSync(pdfPath, content);
+      
+      // Send file
+      res.download(pdfPath, pdfFilename, (err) => {
+        if (err) {
+          console.error("Error sending PDF:", err);
+        }
+        
+        // Delete file after sending
+        if (fs.existsSync(pdfPath)) {
+          fs.unlinkSync(pdfPath);
+        }
       });
     } catch (error) {
-      console.error("Error exporting PDF:", error);
+      console.error("Error generating PDF:", error);
       res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to export PDF" 
+        error: error instanceof Error ? error.message : "Failed to generate PDF" 
       });
     }
   });
   
-  // Mission control endpoint to get detection history
+  // Mission control history endpoint
   app.get("/api/mission-control/history", async (req: Request, res: Response) => {
     try {
-      // Get optional limit parameter
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      // Get detection history from storage
+      const detections = await storage.listDetections(10);
       
-      // Retrieve detection history from database
-      const detections = await storage.listDetections(limit);
-      
-      // Transform data for front-end consumption
-      const formattedData = detections.map(detection => {
-        const objects = detection.objects as DetectedObject[];
-        
-        // Get summary statistics
-        const totalObjects = objects.length;
-        
-        // Calculate counts by category
-        const categoryCounts: Record<string, number> = {};
-        objects.forEach(obj => {
-          const category = obj.context || "Uncategorized";
-          categoryCounts[category] = (categoryCounts[category] || 0) + 1;
-        });
-        
-        // Calculate average confidence
-        const averageConfidence = objects.length > 0
-          ? objects.reduce((sum, obj) => sum + obj.confidence, 0) / objects.length
-          : 0;
-        
-        // Find critical issues
-        const issues = objects
-          .filter(obj => obj.issue)
-          .map(obj => ({
-            component: obj.label,
-            issue: obj.issue,
-            confidence: obj.confidence
-          }));
-        
-        return {
-          id: detection.id,
-          timestamp: detection.createdAt,
-          imageUrl: detection.imageUrl,
-          totalObjects,
-          categories: categoryCounts,
-          averageConfidence,
-          issues,
-          highestConfidenceObject: objects.length > 0 
-            ? objects.reduce((prev, current) => 
-                current.confidence > prev.confidence ? current : prev, objects[0])
-            : null
-        };
-      });
+      // Format response
+      const history = detections.map(detection => ({
+        id: detection.id,
+        timestamp: detection.createdAt,
+        imageUrl: detection.imageUrl,
+        objectCount: detection.objects.length,
+        priorityObjects: detection.objects.filter(obj => 
+          PRIORITY_CATEGORIES.some(category => 
+            obj.label.toLowerCase().includes(category.toLowerCase())
+          )
+        ).length
+      }));
       
       res.status(200).json({
         success: true,
-        count: formattedData.length,
-        detections: formattedData
+        history
       });
     } catch (error) {
-      console.error("Error fetching detection history:", error);
+      console.error("Error retrieving history:", error);
       res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to fetch detection history" 
+        error: error instanceof Error ? error.message : "Failed to retrieve history" 
       });
     }
   });
   
-  // Get specific detection details for mission control
+  // Mission control detection details endpoint
   app.get("/api/mission-control/detection/:id", async (req: Request, res: Response) => {
     try {
-      const detectionId = parseInt(req.params.id);
-      if (isNaN(detectionId)) {
-        return res.status(400).json({ error: "Invalid detection ID" });
-      }
+      const { id } = req.params;
       
-      // Retrieve detection from storage
-      const detection = await storage.getDetection(detectionId);
+      // Get detection from storage
+      const detection = await storage.getDetection(parseInt(id));
       if (!detection) {
         return res.status(404).json({ error: "Detection not found" });
       }
       
       // Get chat messages for this detection
-      const chatMessages = await storage.getChatMessagesByDetection(detectionId);
-      
-      // Transform data for front-end consumption
-      const formattedData = {
-        id: detection.id,
-        timestamp: detection.createdAt,
-        imageUrl: detection.imageUrl,
-        objects: detection.objects,
-        chatHistory: chatMessages
-      };
+      const chatMessages = await storage.getChatMessagesByDetection(detection.id);
       
       res.status(200).json({
         success: true,
-        detection: formattedData
+        detection,
+        chatMessages
       });
     } catch (error) {
-      console.error("Error fetching detection details:", error);
+      console.error("Error retrieving detection details:", error);
       res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to fetch detection details" 
+        error: error instanceof Error ? error.message : "Failed to retrieve detection details" 
       });
     }
   });
-
+  
   // Upload custom YOLOv8 model endpoint
   app.post("/api/upload-model", upload.single("model"), async (req: Request, res: Response) => {
     try {
@@ -339,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const originalFilename = req.file.originalname || 'custom_model.pt';
       const modelName = path.basename(originalFilename);
       
-      // Import model using the space station detector
+      // Import model
       const success = spaceStationDetector.importModel(req.file.buffer, modelName);
       
       if (!success) {
@@ -359,100 +331,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Chat completion endpoint
+  // AI Chat endpoint
   app.post("/api/chat", async (req: Request, res: Response) => {
     try {
-      const validatedData = chatCompletionRequestSchema.parse(req.body);
+      // Validate request
+      const { message, detectionId } = chatCompletionRequestSchema.parse(req.body);
       
-      // Initialize OpenAI client
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      
-      // Extract component information from message or detected objects
-      let componentName = "";
-      let detectedIssue = "";
-      
-      // Extract space station component name from user message
-      const message = validatedData.message.toLowerCase();
-      
-      // Try to find component mentioned in the message
-      if (message.includes("oxygen")) componentName = "oxygen level gauge";
-      else if (message.includes("pressure")) componentName = "pressure gauge";
-      else if (message.includes("temperature")) componentName = "temperature gauge";
-      else if (message.includes("airlock")) componentName = "airlock";
-      else if (message.includes("hatch")) componentName = "hatch seal";
-      else if (message.includes("filter") || message.includes("air quality")) componentName = "air filtration unit";
-      else if (message.includes("wrench")) componentName = "torque wrench";
-      else if (message.includes("drill")) componentName = "power drill";
-      
-      // Try to identify issue in message
-      if (message.includes("leak")) detectedIssue = "air leakage detected";
-      else if (message.includes("malfunction")) detectedIssue = "control panel malfunction";
-      else if (message.includes("error")) detectedIssue = "calibration error";
-      else if (message.includes("reading") && message.includes("fluctuat")) detectedIssue = "fluctuating readings";
-      else if (message.includes("crack")) detectedIssue = "gauge glass cracked";
-      
-      // If no component explicitly mentioned, try to extract from detected objects
-      if (!componentName && validatedData.detectedObjects && validatedData.detectedObjects.length > 0) {
-        // Find the object with highest confidence
-        const highestConfidenceObj = validatedData.detectedObjects.reduce(
-          (prev, current) => (current.confidence > prev.confidence ? current : prev),
-          validatedData.detectedObjects[0]
-        );
-        
-        componentName = highestConfidenceObj.label;
-        
-        // Use detected issue if available
-        if (highestConfidenceObj.issue) {
-          detectedIssue = highestConfidenceObj.issue;
-        }
+      // Get detection from storage
+      const detection = await storage.getDetection(detectionId);
+      if (!detection) {
+        return res.status(404).json({ error: "Detection not found" });
       }
       
-      // Generate component analysis using Falcon AI
-      const analysis = await generateComponentAnalysis(
-        componentName,
-        detectedIssue,
-        validatedData.detectedObjects
-      );
+      // Create a contextual prompt based on the detection
+      let contextPrompt = `You are FALCON, an AI assistant for space station operations. `;
+      contextPrompt += `The user is looking at an image with ${detection.objects.length} objects detected: `;
       
-      // Generate a unique ID for the response
-      const responseId = `chatcmpl-${randomUUID()}`;
+      // Add detected objects to context
+      detection.objects.forEach(obj => {
+        contextPrompt += `${obj.label} (confidence: ${(obj.confidence * 100).toFixed(1)}%), `;
+      });
       
-      // Check if a detectionId was provided to save the chat message
-      if (req.body.detectionId) {
-        try {
-          const detectionId = parseInt(req.body.detectionId);
-          
-          // Save user message
-          await storage.createChatMessage({
-            detectionId,
-            role: 'user',
-            content: validatedData.message
-          });
-          
-          // Save assistant message
-          await storage.createChatMessage({
-            detectionId,
-            role: 'assistant',
-            content: analysis
-          });
-        } catch (dbError) {
-          console.error("Error saving chat message:", dbError);
-          // Continue execution even if saving fails
-        }
-      }
+      contextPrompt += `\n\nUser question: ${message}`;
+      
+      // Use OpenAI for chat response
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+      });
+      
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+        messages: [
+          {
+            role: "system",
+            content: `You are FALCON, an AI assistant for space station operations.
+            You provide concise, helpful information about space station components, safety procedures, and maintenance tasks.
+            Base your answers on the objects detected in the image and space station operational knowledge.
+            Keep responses under 3 paragraphs, focused on technical solutions.`
+          },
+          {
+            role: "user",
+            content: contextPrompt
+          }
+        ],
+        max_tokens: 500
+      });
+      
+      // Get AI response
+      const aiMessage = response.choices[0].message.content || "I'm unable to provide an answer at this time.";
+      
+      // Store the chat message
+      const chatMessage = await storage.createChatMessage({
+        detectionId,
+        message,
+        response: aiMessage
+      });
       
       res.status(200).json({
-        id: responseId,
-        content: analysis,
+        success: true,
+        messageId: chatMessage.id,
+        question: message,
+        response: aiMessage
       });
     } catch (error) {
-      console.error("Error generating chat completion:", error);
+      console.error("Error processing chat:", error);
       res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to generate chat completion" 
+        error: error instanceof Error ? error.message : "Failed to process chat" 
       });
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  const server = createServer(app);
+  return server;
 }
