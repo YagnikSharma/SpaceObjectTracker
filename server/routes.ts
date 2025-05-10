@@ -36,6 +36,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ status: "error", message: "API is not available" });
     }
   });
+  
+  // Simple detection endpoint (GET method) for testing the pure YOLOv8 detector
+  app.get("/api/detect", async (req: Request, res: Response) => {
+    try {
+      const imagePath = req.query.imagePath as string;
+      
+      if (!imagePath) {
+        return res.status(400).json({ error: "No image path provided" });
+      }
+      
+      if (!fs.existsSync(imagePath)) {
+        return res.status(404).json({ error: "Image file not found" });
+      }
+      
+      console.log(`Processing image at path: ${imagePath}`);
+      
+      // Detect objects using our comprehensive detector
+      const result = await spaceStationDetector.detectObjectsFromPath(imagePath);
+      
+      res.status(200).json({
+        success: true,
+        detections: result.detectedObjects,
+        detectionMethod: result.detectionMethod,
+        count: result.detectedObjects.length
+      });
+    } catch (error) {
+      console.error("Error processing image:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to process image" 
+      });
+    }
+  });
 
   // Space object detection endpoint with YOLOv8 model
   app.post("/api/detect", upload.single("image"), async (req: Request, res: Response) => {
