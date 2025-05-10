@@ -11,6 +11,7 @@ export function useFileUpload() {
   const [detectedObjects, setDetectedObjects] = useState<DetectedObject[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isProcessed, setIsProcessed] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<string>("yolov8");
   const { toast } = useToast();
 
   const processImage = useCallback(async () => {
@@ -32,7 +33,7 @@ export function useFileUpload() {
     setUploadError(null);
 
     try {
-      const response = await uploadImageToFalcon(selectedFile);
+      const response = await uploadImageToFalcon(selectedFile, selectedModel);
       
       setImageUrl(response.imageUrl);
       
@@ -65,7 +66,7 @@ export function useFileUpload() {
     } finally {
       setIsUploading(false);
     }
-  }, [selectedFile, toast, isProcessed, isUploading]);
+  }, [selectedFile, selectedModel, toast, isProcessed, isUploading]);
 
   const resetUpload = useCallback(() => {
     setSelectedFile(null);
@@ -82,8 +83,10 @@ export function useFileUpload() {
     detectedObjects,
     uploadError,
     isProcessed,
+    selectedModel,
     setSelectedFile,
     setIsProcessed,
+    setSelectedModel,
     processImage,
     resetUpload
   };

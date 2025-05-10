@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { CameraCapture } from "./camera-capture";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface FileUploaderProps {
   onFileSelect: (file: File) => void;
@@ -11,15 +12,33 @@ interface FileUploaderProps {
   isLoading: boolean;
   isProcessed: boolean;
   setIsProcessed: (processed: boolean) => void;
+  onModelChange?: (model: string) => void;
+  selectedModel?: string;
 }
 
-export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProcessed, setIsProcessed }: FileUploaderProps) {
+export function FileUploader({ 
+  onFileSelect, 
+  onProcessImage, 
+  isLoading, 
+  isProcessed, 
+  setIsProcessed,
+  onModelChange,
+  selectedModel = "yolov8"
+}: FileUploaderProps) {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("upload");
+  const [modelType, setModelType] = useState<string>(selectedModel);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  
+  // Update the model when the modelType changes
+  useEffect(() => {
+    if (onModelChange) {
+      onModelChange(modelType);
+    }
+  }, [modelType, onModelChange]);
 
   // Process image automatically when a file is selected
   useEffect(() => {
@@ -175,6 +194,42 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
             </TabsList>
 
             <TabsContent value="upload" className="mt-0">
+              {/* Model Selector */}
+              <div className="bg-[#1a1f2c]/70 backdrop-blur-sm border border-[#2a3348] rounded-xl p-4 mb-4">
+                <div className="flex items-center space-x-2 mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <p className="text-sm font-medium text-blue-300">Select Detection Model</p>
+                </div>
+                <Select value={modelType} onValueChange={setModelType}>
+                  <SelectTrigger className="bg-[#2a3348]/50 border-[#2a3348] text-blue-200 focus:ring-blue-500 w-full">
+                    <SelectValue placeholder="Select detection model" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#1a1f2c] border-[#2a3348] text-blue-200">
+                    <SelectItem value="yolov8" className="focus:bg-blue-500/20 focus:text-blue-300">
+                      <div className="flex items-center">
+                        <span className="text-xs px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded-md mr-2">v8</span>
+                        YOLOv8 (Default)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="yolov5" className="focus:bg-blue-500/20 focus:text-blue-300">
+                      <div className="flex items-center">
+                        <span className="text-xs px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded-md mr-2">v5</span>
+                        YOLOv5 (PyTorch)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="yolo11n" className="focus:bg-blue-500/20 focus:text-blue-300">
+                      <div className="flex items-center">
+                        <span className="text-xs px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded-md mr-2">v11n</span>
+                        YOLO11n (Small)
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-blue-300/60 mt-2">Different models may detect objects with varying accuracy and speed</p>
+              </div>
+              
               <div 
                 className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                   isDragging 
@@ -268,7 +323,22 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
               </div>
               <div>
                 <p className="text-sm font-medium text-blue-300">{currentFile.name}</p>
-                <p className="text-xs text-blue-300/60">{formatFileSize(currentFile.size)}</p>
+                <div className="flex items-center">
+                  <p className="text-xs text-blue-300/60 mr-3">{formatFileSize(currentFile.size)}</p>
+                  <div className="flex items-center">
+                    <span 
+                      className={`text-xs px-1.5 py-0.5 rounded-md mr-2 ${
+                        modelType === 'yolov8' ? 'bg-green-500/20 text-green-400' :
+                        modelType === 'yolov5' ? 'bg-purple-500/20 text-purple-400' :
+                        'bg-blue-500/20 text-blue-400'
+                      }`}
+                    >
+                      {modelType === 'yolov8' ? 'YOLOv8' : 
+                       modelType === 'yolov5' ? 'YOLOv5' : 
+                       'YOLO11n'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-3">

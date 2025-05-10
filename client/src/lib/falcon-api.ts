@@ -20,9 +20,10 @@ export const OBJECT_COLORS: Record<string, string> = {
   default: "#EF4444",               // red
 };
 
-export async function uploadImageToFalcon(file: File): Promise<FalconApiResponse> {
+export async function uploadImageToFalcon(file: File, model: string = 'yolov8'): Promise<FalconApiResponse> {
   const formData = new FormData();
   formData.append('image', file);
+  formData.append('model', model);
 
   try {
     const response = await fetch('/api/detect', {
