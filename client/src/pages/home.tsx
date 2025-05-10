@@ -35,10 +35,8 @@ export default function Home() {
     detectedObjects, 
     uploadError,
     isProcessed,
-    selectedModel,
     setSelectedFile,
     setIsProcessed,
-    setSelectedModel,
     processImage, 
     resetUpload
   } = useFileUpload();
