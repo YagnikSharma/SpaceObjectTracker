@@ -69,6 +69,19 @@ export function ResultsDisplay({
     return `Detection complete. Found ${detectedObjects.length} objects in the space station image: ${parts.join(", ")}.`;
   };
   
+  // Auto play text-to-speech when results are loaded
+  useEffect(() => {
+    // Automatically speak results when objects are detected and not loading
+    if (!isLoading && detectedObjects.length > 0 && imageUrl) {
+      // Small delay to ensure UI is updated first
+      const timer = setTimeout(() => {
+        speakResults();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, detectedObjects.length, imageUrl]);
+
   // Draw the detected objects on the canvas
   useEffect(() => {
     if (!imageUrl || isLoading || !detectedObjects.length) return;
@@ -411,8 +424,16 @@ export function ResultsDisplay({
                 variant="outline"
                 size="sm"
                 className="text-xs h-8 flex items-center gap-1"
-                onClick={speakResults}
-                disabled={isSpeaking}
+                onClick={() => {
+                  if (isSpeaking) {
+                    // Stop speech
+                    window.speechSynthesis.cancel();
+                    setIsSpeaking(false);
+                  } else {
+                    // Start speech
+                    speakResults();
+                  }
+                }}
               >
                 {isSpeaking ? (
                   <>
