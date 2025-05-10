@@ -245,7 +245,7 @@ names:
       
       log('Model training completed successfully!', 'yolo');
       return { success: true, message: 'Model trained successfully' };
-    } catch (error) {
+    } catch (error: any) {
       log(`Error training model: ${error.message}`, 'yolo');
       return { success: false, message: `Error training model: ${error.message}` };
     }
@@ -281,7 +281,7 @@ names:
         message: 'Model imported successfully',
         modelPath
       };
-    } catch (error) {
+    } catch (error: any) {
       log(`Error importing model: ${error.message}`, 'yolo');
       return { 
         success: false, 
@@ -318,7 +318,7 @@ names:
         detections,
         count: detections.length
       };
-    } catch (error) {
+    } catch (error: any) {
       log(`Error detecting objects: ${error.message}`, 'yolo');
       return {
         success: false,
