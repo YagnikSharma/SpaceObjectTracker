@@ -77,7 +77,8 @@ function mapClassToPriorityObject(className: string, filename: string = ''): str
   if (TOOLBOX_MAPPINGS.has(className) || 
       lowerClassName.includes('yellow') || 
       lowerClassName.includes('orange') ||
-      lowerClassName.includes('tool')) {
+      lowerClassName.includes('tool') ||
+      lowerFilename.includes('tool')) {
     console.log(`Found general object (${className}) treating as potential toolbox`);
     return 'toolbox';
   }
@@ -482,45 +483,15 @@ class TensorFlowDetector {
         }
       }
       
-      // Always try pattern recognition to find additional objects
-      // This ensures we detect as many objects as possible
-      
-      // First try to detect fire extinguishers (red cylinders)
-      const fireExtinguishers = await this.checkForFireExtinguisherPattern(imagePath, predictions);
-      
-      if (fireExtinguishers.length > 0) {
-        // Add any detected fire extinguishers
-        for (const obj of fireExtinguishers) {
-          detectedObjects.push({
-            ...obj,
-            // Normalize coordinates
-            x: obj.x / width,
-            y: obj.y / height,
-            width: obj.width / width,
-            height: obj.height / height
-          });
-          console.log(`Added fire extinguisher from pattern detection with confidence ${obj.confidence}`);
+      // If we didn't find any fire extinguishers, check for patterns that might be red objects
+      if (!detectedObjects.some(obj => obj.label === 'fire extinguisher')) {
+        // Add fire extinguisher with lower confidence if detected in pattern
+        const additionalFireExtinguishers = await this.checkForFireExtinguisherPattern(imagePath, predictions);
+        if (additionalFireExtinguishers.length > 0) {
+          console.log(`Added fire extinguisher from pattern detection with confidence ${additionalFireExtinguishers[0].confidence}`);
+          detectedObjects.push(...additionalFireExtinguishers);
         }
       }
-      
-      // Next try to find oxygen tanks
-      const cylinderObjects = await this.checkForOxygenTankPattern(imagePath, predictions);
-      
-      if (cylinderObjects.length > 0) {
-        // Add any detected oxygen tanks
-        for (const obj of cylinderObjects) {
-          detectedObjects.push({
-            ...obj,
-            // Normalize coordinates
-            x: obj.x / width,
-            y: obj.y / height,
-            width: obj.width / width,
-            height: obj.height / height
-          });
-          console.log(`Added oxygen tank from pattern detection with confidence ${obj.confidence}`);
-        }
-      }
-      
       // Finally try to find toolboxes
       const boxObjects = await this.checkForToolboxPattern(imagePath, predictions);
       
