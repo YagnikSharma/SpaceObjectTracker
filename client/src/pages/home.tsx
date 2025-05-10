@@ -10,7 +10,6 @@ import { useFileUpload } from "@/hooks/use-file-upload";
 import { useChat } from "@/hooks/use-chat";
 import { apiRequest } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
-import ReactPlayer from "react-player";
 import { Link, useLocation } from "wouter";
 
 // Navigation links
