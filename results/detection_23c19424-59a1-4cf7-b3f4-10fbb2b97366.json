@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "timestamp": "2025-05-10T02:35:34.115795",
+  "method": "standalone",
+  "detections": [
+    {
+      "id": "8f8617b1-ab73-4d68-a71b-ac4fd60a0e58",
+      "label": "oxygen tank",
+      "confidence": 0.95,
+      "x": 0.6499999999999999,
+      "y": 0.6,
+      "width": 0.2,
+      "height": 0.3,
+      "color": "#2196f3",
+      "context": "Life support equipment. Verify pressure levels and connection integrity."
+    }
+  ],
+  "count": 1
+}

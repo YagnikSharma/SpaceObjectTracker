@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "timestamp": "2025-05-10T02:35:34.128411",
+  "method": "standalone",
+  "detections": [
+    {
+      "id": "67452a0d-e241-4d93-9614-da90f75598fc",
+      "label": "toolbox",
+      "confidence": 0.95,
+      "x": 0.31,
+      "y": 0.36,
+      "width": 0.2,
+      "height": 0.3,
+      "color": "#ffc107",
+      "context": "Equipment storage. Ensure proper organization and inventory completion."
+    }
+  ],
+  "count": 1
+}

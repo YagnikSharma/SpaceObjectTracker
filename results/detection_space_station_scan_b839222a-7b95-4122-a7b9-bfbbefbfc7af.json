@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "timestamp": "2025-05-10T02:35:34.284540",
+  "method": "standalone",
+  "detections": [
+    {
+      "id": "ab0c8099-71b1-4b97-9719-6c26026ca35a",
+      "label": "fire extinguisher",
+      "confidence": 0.95,
+      "x": 0.5700000000000001,
+      "y": 0.62,
+      "width": 0.2,
+      "height": 0.3,
+      "color": "#f44336",
+      "context": "Critical safety equipment. Check pressure gauge and ensure easy access."
+    }
+  ],
+  "count": 1
+}
