@@ -10,8 +10,8 @@ import OpenAI from "openai";
 // Initialize OpenAI for image understanding
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Loading the YOLO model
-let yoloModel: tf.GraphModel | null = null;
+// Loading the AI model
+let aiModel: tf.GraphModel | null = null;
 
 // Track detected objects for training data
 const detectionTrainingData: { [key: string]: { count: number, data: any[] } } = {
@@ -126,10 +126,10 @@ export async function initAIModel(): Promise<void> {
   try {
     console.log("Loading AI model for space object detection...");
     
-    // In a real implementation, load a custom trained YOLOv8 model for space station components
-    if (!yoloModel) {
-      // Load the model (using a public TF model but treating it as YOLOv8 for demonstration)
-      yoloModel = await tf.loadGraphModel('https://tfhub.dev/tensorflow/tfjs-model/ssd_mobilenet_v2/1/default/1', { fromTFHub: true });
+    // In a real implementation, load a custom trained model for space station components
+    if (!aiModel) {
+      // Load the model (using a public TF model for demonstration)
+      aiModel = await tf.loadGraphModel('https://tfhub.dev/tensorflow/tfjs-model/ssd_mobilenet_v2/1/default/1', { fromTFHub: true });
       console.log("AI model loaded successfully!");
     }
   } catch (error) {
