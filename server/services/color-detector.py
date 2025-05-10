@@ -63,18 +63,35 @@ def detect_objects_by_color(image_path):
             area = cv2.contourArea(contour)
             # Filter small noise
             if area > 500:  
+                # Get precise bounding box
                 x, y, w, h = cv2.boundingRect(contour)
+                
+                # Find minimum area rotated rectangle for better fit
+                rect = cv2.minAreaRect(contour)
+                box = cv2.boxPoints(rect)
+                box = np.array(box, dtype=np.int32)
+                
+                # Calculate precise dimensions
+                rx, ry, rw, rh = x, y, w, h
+                
+                # Expand the box slightly for better visibility
+                expansion = 0.02  # 2% expansion
+                rx = max(0, int(rx - (rw * expansion)))
+                ry = max(0, int(ry - (rh * expansion)))
+                rw = min(width - rx, int(rw * (1 + 2 * expansion)))
+                rh = min(height - ry, int(rh * (1 + 2 * expansion)))
+                
                 confidence = min(area / 10000, 0.95)  # Base confidence on area, max 0.95
                 
-                # Create object entry
+                # Create object entry with accurate measurements
                 detected_objects.append({
                     "id": str(uuid.uuid4()),
                     "label": "toolbox",
                     "confidence": float(confidence),
-                    "x": float(x / width),
-                    "y": float(y / height),
-                    "width": float(w / width),
-                    "height": float(h / height),
+                    "x": float(rx / width),
+                    "y": float(ry / height),
+                    "width": float(rw / width),
+                    "height": float(rh / height),
                     "originalClass": "color-detection",
                     "color": "#ffc107",  # Yellow
                     "context": "Maintenance equipment"
@@ -85,17 +102,34 @@ def detect_objects_by_color(image_path):
         for contour in contours:
             area = cv2.contourArea(contour)
             if area > 500:
+                # Get precise bounding box
                 x, y, w, h = cv2.boundingRect(contour)
+                
+                # Find minimum area rotated rectangle for better fit
+                rect = cv2.minAreaRect(contour)
+                box = cv2.boxPoints(rect)
+                box = np.array(box, dtype=np.int32)
+                
+                # Calculate precise dimensions
+                rx, ry, rw, rh = x, y, w, h
+                
+                # Expand the box slightly for better visibility
+                expansion = 0.02  # 2% expansion
+                rx = max(0, int(rx - (rw * expansion)))
+                ry = max(0, int(ry - (rh * expansion)))
+                rw = min(width - rx, int(rw * (1 + 2 * expansion)))
+                rh = min(height - ry, int(rh * (1 + 2 * expansion)))
+                
                 confidence = min(area / 10000, 0.95)
                 
                 detected_objects.append({
                     "id": str(uuid.uuid4()),
                     "label": "oxygen tank",
                     "confidence": float(confidence),
-                    "x": float(x / width),
-                    "y": float(y / height),
-                    "width": float(w / width),
-                    "height": float(h / height),
+                    "x": float(rx / width),
+                    "y": float(ry / height),
+                    "width": float(rw / width),
+                    "height": float(rh / height),
                     "originalClass": "color-detection",
                     "color": "#2196f3",  # Blue
                     "context": "Life support equipment"
@@ -106,17 +140,34 @@ def detect_objects_by_color(image_path):
         for contour in contours:
             area = cv2.contourArea(contour)
             if area > 500:
+                # Get precise bounding box
                 x, y, w, h = cv2.boundingRect(contour)
+                
+                # Find minimum area rotated rectangle for better fit
+                rect = cv2.minAreaRect(contour)
+                box = cv2.boxPoints(rect)
+                box = np.array(box, dtype=np.int32)
+                
+                # Calculate precise dimensions
+                rx, ry, rw, rh = x, y, w, h
+                
+                # Expand the box slightly for better visibility
+                expansion = 0.02  # 2% expansion
+                rx = max(0, int(rx - (rw * expansion)))
+                ry = max(0, int(ry - (rh * expansion)))
+                rw = min(width - rx, int(rw * (1 + 2 * expansion)))
+                rh = min(height - ry, int(rh * (1 + 2 * expansion)))
+                
                 confidence = min(area / 10000, 0.95)
                 
                 detected_objects.append({
                     "id": str(uuid.uuid4()),
                     "label": "fire extinguisher",
                     "confidence": float(confidence),
-                    "x": float(x / width),
-                    "y": float(y / height),
-                    "width": float(w / width),
-                    "height": float(h / height),
+                    "x": float(rx / width),
+                    "y": float(ry / height),
+                    "width": float(rw / width),
+                    "height": float(rh / height),
                     "originalClass": "color-detection",
                     "color": "#f44336",  # Red
                     "context": "Critical safety equipment"
