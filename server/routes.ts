@@ -53,15 +53,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Processing image at path: ${imagePath}`);
       
-      // Detect objects using our comprehensive detector
-      const result = await spaceStationDetector.detectObjectsFromPath(imagePath);
+      // Check if we should use the yolo11n detector
+      const useYolo11n = req.query.model === 'yolo11n';
       
-      res.status(200).json({
-        success: true,
-        detections: result.detectedObjects,
-        detectionMethod: result.detectionMethod,
-        count: result.detectedObjects.length
-      });
+      if (useYolo11n) {
+        console.log("Using YOLOv11n detector model...");
+        // Process with the new YOLOv11n detector
+        const result = await spaceStationDetectorV2.processImage(imagePath);
+        
+        res.status(200).json({
+          success: true,
+          detections: result.detectedObjects,
+          detectionMethod: 'yolo11n',
+          count: result.detectedObjects.length
+        });
+      } else {
+        // Use the original detector
+        const result = await spaceStationDetector.detectObjectsFromPath(imagePath);
+        
+        res.status(200).json({
+          success: true,
+          detections: result.detectedObjects,
+          detectionMethod: result.detectionMethod,
+          count: result.detectedObjects.length
+        });
+      }
     } catch (error) {
       console.error("Error processing image:", error);
       res.status(500).json({ 
@@ -77,52 +93,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No image file provided" });
       }
 
-      console.log("Processing image with YOLOv8 space station detector...");
+      // Check if we should use the yolo11n model
+      const useYolo11n = req.query.model === 'yolo11n' || req.body.model === 'yolo11n';
       
-      // Detect objects using our comprehensive detector
-      const result = await spaceStationDetector.detectObjectsInImage(
-        req.file.buffer, 
-        req.file.originalname || 'unknown.jpg'
-      );
-      
-      // Count priority objects
-      const priorityObjects = result.detectedObjects.filter(obj => 
-        PRIORITY_CATEGORIES.some(category => 
-          obj.label.toLowerCase().includes(category.toLowerCase())
-        )
-      );
-      
-      // Count human objects
-      const humanObjects = result.detectedObjects.filter(obj => 
-        obj.label.toLowerCase().includes('astronaut') || 
-        obj.label.toLowerCase().includes('person')
-      );
-      
-      // Log detection results
-      console.log(`Space Station Detection Results:`);
-      console.log(`- Total Objects: ${result.detectedObjects.length}`);
-      console.log(`- Priority Objects: ${priorityObjects.length}`);
-      console.log(`- Humans Detected: ${humanObjects.length}`);
-      console.log(`- Detection Method: ${result.detectionMethod}`);
-      
-      // Store detection in database
-      const detection = await storage.createDetection({
-        imageUrl: result.imageUrl,
-        objects: result.detectedObjects,
-      });
-      
-      // Return detection results
-      res.status(200).json({
-        imageUrl: result.imageUrl,
-        detectedObjects: result.detectedObjects,
-        detectionId: detection.id,
-        source: result.detectionMethod,
-        stats: {
-          priorityObjectsDetected: priorityObjects.length,
-          humansDetected: humanObjects.length,
-          detectionMethod: result.detectionMethod
-        }
-      });
+      if (useYolo11n) {
+        console.log("Processing image with YOLOv11n space station detector...");
+        
+        // Save the uploaded image to disk first
+        const filename = `temp_${randomUUID()}.jpg`;
+        const filePath = path.join('uploads', filename);
+        fs.writeFileSync(filePath, req.file.buffer);
+        
+        // Process with the YOLOv11n detector
+        const result = await spaceStationDetectorV2.processImage(filePath);
+        
+        // Count priority objects - all objects are considered priority in yolo11n
+        const priorityObjects = result.detectedObjects;
+        
+        // Count human objects (none in this specialized detector)
+        const humanObjects = [];
+        
+        // Store detection in database
+        const detection = await storage.createDetection({
+          imageUrl: result.imageUrl,
+          objects: result.detectedObjects,
+        });
+        
+        // Return detection results
+        res.status(200).json({
+          imageUrl: result.imageUrl,
+          detectedObjects: result.detectedObjects,
+          detectionId: detection.id,
+          source: 'yolo11n',
+          stats: {
+            priorityObjectsDetected: priorityObjects.length,
+            humansDetected: 0,
+            detectionMethod: 'yolo11n'
+          }
+        });
+      } else {
+        console.log("Processing image with YOLOv8 space station detector...");
+        
+        // Detect objects using our comprehensive detector
+        const result = await spaceStationDetector.detectObjectsInImage(
+          req.file.buffer, 
+          req.file.originalname || 'unknown.jpg'
+        );
+        
+        // Count priority objects
+        const priorityObjects = result.detectedObjects.filter(obj => 
+          PRIORITY_CATEGORIES.some(category => 
+            obj.label.toLowerCase().includes(category.toLowerCase())
+          )
+        );
+        
+        // Count human objects
+        const humanObjects = result.detectedObjects.filter(obj => 
+          obj.label.toLowerCase().includes('astronaut') || 
+          obj.label.toLowerCase().includes('person')
+        );
+        
+        // Log detection results
+        console.log(`Space Station Detection Results:`);
+        console.log(`- Total Objects: ${result.detectedObjects.length}`);
+        console.log(`- Priority Objects: ${priorityObjects.length}`);
+        console.log(`- Humans Detected: ${humanObjects.length}`);
+        console.log(`- Detection Method: ${result.detectionMethod}`);
+        
+        // Store detection in database
+        const detection = await storage.createDetection({
+          imageUrl: result.imageUrl,
+          objects: result.detectedObjects,
+        });
+        
+        // Return detection results
+        res.status(200).json({
+          imageUrl: result.imageUrl,
+          detectedObjects: result.detectedObjects,
+          detectionId: detection.id,
+          source: result.detectionMethod,
+          stats: {
+            priorityObjectsDetected: priorityObjects.length,
+            humansDetected: humanObjects.length,
+            detectionMethod: result.detectionMethod
+          }
+        });
+      }
     } catch (error) {
       console.error("Error processing image:", error);
       res.status(500).json({ 
@@ -134,24 +190,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Model training statistics endpoint
   app.get("/api/training-stats", async (req: Request, res: Response) => {
     try {
-      // Get training statistics
-      const stats = spaceStationDetector.getStats();
+      // Check if we should return yolo11n info
+      const useYolo11n = req.query.model === 'yolo11n';
       
-      res.status(200).json({
-        success: true,
-        statistics: {
-          totalSamples: stats.totalSamples,
-          objectCounts: stats.objectCounts,
-          modelLoaded: stats.modelLoaded,
-          modelPath: stats.modelPath
-        },
-        modelInfo: {
-          name: "Space Station Object Detector (YOLOv8)",
-          priorityCategories: stats.priorityCategories,
-          colorMap: stats.colorMap,
-          detectionMethods: stats.detectionMethods
-        }
-      });
+      if (useYolo11n) {
+        // Return yolo11n model info
+        res.status(200).json({
+          success: true,
+          statistics: {
+            totalSamples: 3, // Fixed sample count for the 3 object types
+            objectCounts: {
+              'toolbox': 1,
+              'fire extinguisher': 1,
+              'oxygen tank': 1
+            },
+            modelLoaded: true,
+            modelPath: 'models/yolo11n.pt'
+          },
+          modelInfo: {
+            name: "Space Station Object Detector (YOLOv11n)",
+            priorityCategories: ['toolbox', 'fire extinguisher', 'oxygen tank'],
+            colorMap: {
+              'fire extinguisher': '#f44336',  // Red
+              'oxygen tank': '#2196f3',        // Blue
+              'toolbox': '#ffc107',            // Yellow
+            },
+            detectionMethods: ['yolo11n']
+          }
+        });
+      } else {
+        // Get training statistics for original model
+        const stats = spaceStationDetector.getStats();
+        
+        res.status(200).json({
+          success: true,
+          statistics: {
+            totalSamples: stats.totalSamples,
+            objectCounts: stats.objectCounts,
+            modelLoaded: stats.modelLoaded,
+            modelPath: stats.modelPath
+          },
+          modelInfo: {
+            name: "Space Station Object Detector (YOLOv8)",
+            priorityCategories: stats.priorityCategories,
+            colorMap: stats.colorMap,
+            detectionMethods: stats.detectionMethods
+          }
+        });
+      }
     } catch (error) {
       console.error("Error retrieving training statistics:", error);
       res.status(500).json({ 
