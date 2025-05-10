@@ -21,7 +21,7 @@ export function ModelUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [modelName, setModelName] = useState("space-station-objects-v1.pt");
+  const [modelName, setModelName] = useState("space-station-detector-v1.pt");
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -81,10 +81,10 @@ export function ModelUploader() {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gradient">
-          Import Trained YOLO Model
+          Import Trained AI Model
         </CardTitle>
         <CardDescription>
-          Upload a trained YOLOv8 model to improve detection of space station components.
+          Upload a trained model to improve detection of space station components.
           <br />
           The model should be trained to detect: {MODEL_CATEGORIES.join(', ')}
         </CardDescription>
@@ -95,7 +95,7 @@ export function ModelUploader() {
             <Label htmlFor="model-name">Model Name</Label>
             <Input
               id="model-name"
-              placeholder="e.g., space-station-objects-v1.pt"
+              placeholder="e.g., space-station-detector-v1.pt"
               value={modelName}
               onChange={(e) => setModelName(e.target.value)}
             />

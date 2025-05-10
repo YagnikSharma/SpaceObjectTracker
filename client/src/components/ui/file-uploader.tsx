@@ -196,7 +196,7 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
                 </div>
                 
                 <h3 className="text-lg font-semibold text-blue-300 mb-2">Upload Space Image for Analysis</h3>
-                <p className="text-blue-200/70 mb-3">Drag and drop your space station image for YOLO detection</p>
+                <p className="text-blue-200/70 mb-3">Drag and drop your space station image for AI analysis</p>
                 <p className="text-blue-200/50 text-sm mb-6">Supports: JPG, PNG, TIFF (max 10MB)</p>
                 
                 <button 
@@ -287,7 +287,7 @@ export function FileUploader({ onFileSelect, onProcessImage, isLoading, isProces
               {isLoading ? (
                 <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/30 rounded-lg">
                   <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-blue-300">Processing with YOLO...</span>
+                  <span className="text-blue-300">Processing with AI detection...</span>
                 </div>
               ) : (
                 <button 
