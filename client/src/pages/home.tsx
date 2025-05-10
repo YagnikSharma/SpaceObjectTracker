@@ -35,8 +35,10 @@ export default function Home() {
     detectedObjects, 
     uploadError,
     isProcessed,
+    selectedModel,
     setSelectedFile,
     setIsProcessed,
+    setSelectedModel,
     processImage, 
     resetUpload
   } = useFileUpload();
@@ -306,6 +308,8 @@ export default function Home() {
                         isLoading={isUploading}
                         isProcessed={isProcessed}
                         setIsProcessed={setIsProcessed}
+                        onModelChange={setSelectedModel}
+                        selectedModel={selectedModel}
                       />
                     </div>
                   </div>
