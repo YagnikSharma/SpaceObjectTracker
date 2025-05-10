@@ -75,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           imageUrl: `/uploads/${imageName}`,
           detectedObjects: customResult.detections,
           detectionId: detection.id,
-          source: "custom-yolo",
+          source: "ai-detection",
           stats: {
             priorityObjectsDetected: customResult.detections.length,
             trainingImagesCount: spaceObjectDetector.getModelStats().isModelLoaded ? 1 : 0
