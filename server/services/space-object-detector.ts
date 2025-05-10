@@ -219,7 +219,7 @@ export class SpaceObjectDetector {
    * Fallback detection when model isn't available
    */
   private performFallbackDetection(imagePath: string) {
-    log('Using fallback detection method', 'yolo');
+    log('Using fallback detection method', 'ai');
     
     const detections = this.analyzeImage(imagePath);
     
@@ -267,7 +267,7 @@ export class SpaceObjectDetector {
   /**
    * Import a pre-trained AI model
    */
-  public importModel(modelBuffer: Buffer, modelName: string = 'yolov8s.pt'): boolean {
+  public importModel(modelBuffer: Buffer, modelName: string = 'space-objects-model.pt'): boolean {
     try {
       // Create model path
       const modelPath = path.join(process.cwd(), 'models', modelName);
@@ -279,10 +279,10 @@ export class SpaceObjectDetector {
       this.modelPath = modelPath;
       this.isModelLoaded = true;
       
-      log(`AI model imported successfully to ${modelPath}`, 'yolo');
+      log(`AI model imported successfully to ${modelPath}`, 'ai');
       return true;
     } catch (error: any) {
-      log(`Error importing AI model: ${error.message}`, 'yolo');
+      log(`Error importing AI model: ${error.message}`, 'ai');
       return false;
     }
   }

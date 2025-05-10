@@ -120,20 +120,20 @@ const DETECTED_TO_SPACE: Record<string, string> = {
 };
 
 /**
- * Initialize and load the YOLO model for space object detection
+ * Initialize and load the AI model for space object detection
  */
 export async function initYOLOModel(): Promise<void> {
   try {
-    console.log("Loading YOLOv8 model for space object detection...");
+    console.log("Loading AI model for space object detection...");
     
     // In a real implementation, load a custom trained YOLOv8 model for space station components
     if (!yoloModel) {
       // Load the model (using a public TF model but treating it as YOLOv8 for demonstration)
       yoloModel = await tf.loadGraphModel('https://tfhub.dev/tensorflow/tfjs-model/ssd_mobilenet_v2/1/default/1', { fromTFHub: true });
-      console.log("YOLOv8 model loaded successfully!");
+      console.log("AI model loaded successfully!");
     }
   } catch (error) {
-    console.error("Error loading YOLOv8 model:", error);
+    console.error("Error loading AI model:", error);
     // We will continue without model, using simulated detection in case of failure
   }
 }
@@ -356,7 +356,7 @@ export function getTrainingStatistics(): { totalSamples: number, objectCounts: R
 }
 
 // Initialize model when module is loaded
-initYOLOModel().catch(err => console.error("Failed to initialize YOLOv8 model:", err));
+initYOLOModel().catch(err => console.error("Failed to initialize AI model:", err));
 
 export default {
   detectSpaceStationObjects,

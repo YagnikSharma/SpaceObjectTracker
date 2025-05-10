@@ -6,7 +6,7 @@ import { chatCompletionRequestSchema, DetectedObject } from "@shared/schema";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
-import yoloService, { detectSpaceStationObjects, getTrainingStatistics } from "./services/yolo-service";
+import aiService, { detectSpaceStationObjects, getTrainingStatistics } from "./services/yolo-service";
 import { spaceObjectDetector, PRIORITY_CATEGORIES } from "./services/space-object-detector";
 import { randomUUID } from "crypto";
 import * as fs from "fs";
@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Space object detection endpoint with custom YOLO model
+  // Space object detection endpoint with custom AI model
   app.post("/api/detect", upload.single("image"), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
@@ -63,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If custom detection finds objects, use those results
       if (customResult.success && customResult.detections.length > 0) {
-        console.log(`Custom YOLO model detected ${customResult.detections.length} objects`);
+        console.log(`Custom AI model detected ${customResult.detections.length} objects`);
         
         // Store detection in database
         const detection = await storage.createDetection({
@@ -153,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         modelInfo: {
           generalModel: {
             name: "Space Object Detection AI",
-            priorityObjects: yoloService.PRIORITY_OBJECTS,
+            priorityObjects: aiService.PRIORITY_OBJECTS,
             colorMapping: {
               humans: "#4caf50", // green
               priorityObjects: "#ffc107", // yellow
