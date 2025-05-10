@@ -27,18 +27,14 @@ export function FileUploader({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Process image automatically when a file is selected
+  // Process image automatically when a file is selected - optimized for faster loading
   useEffect(() => {
     if (currentFile && !isLoading && !isProcessed) {
       // Mark that we're processing this file
       setIsProcessed(true);
       
-      // Slight delay to let the UI update first
-      const timer = setTimeout(() => {
-        onProcessImage();
-      }, 300);
-      
-      return () => clearTimeout(timer);
+      // Process immediately without delay to make images load faster
+      onProcessImage();
     }
   }, [currentFile, isLoading, isProcessed, onProcessImage, setIsProcessed]);
   

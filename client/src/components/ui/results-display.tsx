@@ -341,12 +341,14 @@ export function ResultsDisplay({
           </div>
         ) : (
           <div className="relative">
-            {/* Original image */}
+            {/* Original image - with optimized loading */}
             <img 
               ref={imageRef}
               src={imageUrl!} 
               alt="Analyzed space image" 
               className="w-full h-auto" 
+              loading="eager" // Set priority loading
+              decoding="async" // Enable async decoding for faster display
               onLoad={() => {
                 // Redraw canvas when image loads
                 if (canvasRef.current && imageRef.current) {
