@@ -7,6 +7,7 @@ import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { generateComponentAnalysis, enhanceDetectionWithContext, generateSyntheticTrainingImages, SPACE_STATION_ELEMENTS } from "./services/falcon-service";
 import { spaceStationDetector, PRIORITY_CATEGORIES } from "./services/space-station-detector";
+import { spaceStationDetectorV2 } from "./services/space-station-detector-v2";
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
