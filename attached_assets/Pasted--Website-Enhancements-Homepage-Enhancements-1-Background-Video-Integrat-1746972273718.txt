@@ -1,0 +1,88 @@
+### Website Enhancements
+
+---
+
+#### **Homepage Enhancements:**
+
+1. **Background Video Integration:**
+
+   * **Objective:** Set the provided video as a full-screen background on the homepage.
+   * **Implementation Details:**
+
+     * Use the `<video>` HTML element with the following attributes: `autoplay`, `muted`, `loop`, and `playsinline`.
+     * Apply CSS to ensure the video covers the entire viewport without distortion.
+     * Position the video behind all other content using appropriate `z-index` and positioning properties.
+   * **Reference:** For guidance on implementing a full-screen video background, refer to [W3Schools' tutorial](https://www.w3schools.com/howto/howto_css_fullscreen_video.asp).
+
+2. **Logo Integration:**
+
+   * **Objective:** Replace all instances of the website's logo with the provided image.
+   * **Implementation Details:**
+
+     * Update the homepage header to display the new logo.
+     * Replace the favicon with the new logo image.
+     * Ensure the new logo appears in the navigation bar across all pages.
+
+---
+
+#### **Website-Wide Enhancements:**
+
+3. **Dark/Light Mode Toggle:**
+
+   * **Objective:** Implement a toggle switch to switch between dark and light modes for the entire website.
+   * **Implementation Details:**
+
+     * Design the toggle based on the provided GIF reference, ensuring smooth animations and transitions.
+     * Use JavaScript to toggle a class on the `<body>` or `<html>` element, which will switch between dark and light themes.
+     * Store the user's preference in `localStorage` to persist the theme across sessions.
+     * Change the toggle icon (e.g., sun/moon) based on the current theme.
+   * **Reference:** For inspiration on animated theme toggles, consider the examples at [Theme Toggles](https://toggles.dev/).
+
+4. **Color Scheme Update:**
+
+   * **Objective:** Update the website's prominent colors to dark black and navy blue.
+   * **Implementation Details:**
+
+     * Modify the CSS variables or classes to reflect the new color scheme.
+     * Ensure consistency across all components, including text, backgrounds, buttons, and links.
+     * Use the provided logo image (camera) as an icon or highlight in elements like text, tabs, navigation, toggles, and other interactive components.
+
+5. **Navigation Bar Update:**
+
+   * **Objective:** Add a "Detection Tool" tab to the navigation bar.
+   * **Implementation Details:**
+
+     * Insert a new navigation item labeled "Detection Tool" that links to the corresponding page or section.
+     * Ensure the new tab matches the styling and behavior of existing navigation items.
+
+6. **Background Image for Non-Homepage Pages:**
+
+   * **Objective:** Set a minimalistic starry sky image as the background for all pages except the homepage.
+   * **Implementation Details:**
+
+     * Apply the background image using CSS to the `<body>` or a main container element.
+     * Ensure the image is subtle, non-distracting, and enhances readability.
+     * Optimize the image for web to ensure fast loading times.
+
+7. **Emoji Removal:**
+
+   * **Objective:** Remove all emojis from the navigation bar and other instances across the website.
+   * **Implementation Details:**
+
+     * Review the HTML and remove any emoji characters or images.
+     * Ensure that the removal does not affect the layout or functionality of the navigation bar or other components.
+
+8. **Font Update:**
+
+   * **Objective:** Update the website's fonts to "Elianto" for headers and prominent texts, and "Quantico" for other text.
+   * **Implementation Details:**
+
+     * If these fonts are not accessible, implement similar fonts available through Google Fonts or other sources.
+     * Use the `@font-face` rule in CSS to define custom fonts if necessary.
+     * Apply the fonts to the appropriate elements using CSS selectors.
+   * **Reference:** For guidance on using custom fonts with CSS, refer to [W3Schools' CSS Web Fonts tutorial](https://www.w3schools.com/css/css3_fonts.asp).([Stack Overflow][1], [W3Schools][2])
+
+---
+
+Please proceed with implementing these enhancements.
+---
