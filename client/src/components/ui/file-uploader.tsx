@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { CameraCapture } from "./camera-capture";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2 } from "lucide-react";
 
 interface FileUploaderProps {
   onFileSelect: (file: File) => void;
@@ -32,12 +33,12 @@ export function FileUploader({
     if (currentFile && !isLoading && !isProcessed) {
       // Mark that we're processing this file
       setIsProcessed(true);
-      
+
       // Process immediately without delay to make images load faster
       onProcessImage();
     }
   }, [currentFile, isLoading, isProcessed, onProcessImage, setIsProcessed]);
-  
+
   // Reset processing flag when file changes
   useEffect(() => {
     if (!currentFile) {
@@ -71,7 +72,7 @@ export function FileUploader({
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-    
+
     const file = files[0];
     if (!validateFile(file)) return;
 
@@ -92,7 +93,7 @@ export function FileUploader({
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       if (!validateFile(file)) return;
@@ -140,10 +141,10 @@ export function FileUploader({
   const isCameraSupported = () => {
     // Check if we're in a secure context (HTTPS or localhost)
     const isSecureContext = window.isSecureContext;
-    
+
     // Check if the browser supports camera access
     const hasMediaDevices = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-    
+
     return isSecureContext && hasMediaDevices;
   };
 
@@ -178,7 +179,7 @@ export function FileUploader({
 
             <TabsContent value="upload" className="mt-0">
 
-              
+
               <div 
                 className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                   isDragging 
@@ -198,11 +199,11 @@ export function FileUploader({
                     </svg>
                   </div>
                 </div>
-                
+
                 <h3 className="text-lg font-semibold text-blue-300 mb-2">Upload Space Image for Analysis</h3>
                 <p className="text-blue-200/70 mb-3">Drag and drop your space station image for AI analysis</p>
                 <p className="text-blue-200/50 text-sm mb-6">Supports: JPG, PNG, TIFF (max 10MB)</p>
-                
+
                 <button 
                   className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white font-medium 
                           shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all
@@ -210,7 +211,7 @@ export function FileUploader({
                 >
                   Select Image File
                 </button>
-                
+
                 <input 
                   type="file" 
                   className="hidden" 
@@ -240,7 +241,7 @@ export function FileUploader({
                       ? "Camera access requires a secure connection (HTTPS). You're currently on HTTP."
                       : "Your browser does not support camera access or permission was denied."}
                   </p>
-                  
+
                   <div className="mb-6 p-4 bg-[#2a3348]/50 rounded-lg text-sm text-blue-200/80">
                     <p className="font-medium mb-1">Try the following:</p>
                     <ul className="list-disc list-inside text-left space-y-1">
@@ -252,7 +253,7 @@ export function FileUploader({
                       <li>Connect a camera to your device if you don't have one</li>
                     </ul>
                   </div>
-                  
+
                   <p className="text-blue-200/50 text-sm">
                     You can still use the file upload tab to analyze existing images.
                   </p>
@@ -290,12 +291,14 @@ export function FileUploader({
                   </svg>
                 </button>
               )}
-              {isLoading ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/30 rounded-lg">
-                  <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-blue-300">Processing with AI detection...</span>
-                </div>
-              ) : (
+              <div className="flex items-center space-x-3">
+            {isLoading ? (
+              <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/30 rounded-lg">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-blue-300">Processing with AI detection...</span>
+              </div>
+            ) : (
+              <>
                 <button 
                   onClick={() => {
                     setIsProcessed(false);
@@ -303,15 +306,23 @@ export function FileUploader({
                   }} 
                   disabled={isLoading}
                   className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white font-medium 
-                         shadow-lg shadow-blue-500/10 hover:shadow-blue-500/30 transition-all
-                         hover:from-blue-400 hover:to-purple-500 flex items-center"
+                           shadow-lg shadow-blue-500/10 hover:shadow-blue-500/30 transition-all
+                           hover:from-blue-400 hover:to-purple-500 flex items-center"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                   Scan
                 </button>
-              )}
+                <button
+                  onClick={handleCancelUpload}
+                  className="px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 rounded-lg text-blue-300 font-medium transition-colors flex items-center"
+                >
+                  Choose Another Image
+                </button>
+              </>
+            )}
+          </div>
             </div>
           </div>
         </div>
