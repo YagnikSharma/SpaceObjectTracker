@@ -16,7 +16,7 @@ const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (req: any, file: Express.Multer.File, cb: Function) => {
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
@@ -49,7 +49,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Object detection endpoint
-  app.post("/api/detect", upload.single("image"), async (req: Request, res: Response) => {
+  app.post("/api/detect", upload.single("image"), async (req: Request & { file?: Express.Multer.File }, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No image file provided" });
@@ -62,20 +62,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Processing image at path: ${filePath}`);
       
-      // First try using TensorFlow COCO-SSD model for detection
-      let result = await tensorflowDetector.detectObjects(filePath);
+      // Use YOLOv8 model for object detection
+      const result = await yoloDetector.detectObjects(filePath);
+      console.log(`YOLOv8 detected ${result.detectedObjects.length} objects`);
       
-      // If no objects detected or very few, try OpenCV color detection as fallback
-      if (result.detectedObjects.length < 1) {
-        try {
-          console.log("TensorFlow detected no objects, trying OpenCV color detection as fallback");
-          result = await opencvDetector.detectObjects(filePath);
-          console.log(`OpenCV detected ${result.detectedObjects.length} objects by color`);
-        } catch (opencvError) {
-          console.error("OpenCV fallback detection failed:", opencvError);
-          // Continue with TensorFlow results if OpenCV fails
-        }
-      }
       
       // Enhance objects with contextual information
       const enhancedObjects = await enhanceObjectsWithContext(result.detectedObjects);
