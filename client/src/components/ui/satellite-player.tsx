@@ -21,9 +21,11 @@ export function SatellitePlayer({ className }: SatellitePlayerProps) {
         console.error('Autoplay failed:', err);
       });
     };
-    const handleError = () => {
+    const handleError = (e: Event) => {
+      const video = e.target as HTMLVideoElement;
+      console.error('Video error:', video.error);
       setIsLoading(false);
-      setError('Failed to load satellite feed');
+      setError(`Failed to load satellite feed: ${video.error?.message || 'Unknown error'}`);
     };
 
     video.addEventListener('loadstart', handleLoadStart);
@@ -60,10 +62,10 @@ export function SatellitePlayer({ className }: SatellitePlayerProps) {
         playsInline
         autoPlay
       >
-        <source src="/satellite-feed.webm" type="video/webm" />
-        <source src="/satellite-feed.mp4" type="video/mp4" />
-        <source src="/satellite-feed.ogv" type="video/ogg" />
-        <source src="/satellite-feed.mkv" type="video/x-matroska" />
+        <source src="./satellite-feed.webm" type="video/webm" />
+        <source src="./satellite-feed.mp4" type="video/mp4" />
+        <source src="./satellite-feed.ogv" type="video/ogg" />
+        <source src="./satellite-feed.mkv" type="video/x-matroska" />
         Your browser doesn't support HTML5 video playback.
       </video>
       
