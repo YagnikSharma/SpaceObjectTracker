@@ -1,0 +1,70 @@
+### ✅ **Replit AI Task: Website Enhancement *
+
+---
+
+#### 🏠 **Homepage Fixes**
+
+1. **Logo Update**
+
+   * Replace the website logo everywhere (homepage, navbar, favicon, etc.) with the provided **camera image**.
+   * Ensure it’s consistently styled across all pages and components.
+
+---
+
+#### 🌐 **Global Website Fixes**
+
+2. **Light/Dark Mode Toggle **
+
+   * Implement a **smooth toggle** switch for light and dark mode across the entire website.
+   * Key requirements:
+
+     * Add a switch (e.g., icon-based toggle: 🌙/☀️ or similar)
+     * Toggle should smoothly transition between themes using CSS variables or classes
+     * Save user preference in `localStorage`
+     * Toggle icon should also switch on mode change
+
+3. **Color Scheme Update**
+
+   * Set **#000000 (Dark Black)** and **#0a2a43 (Navy Blue)** as primary brand colors.
+   * Use the **camera logo image** for accents and visual highlights on:
+
+     * Tabs
+     * Buttons
+     * Navigation items
+     * Toggle switch
+
+4. **Navigation Bar Improvements**
+
+   * Add a **"Detection Tool"** tab to the navbar.
+   * **Remove all emojis** from navigation and across the website.
+
+5. **Backgrounds for Non-Homepage Pages**
+
+   * Set a **clean, minimalistic starry sky image** as the background for all pages *except* the homepage.
+   * Ensure readability and modern visual appeal.
+
+6. **Font Enhancements**
+
+   * Use:
+
+     * **“Elianto”** (or the closest available alternative) for titles and headers
+     * **“Quantico”** (or similar) for body text and smaller elements
+   * Load fonts via Google Fonts or `@font-face` if needed
+
+---
+
+#### 🧠 **Object Detection Page Fix**
+
+7. **Remove TensorFlow Branding**
+
+   * **Delete the “TensorFlow” tag** from the uploaded file display area.
+   * **Remove the line**:
+
+     > “Analyzing space station image using TensorFlow AI”
+   * Keep the fallback or `else` content **unchanged**.
+
+---
+
+> 📁 Ensure all referenced assets (camera logo image, background image, custom fonts) are available in your Replit project.
+> ✅ Make the changes responsive and clean across all device types.
+

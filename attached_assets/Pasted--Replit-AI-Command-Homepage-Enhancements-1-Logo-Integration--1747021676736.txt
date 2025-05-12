@@ -1,0 +1,100 @@
+### 🛠️ **Replit AI Command**
+
+---
+
+#### ✅ **Homepage Enhancements**
+
+1. **Logo Integration**
+
+   * **Objective:** Replace all instances of the website logo with the provided **camera image**.
+   * **Implementation:**
+
+     * Update the homepage header with the new logo.
+     * Replace the favicon with this image.
+     * Ensure the logo appears in the navigation bar and all pages consistently.
+
+---
+
+#### 🌐 **Website-Wide Enhancements**
+
+2. **Dark/Light Mode Toggle (GIF Reference Not Usable)**
+
+   * **Objective:** Implement a smooth dark/light mode toggle without needing the GIF file.
+   * **Implementation:**
+
+     * Use a button/icon toggle (e.g., sun/moon).
+     * On toggle click, add/remove a `dark-theme` class on `<body>` or `<html>`.
+     * Save the user’s theme choice in `localStorage`.
+     * Animate the icon and background-color transitions using CSS for a modern feel.
+   * **Note:** Refer to [Theme Toggles](https://toggles.dev/) or W3C standards for smooth transitions.
+
+3. **Color Scheme Update**
+
+   * **Objective:** Adopt a modern, bold palette.
+   * **Implementation:**
+
+     * Use **#000000 (Dark Black)** and **#0a2a43 (Navy Blue)** as primary colors.
+     * Apply via CSS variables or global styles.
+     * Use the **camera logo image** as a visual accent for:
+
+       * Buttons
+       * Tabs
+       * Navigation indicators
+       * Toggle designs
+
+4. **Navigation Bar Updates**
+
+   * **Add Detection Tool Tab:**
+
+     * Add a new item labeled **“Detection Tool”** linking to the detection page.
+   * **Remove Emojis:**
+
+     * Eliminate all emoji characters or symbols from:
+
+       * Navigation bar
+       * Footer
+       * Other UI components
+
+5. **Background Image (Non-Homepage Pages)**
+
+   * **Objective:** Set a minimalist starry sky background on all pages *except* the homepage.
+   * **Implementation:**
+
+     * Apply via CSS background to body or wrapper containers.
+     * Ensure readability and responsiveness.
+     * Optimize image size for performance.
+
+6. **Font Integration**
+
+   * **Objective:** Use elegant, tech-style fonts across the site.
+   * **Implementation:**
+
+     * Use **“Elianto”** (for headings) and **“Quantico”** (for all other text).
+     * If not available directly, use Google Fonts or similar-looking alternatives.
+     * Add fonts via `<link>` in HTML head or use `@font-face` in CSS.
+     * Apply fonts selectively via CSS (e.g., `h1, h2, nav { font-family: 'Elianto', sans-serif; }`).
+
+---
+
+#### 🧠 **Object Detection Page Fixes**
+
+7. **Remove TensorFlow Branding**
+
+   * **Objective:** Clean up outdated or inaccurate branding.
+   * **Implementation:**
+
+     * **Remove the “TensorFlow” tag** from uploaded file preview sections.
+     * **Delete the line**:
+
+       > "Analyzing space station image using TensorFlow AI"
+     * Retain fallback logic and ensure no other functionality is affected.
+
+---
+
+### 🧾 **Final Notes**
+
+* Ensure all assets (camera logo, background image, font files) are uploaded in the Replit project directory.
+* Verify visual consistency across all screen sizes and devices.
+* Use semantic HTML and responsive CSS for clean, maintainable code.
+
+---

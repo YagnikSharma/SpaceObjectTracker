@@ -1,0 +1,71 @@
+### ✅ **Replit AI Task: Full Website Enhancement**
+
+---
+
+#### 🏠 **Homepage Fixes**
+
+1. **Background Video**
+
+   * Set the provided video as the **full-screen background** on the homepage.
+   * Use `<video>` tag with `autoplay`, `muted`, `loop`, and `playsinline`.
+   * Use CSS to position it properly behind all content.
+
+2. **Logo Update**
+
+   * Replace the **entire website's logo** (homepage, navbar, favicon, etc.) with the provided **camera image**.
+   * Apply consistently across all pages and elements.
+
+---
+
+#### 🌐 **Global Website Fixes**
+
+3. **Light/Dark Mode Toggle**
+
+   * Use the provided **GIF as a reference** to implement a toggle for dark/light mode.
+   * Make it smooth, animated, and responsive.
+   * Store user preference in `localStorage`.
+   * Change toggle icon (e.g., sun/moon) based on the mode.
+
+4. **Color Scheme**
+
+   * Set prominent theme colors to:
+
+     * **Dark Black:** `#000000`
+     * **Navy Blue:** `#0a2a43` or similar
+   * Use the **camera logo image** as a visual highlight in tabs, buttons, toggles, and navigation wherever appropriate.
+
+5. **Navigation Bar Update**
+
+   * Add a new navigation tab called **“Detection Tool”** linking to the detection section/page.
+   * **Remove all emojis** from the navigation bar and any other part of the site.
+
+6. **Non-Homepage Background**
+
+   * Replace current background with a **minimalistic starry sky image** for all pages except the homepage.
+   * Ensure readability and visual quality with subtle design.
+
+7. **Font Styling**
+
+   * Use:
+
+     * **“Elianto”** (or closest available) for headers and prominent text
+     * **“Quantico”** (or closest available) for body text and smaller elements
+   * Import from Google Fonts or use `@font-face` if needed.
+
+---
+
+#### 🧠 **Object Detection Page Fix**
+
+8. **TensorFlow References Removal**
+
+   * **Remove the “TensorFlow” tag** from any file display or label in the object detection area.
+   * **Replace the line**:
+
+     > “Analyzing space station image using TensorFlow AI”
+   * Keep the rest of the functionality and fallback behavior **unchanged**.
+
+---
+
+> 📁 Please ensure all required assets (video, logo image, background image, GIF reference) are available in the project directory.
+> 🎨 Make sure all changes are responsive and consistent across devices.
+
