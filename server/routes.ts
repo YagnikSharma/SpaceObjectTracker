@@ -6,8 +6,7 @@ import { chatCompletionRequestSchema } from "@shared/schema";
 import * as fs from "fs";
 import * as path from "path";
 import { randomUUID } from "crypto";
-import { tensorflowDetector } from "./services/tensorflow-detector";
-import { opencvDetector } from "./services/opencv-bridge";
+import { yoloDetector } from "./services/yolo-bridge";
 import { enhanceObjectsWithContext, generateComponentAnalysis } from "./services/context-service";
 import OpenAI from "openai";
 
