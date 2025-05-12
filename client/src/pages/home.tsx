@@ -5,7 +5,6 @@ import { ResultsDisplay } from "@/components/ui/results-display";
 import { DetectedObject } from "@shared/schema";
 import { ChatInterface, ChatMessage } from "@/components/ui/chat-interface";
 import { FeedbackForm } from "@/components/ui/feedback-form";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { useChat } from "@/hooks/use-chat";
 import { apiRequest } from "@/lib/queryClient";
