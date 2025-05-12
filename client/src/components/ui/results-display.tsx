@@ -438,11 +438,11 @@ export function ResultsDisplay({
         <div className="border-t border-border p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold">Detected Space Objects:</h3>
-            <div className="flex space-x-2">
+            <div className="flex space-x-3">
               <Button
-                variant="outline"
+                variant={isSpeaking ? "destructive" : "secondary"}
                 size="sm"
-                className="text-xs h-8 flex items-center gap-1"
+                className="text-xs h-9 flex items-center gap-1 font-medium"
                 onClick={() => {
                   if (isSpeaking) {
                     // Stop speech
@@ -470,7 +470,7 @@ export function ResultsDisplay({
               <Button
                 variant="outline"
                 size="sm"
-                className="text-xs h-8 flex items-center gap-1"
+                className="text-xs h-9 flex items-center gap-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border-blue-500/30"
                 onClick={exportToPDF}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -479,9 +479,9 @@ export function ResultsDisplay({
                 Export PDF
               </Button>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="text-xs h-8 flex items-center gap-1"
+                className="text-xs h-9 flex items-center gap-1 font-medium bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30"
                 onClick={exportToJSON}
               >
                 ⬇ Export JSON
