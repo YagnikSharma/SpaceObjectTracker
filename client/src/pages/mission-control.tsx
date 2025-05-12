@@ -182,10 +182,7 @@ export default function MissionControl() {
             </nav>
             
             {/* System status indicator */}
-            <span className="text-xs px-2.5 py-1 rounded-full flex items-center bg-green-500/20 text-green-400 border border-green-500/30">
-              <span className="w-2 h-2 rounded-full mr-1.5 bg-green-400"></span>
-              System Online
-            </span>
+            <StatusIndicator isOnline={true} />
           </div>
         </div>
       </header>

@@ -91,7 +91,7 @@ export default function Landing() {
                 animate={isLoaded ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.8, delay: 0.9 }}
               >
-                <Link href="/detection-hub">
+                <Link href="/home">
                   <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-6 rounded-lg text-lg font-medium">
                     Launch Detection System
                   </Button>
@@ -178,6 +178,11 @@ export default function Landing() {
             </p>
             
             <div className="flex space-x-6 mt-4 md:mt-0">
+              <Link href="/home">
+                <Button variant="ghost" className="text-blue-300 hover:text-blue-100 hover:bg-blue-900/20">
+                  Home
+                </Button>
+              </Link>
               <Link href="/detection-hub">
                 <Button variant="ghost" className="text-blue-300 hover:text-blue-100 hover:bg-blue-900/20">
                   Detection Hub
@@ -191,6 +196,11 @@ export default function Landing() {
               <Link href="/galactic-map">
                 <Button variant="ghost" className="text-blue-300 hover:text-blue-100 hover:bg-blue-900/20">
                   Galactic Map
+                </Button>
+              </Link>
+              <Link href="/archives">
+                <Button variant="ghost" className="text-blue-300 hover:text-blue-100 hover:bg-blue-900/20">
+                  Stellar Archives
                 </Button>
               </Link>
             </div>
