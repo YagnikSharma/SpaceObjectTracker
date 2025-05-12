@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/hooks/use-toast';
+import { StatusIndicator } from '@/components/ui/status-indicator';
 
 // Advanced type definitions for our API responses
 interface DetectionSummary {
