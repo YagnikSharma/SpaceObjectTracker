@@ -217,7 +217,7 @@ results/*
 
 ## 👤 Credits
 
-- Developed by: [Your Name/Team]
+- Developed by: Tech Titans (Leader- Sanjana Kumari)
 - YOLOv8 by Ultralytics
 - UI Components: Shadcn UI
 - Fonts: Google Fonts (Quantico and Elianto)
