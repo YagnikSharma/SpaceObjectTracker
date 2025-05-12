@@ -136,7 +136,6 @@ export default function Home() {
                   alt="Syndetect Logo" 
                   className="w-full h-full object-contain antialiased transform scale-95" 
                   style={{
-                    imageRendering: 'high-quality',
                     backfaceVisibility: 'hidden',
                   }}
                 />

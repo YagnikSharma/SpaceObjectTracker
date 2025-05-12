@@ -60,7 +60,6 @@ export default function Landing() {
                     alt="Syndetect Logo" 
                     className="w-full h-full object-contain antialiased transform scale-[0.92] transition-transform duration-200 hover:scale-95" 
                     style={{
-                      imageRendering: 'high-quality',
                       backfaceVisibility: 'hidden',
                     }}
                   />
