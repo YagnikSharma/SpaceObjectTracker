@@ -9,6 +9,7 @@ import Landing from "@/pages/landing";
 import MissionControl from "@/pages/mission-control";
 import GalacticMap from "@/pages/galactic-map";
 import StellarArchives from "@/pages/archives";
+import { StarryBackground } from "@/components/ui/starry-background";
 import { useEffect } from "react";
 
 function Router() {
@@ -34,6 +35,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <StarryBackground />
         <Toaster />
         <Router />
       </TooltipProvider>

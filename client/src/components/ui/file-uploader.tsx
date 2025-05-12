@@ -274,11 +274,6 @@ export function FileUploader({
                 <p className="text-sm font-medium text-blue-300">{currentFile.name}</p>
                 <div className="flex items-center">
                   <p className="text-xs text-blue-300/60 mr-3">{formatFileSize(currentFile.size)}</p>
-                  <div className="flex items-center">
-                    <span className="text-xs px-1.5 py-0.5 rounded-md mr-2 bg-blue-500/20 text-blue-400">
-                      TensorFlow
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>

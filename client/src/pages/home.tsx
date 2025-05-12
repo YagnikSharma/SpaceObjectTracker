@@ -173,7 +173,7 @@ export default function Home() {
               </span>
               
               {/* Theme Toggle */}
-              <div className="bg-blue-500/30 p-1.5 rounded-lg border border-blue-400/50">
+              <div className="bg-gradient-to-r from-[#0a2a43] to-[#000000] p-1.5 rounded-lg border border-blue-400/50">
                 <button
                   onClick={() => {
                     const html = document.documentElement;
@@ -188,23 +188,47 @@ export default function Home() {
                       localStorage.setItem('syndetect-theme', 'dark');
                     }
                   }}
-                  className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-600/20 text-white"
+                  className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-blue-600/20 transition-all duration-300 text-white"
                   aria-label="Toggle theme"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden dark:block">
-                    <circle cx="12" cy="12" r="4"></circle>
-                    <path d="M12 2v2"></path>
-                    <path d="M12 20v2"></path>
-                    <path d="m4.93 4.93 1.41 1.41"></path>
-                    <path d="m17.66 17.66 1.41 1.41"></path>
-                    <path d="M2 12h2"></path>
-                    <path d="M20 12h2"></path>
-                    <path d="m6.34 17.66-1.41 1.41"></path>
-                    <path d="m19.07 4.93-1.41 1.41"></path>
-                  </svg>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="block dark:hidden">
-                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-                  </svg>
+                  <div className="relative w-full h-full overflow-hidden">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      className="absolute inset-0 m-auto transition-all duration-500 ease-in-out transform rotate-0 opacity-100 dark:rotate-90 dark:opacity-0"
+                    >
+                      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                    </svg>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      className="absolute inset-0 m-auto transition-all duration-500 ease-in-out transform -rotate-90 opacity-0 dark:rotate-0 dark:opacity-100"
+                    >
+                      <circle cx="12" cy="12" r="4"></circle>
+                      <path d="M12 2v2"></path>
+                      <path d="M12 20v2"></path>
+                      <path d="m4.93 4.93 1.41 1.41"></path>
+                      <path d="m17.66 17.66 1.41 1.41"></path>
+                      <path d="M2 12h2"></path>
+                      <path d="M20 12h2"></path>
+                      <path d="m6.34 17.66-1.41 1.41"></path>
+                      <path d="m19.07 4.93-1.41 1.41"></path>
+                    </svg>
+                  </div>
                 </button>
               </div>
               
