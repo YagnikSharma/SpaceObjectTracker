@@ -18,7 +18,9 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/home" component={Home} />
       <Route path="/detection-hub" component={Home} />
-      <Route path="/mission-control" component={MissionControl} />
+      <Route path="/mission-control">
+  <MissionControl />
+</Route>
       <Route path="/galactic-map" component={GalacticMap} />
       <Route path="/archives" component={StellarArchives} />
       <Route component={NotFound} />

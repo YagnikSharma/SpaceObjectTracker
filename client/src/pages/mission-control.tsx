@@ -61,7 +61,7 @@ export default function MissionControl() {
   const [location, setLocation] = useLocation();
   const [selectedDetectionId, setSelectedDetectionId] = useState<number | null>(null);
   const { toast } = useToast();
-  
+
   // Fetch detection history from the database
   const { 
     data: historyData, 
@@ -71,7 +71,7 @@ export default function MissionControl() {
     queryKey: ['/api/mission-control/history'],
     refetchInterval: 60000, // Refetch every minute
   });
-  
+
   // Fetch detailed detection data when a detection is selected
   const { 
     data: detailData,
@@ -81,7 +81,7 @@ export default function MissionControl() {
     queryKey: [`/api/mission-control/detection/${selectedDetectionId}`],
     enabled: !!selectedDetectionId,
   });
-  
+
   // Handle errors
   useEffect(() => {
     if (historyError) {
@@ -92,7 +92,7 @@ export default function MissionControl() {
         variant: "destructive"
       });
     }
-    
+
     if (detailError) {
       console.error("Detail error:", detailError);
       toast({
@@ -102,7 +102,7 @@ export default function MissionControl() {
       });
     }
   }, [historyError, detailError, toast]);
-  
+
   // Format the detection history data
   const detectionHistory = historyData?.detections || [];
 
@@ -180,9 +180,12 @@ export default function MissionControl() {
                 Stellar Archives
               </Link>
             </nav>
-            
+
             {/* System status indicator */}
-            <StatusIndicator isOnline={true} />
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+              <span className="text-sm text-green-500">System Online</span>
+            </div>
           </div>
         </div>
       </header>
@@ -405,7 +408,7 @@ export default function MissionControl() {
                                 Detection #{detection.id} - {formatDate(detection.timestamp)}
                               </DialogTitle>
                             </DialogHeader>
-                            
+
                             {isDetailLoading ? (
                               <div className="py-10 flex flex-col items-center">
                                 <div className="w-10 h-10 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -421,7 +424,7 @@ export default function MissionControl() {
                                     className="w-full h-auto object-contain"
                                   />
                                 </div>
-                                
+
                                 {/* Detection details */}
                                 <div className="space-y-4">
                                   <div className="bg-[#242b3d]/50 rounded-lg p-4">
@@ -440,7 +443,7 @@ export default function MissionControl() {
                                       ))}
                                     </div>
                                   </div>
-                                  
+
                                   {detailData.detection.chatHistory.length > 0 && (
                                     <div className="bg-[#242b3d]/50 rounded-lg p-4">
                                       <h4 className="font-medium text-yellow-300 mb-2">Analysis History</h4>
@@ -463,7 +466,7 @@ export default function MissionControl() {
                                       </div>
                                     </div>
                                   )}
-                                  
+
                                   <div className="flex space-x-2">
                                     <Button
                                       onClick={() => window.open(`/api/export-pdf/${detailData.detection.id}`, '_blank')}
