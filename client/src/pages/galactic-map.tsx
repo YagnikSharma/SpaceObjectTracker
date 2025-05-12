@@ -376,71 +376,44 @@ export default function GalacticMap() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Link href="/" className="flex items-center space-x-3">
-                <div className="bg-gradient-to-r dark:from-blue-500 dark:to-purple-600 from-blue-400 to-blue-600 p-2 rounded-lg shadow-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <Link href="/home" className="flex items-center space-x-3">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 from-blue-500 to-blue-600 bg-clip-text text-transparent">
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                     Syndetect
                   </h1>
-                  <p className="text-xs dark:text-blue-300/80 text-blue-700/90">Galactic Map Explorer</p>
+                  <p className="text-xs text-blue-300/80">Galactic Map Explorer</p>
                 </div>
               </Link>
             </motion.div>
 
             <nav className="hidden md:flex space-x-6">
-              <Link href="/" className="px-3 py-2 rounded-lg dark:text-blue-300/80 text-blue-700/80 hover:text-blue-300 dark:hover:bg-blue-600/20 hover:bg-blue-500/20 transition-colors">
+              <Link href="/home" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
+                Home
+              </Link>
+              <Link href="/detection-hub" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
                 Detection Hub
               </Link>
-              <Link href="/mission-control" className="px-3 py-2 rounded-lg dark:text-blue-300/80 text-blue-700/80 hover:text-blue-300 dark:hover:bg-blue-600/20 hover:bg-blue-500/20 transition-colors">
+              <Link href="/mission-control" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
                 Mission Control
               </Link>
-              <Link href="/galactic-map" className="px-3 py-2 rounded-lg dark:bg-blue-500/20 bg-blue-500/20 dark:text-blue-300 text-blue-700 dark:border-blue-500/30 border-blue-500/30 border">
+              <Link href="/galactic-map" className="px-3 py-2 rounded-lg bg-blue-500/20 text-blue-300 border-blue-500/30 border">
                 Galactic Map
               </Link>
-              <Link href="/archives" className="px-3 py-2 rounded-lg dark:text-blue-300/80 text-blue-700/80 hover:text-blue-300 dark:hover:bg-blue-600/20 hover:bg-blue-500/20 transition-colors">
+              <Link href="/archives" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
                 Stellar Archives
               </Link>
             </nav>
             
-            {/* Theme toggle button */}
-            <div className="dark:bg-blue-500/30 bg-blue-500/30 p-1.5 rounded-lg border dark:border-blue-400/50 border-blue-500/50">
-              <button
-                onClick={() => {
-                  const html = document.documentElement;
-                  const isDark = html.classList.contains('dark');
-                  if (isDark) {
-                    // Switch to light mode
-                    html.classList.remove('dark');
-                    localStorage.setItem('syndetect-theme', 'light');
-                  } else {
-                    // Switch to dark mode
-                    html.classList.add('dark');
-                    localStorage.setItem('syndetect-theme', 'dark');
-                  }
-                }}
-                className="flex items-center justify-center w-8 h-8 rounded-md dark:hover:bg-blue-600/20 hover:bg-blue-600/20 dark:text-white text-blue-800"
-                aria-label="Toggle theme"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden dark:block">
-                  <circle cx="12" cy="12" r="4"></circle>
-                  <path d="M12 2v2"></path>
-                  <path d="M12 20v2"></path>
-                  <path d="m4.93 4.93 1.41 1.41"></path>
-                  <path d="m17.66 17.66 1.41 1.41"></path>
-                  <path d="M2 12h2"></path>
-                  <path d="M20 12h2"></path>
-                  <path d="m6.34 17.66-1.41 1.41"></path>
-                  <path d="m19.07 4.93-1.41 1.41"></path>
-                </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="block dark:hidden">
-                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-                </svg>
-              </button>
-            </div>
+            {/* System status indicator */}
+            <span className="text-xs px-2.5 py-1 rounded-full flex items-center bg-green-500/20 text-green-400 border border-green-500/30">
+              <span className="w-2 h-2 rounded-full mr-1.5 bg-green-400"></span>
+              System Online
+            </span>
           </div>
         </div>
       </header>
@@ -557,21 +530,26 @@ export default function GalacticMap() {
 
       <footer className="relative z-10 dark:bg-[#1a1f2c]/70 bg-card/70 backdrop-blur-md dark:border-[#2a3348] border-border border-t py-4 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
-          <div className="text-sm dark:text-blue-300/70 text-blue-700/70 mb-4 sm:mb-0 flex items-center">
-            <span className="mr-2">🚀</span>
-            <p className="font-semibold bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 from-blue-500 to-blue-600 bg-clip-text text-transparent">
+          <div className="text-sm text-blue-300/70 mb-4 sm:mb-0 flex items-center">
+            <p className="font-semibold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               POWERED BY SYNDETECT AI
             </p>
           </div>
           <div className="flex items-center space-x-6">
-            <Link href="/mission-control" className="dark:text-blue-300/70 text-blue-700/70 dark:hover:text-blue-300 hover:text-blue-700 transition-colors text-sm flex items-center">
-              <span className="mr-1">🛰️</span> Mission Control
+            <Link href="/home" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              Home
             </Link>
-            <Link href="/galactic-map" className="dark:text-blue-300/70 text-blue-700/70 dark:hover:text-blue-300 hover:text-blue-700 transition-colors text-sm flex items-center">
-              <span className="mr-1">🪐</span> Galactic Map
+            <Link href="/detection-hub" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              Detection Hub
             </Link>
-            <Link href="/archives" className="dark:text-blue-300/70 text-blue-700/70 dark:hover:text-blue-300 hover:text-blue-700 transition-colors text-sm flex items-center">
-              <span className="mr-1">🔭</span> Stellar Archives
+            <Link href="/mission-control" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              Mission Control
+            </Link>
+            <Link href="/galactic-map" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              Galactic Map
+            </Link>
+            <Link href="/archives" className="text-blue-300/70 hover:text-blue-300 transition-colors text-sm flex items-center">
+              Stellar Archives
             </Link>
           </div>
         </div>
