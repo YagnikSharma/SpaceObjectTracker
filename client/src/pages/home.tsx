@@ -16,8 +16,9 @@ import SyndetectLogo from "@/assets/syndetect-logo.jpg";
 
 // Navigation links
 const NAV_LINKS = [
-  { name: "Home", href: "/", icon: "" },
-  { name: "Detection Tool", href: "/mission-control", icon: "" },
+  { name: "Home", href: "/home", icon: "" },
+  { name: "Detection Hub", href: "/detection-hub", icon: "" },
+  { name: "Mission Control", href: "/mission-control", icon: "" },
   { name: "Galactic Map", href: "/galactic-map", icon: "" },
   { name: "Stellar Archives", href: "/archives", icon: "" }
 ];

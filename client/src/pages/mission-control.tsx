@@ -304,7 +304,7 @@ export default function MissionControl() {
                 Start capturing space station images to build your detection history.
               </p>
               <Button
-                onClick={() => setLocation('/')}
+                onClick={() => setLocation('/detection-hub')}
                 className="bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-white"
               >
                 Start New Detection

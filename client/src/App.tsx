@@ -17,6 +17,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/home" component={Home} />
+      <Route path="/detection-hub" component={Home} />
       <Route path="/mission-control" component={MissionControl} />
       <Route path="/galactic-map" component={GalacticMap} />
       <Route path="/archives" component={StellarArchives} />
