@@ -63,6 +63,7 @@ export function SatellitePlayer({ className }: SatellitePlayerProps) {
         <source src="/satellite-feed.webm" type="video/webm" />
         <source src="/satellite-feed.mp4" type="video/mp4" />
         <source src="/satellite-feed.ogv" type="video/ogg" />
+        <source src="/satellite-feed.mkv" type="video/x-matroska" />
         Your browser doesn't support HTML5 video playback.
       </video>
       
