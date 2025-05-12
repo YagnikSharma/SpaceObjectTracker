@@ -129,11 +129,15 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="w-10 h-10 relative rounded-lg overflow-hidden shadow-lg">
+              <div className="w-10 h-10 relative rounded-lg overflow-hidden shadow-[0_2px_10px_rgba(59,130,246,0.25)]">
                 <img 
                   src={SyndetectLogo} 
                   alt="Syndetect Logo" 
-                  className="w-full h-full object-cover" 
+                  className="w-full h-full object-contain antialiased transform scale-95" 
+                  style={{
+                    imageRendering: 'high-quality',
+                    backfaceVisibility: 'hidden',
+                  }}
                 />
               </div>
               <div>

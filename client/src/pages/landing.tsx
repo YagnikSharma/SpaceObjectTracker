@@ -54,11 +54,15 @@ export default function Landing() {
                 transition={{ duration: 0.8, delay: 0.3 }}
                 className="mb-4"
               >
-                <div className="inline-block mb-6 w-40 h-40 relative">
+                <div className="inline-block mb-6 w-40 h-40 relative overflow-hidden rounded-2xl shadow-[0_0_15px_rgba(59,130,246,0.3)]">
                   <img 
                     src={SyndetectLogo} 
                     alt="Syndetect Logo" 
-                    className="w-full h-full object-contain" 
+                    className="w-full h-full object-contain antialiased transform scale-[0.92] transition-transform duration-200 hover:scale-95" 
+                    style={{
+                      imageRendering: 'high-quality',
+                      backfaceVisibility: 'hidden',
+                    }}
                   />
                 </div>
               </motion.div>
