@@ -208,9 +208,9 @@ export default function StellarArchives() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Link href="/" className="flex items-center space-x-3">
+              <Link href="/home" className="flex items-center space-x-3">
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shadow-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
@@ -224,7 +224,10 @@ export default function StellarArchives() {
             </motion.div>
 
             <nav className="hidden md:flex space-x-6">
-              <Link href="/" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
+              <Link href="/home" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
+                Home
+              </Link>
+              <Link href="/detection-hub" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
                 Detection Hub
               </Link>
               <Link href="/mission-control" className="px-3 py-2 rounded-lg text-blue-300/80 hover:text-blue-300 hover:bg-blue-600/20 transition-colors">
@@ -237,6 +240,12 @@ export default function StellarArchives() {
                 Stellar Archives
               </Link>
             </nav>
+            
+            {/* System status indicator */}
+            <span className="text-xs px-2.5 py-1 rounded-full flex items-center bg-green-500/20 text-green-400 border border-green-500/30">
+              <span className="w-2 h-2 rounded-full mr-1.5 bg-green-400"></span>
+              System Online
+            </span>
           </div>
         </div>
       </header>
