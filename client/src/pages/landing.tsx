@@ -208,7 +208,7 @@ function FeatureCard({ icon, color, title, description }: FeatureCardProps) {
       
       <div className="relative">
         <div className="mb-4 flex justify-center">
-          <div className={`bg-gradient-to-r ${color} p-3 rounded-lg`}>
+          <div className={`bg-gradient-to-r ${color} p-3 rounded-2xl border-2 border-opacity-20 border-blue-400 shadow-lg shadow-blue-500/20`}>
             {icon}
           </div>
         </div>
