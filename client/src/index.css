@@ -2,12 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Elianto';
+  src: url('https://fonts.cdnfonts.com/css/elianto') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Default root theme values - Dark space theme with blue accents */
 :root {
-  /* Dark mode - Deep space theme with blue highlights */
-  --background: 222 47% 5%;
+  /* Dark mode - Deep space theme with navy blue highlights */
+  --background: 0 0% 0%;  /* Pure black background */
   --foreground: 210 40% 98%;
-  --muted: 222 47% 15%;
+  --muted: 220 47% 15%;
   --muted-foreground: 210 40% 80%;  /* Blue muted text */
   --popover: 222 47% 10%;
   --popover-foreground: 210 40% 98%;
@@ -16,8 +24,8 @@
   --border: 214 70% 30%;  /* Blue border color */
   --input: 222 47% 20%;
   
-  /* Blue primary colors for dark theme */
-  --primary: 214 100% 60%;  /* Bright blue */
+  /* Navy blue primary colors for dark theme */
+  --primary: 215 84% 15%;  /* #0a2a43 - Navy Blue */
   --primary-foreground: 0 0% 100%;  /* White text on blue */
   
   /* Secondary colors with blue accent */
@@ -40,7 +48,7 @@
   --blue-dark: 214 70% 50%;
 }
 
-/* Light mode theme - White with blue highlights */
+/* Light mode theme - White with navy blue highlights */
 :root:not(.dark) {
   /* Light mode - Blue theme */
   --background: 0 0% 100%;
@@ -54,8 +62,8 @@
   --border: 214 100% 80%;  /* More visible blue border */
   --input: 214 30% 95%;
   
-  /* Blue primary highlight color - Rich blue */
-  --primary: 214 100% 50%;
+  /* Navy blue primary highlight color */
+  --primary: 215 84% 15%; /* #0a2a43 - Navy Blue */
   --primary-foreground: 0 0% 100%;
   
   /* Secondary colors with blue tint */
@@ -84,7 +92,12 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Quantico', sans-serif;
+    @apply antialiased bg-background text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6, nav, button {
+    font-family: 'Elianto', 'Quantico', sans-serif;
   }
 }
 
