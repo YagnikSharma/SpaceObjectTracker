@@ -12,13 +12,14 @@ import { apiRequest } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import { SatellitePlayer } from "@/components/ui/satellite-player";
+import SyndetectLogo from "@/assets/syndetect-logo.jpg";
 
 // Navigation links
 const NAV_LINKS = [
-  { name: "Home", href: "/", icon: "🚀" },
-  { name: "Mission Control", href: "/mission-control", icon: "🛰️" },
-  { name: "Galactic Map", href: "/galactic-map", icon: "🪐" },
-  { name: "Stellar Archives", href: "/archives", icon: "🔭" }
+  { name: "Home", href: "/", icon: "" },
+  { name: "Detection Tool", href: "/mission-control", icon: "" },
+  { name: "Galactic Map", href: "/galactic-map", icon: "" },
+  { name: "Stellar Archives", href: "/archives", icon: "" }
 ];
 
 export default function Home() {
@@ -128,10 +129,12 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+              <div className="w-10 h-10 relative rounded-lg overflow-hidden shadow-lg">
+                <img 
+                  src={SyndetectLogo} 
+                  alt="Syndetect Logo" 
+                  className="w-full h-full object-cover" 
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
@@ -153,7 +156,7 @@ export default function Home() {
                       : 'hover:bg-[#2a3348]/70 hover:text-blue-300'
                   }`}
                 >
-                  <span>{link.icon}</span>
+                  {link.icon && <span>{link.icon}</span>}
                   <span>{link.name}</span>
                 </Link>
               ))}
@@ -242,7 +245,7 @@ export default function Home() {
                       }`}
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <span className="text-xl">{link.icon}</span>
+                      {link.icon && <span className="text-xl">{link.icon}</span>}
                       <span>{link.name}</span>
                     </Link>
                   ))}

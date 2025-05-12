@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import SyndetectLogo from "@/assets/syndetect-logo.jpg";
 
 export default function Landing() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -53,21 +54,12 @@ export default function Landing() {
                 transition={{ duration: 0.8, delay: 0.3 }}
                 className="mb-4"
               >
-                <div className="inline-block bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-2xl mb-6">
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-16 w-16 text-white" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M13 10V3L4 14h7v7l9-11h-7z" 
-                    />
-                  </svg>
+                <div className="inline-block mb-6 w-40 h-40 relative">
+                  <img 
+                    src={SyndetectLogo} 
+                    alt="Syndetect Logo" 
+                    className="w-full h-full object-contain" 
+                  />
                 </div>
               </motion.div>
               
