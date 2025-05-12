@@ -69,18 +69,8 @@ export function ResultsDisplay({
     return `Detection complete. Found ${detectedObjects.length} objects in the space station image: ${parts.join(", ")}.`;
   };
   
-  // Auto play text-to-speech when results are loaded
-  useEffect(() => {
-    // Automatically speak results when objects are detected and not loading
-    if (!isLoading && detectedObjects.length > 0 && imageUrl) {
-      // Small delay to ensure UI is updated first
-      const timer = setTimeout(() => {
-        speakResults();
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading, detectedObjects.length, imageUrl]);
+  // Text-to-speech is now manually triggered by the 🔊 Speak Result button
+  // Auto-play has been disabled per user requirements
 
   // Draw the detected objects on the canvas
   useEffect(() => {
@@ -185,20 +175,37 @@ export function ResultsDisplay({
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
       
-      // Use a more professional voice if available
-      const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(voice => 
-        voice.name.includes('Daniel') || voice.name.includes('Google') || voice.name.includes('Male')
-      );
+      // Ensure voices are loaded
+      const loadVoices = () => {
+        // Use a more professional voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(voice => 
+          voice.name.includes('Daniel') || 
+          voice.name.includes('Google') || 
+          voice.name.includes('Male')
+        );
+        
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+        
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        
+        // Speak the detection results
+        window.speechSynthesis.speak(utterance);
+      };
       
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
+      // Check if voices are already loaded
+      if (window.speechSynthesis.getVoices().length > 0) {
+        loadVoices();
+      } else {
+        // Wait for voices to be loaded
+        window.speechSynthesis.onvoiceschanged = loadVoices;
       }
-      
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      
-      window.speechSynthesis.speak(utterance);
+    } else {
+      console.warn("Speech synthesis not supported in this browser");
+      alert("Speech synthesis is not supported in your browser. Please try a different browser.");
     }
   };
   
@@ -275,10 +282,22 @@ export function ResultsDisplay({
   const exportToJSON = () => {
     if (!detectedObjects.length) return;
     
+    // Create timestamp for filename
+    const now = new Date();
+    const timestamp = now.toISOString()
+      .replace(/[:.]/g, '')
+      .replace('T', '_')
+      .slice(0, 15);
+    
     const jsonData = {
-      timestamp: new Date().toISOString(),
+      timestamp: now.toISOString(),
       imageUrl: imageUrl,
-      detectedObjects: detectedObjects,
+      detectedObjects: detectedObjects.map(obj => ({
+        label: obj.label,
+        confidence: obj.confidence,
+        timestamp: now.toISOString(),
+        image: imageUrl ? imageUrl.split('/').pop() : 'unknown'
+      })),
       summary: getDetectionSummary()
     };
     
@@ -288,7 +307,7 @@ export function ResultsDisplay({
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'space-station-detection.json';
+    link.download = `detection_result_${timestamp}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -440,14 +459,11 @@ export function ResultsDisplay({
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Stop Reading
+                    Stop Speaking
                   </>
                 ) : (
                   <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 010-7.072m12.728 2.828a9 9 0 000-12.728M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                    </svg>
-                    Read Results
+                    🔊 Speak Result
                   </>
                 )}
               </Button>
@@ -468,10 +484,7 @@ export function ResultsDisplay({
                 className="text-xs h-8 flex items-center gap-1"
                 onClick={exportToJSON}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-                Export JSON
+                ⬇ Export JSON
               </Button>
             </div>
           </div>
