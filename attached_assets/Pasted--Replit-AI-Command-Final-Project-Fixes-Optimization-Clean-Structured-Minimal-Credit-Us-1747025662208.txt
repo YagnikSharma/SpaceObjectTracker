@@ -1,0 +1,85 @@
+### 🛠️ Replit AI Command — Final Project Fixes & Optimization (Clean, Structured, Minimal-Credit Use)
+
+---
+
+#### ⚠️ Phase 1: Remove Unwanted/Unused Features
+
+1. **Remove Light/Dark Mode Toggle Completely**
+
+   * Delete all code, scripts, and styles related to theme toggling.
+   * Reason: Partial implementation, unnecessary credit usage, and no full-site effect.
+
+2. **Clean Up Project Folder**
+
+   * Remove unused files (e.g. placeholder images, test scripts, redundant styles).
+   * Only retain files directly used by pages or components.
+
+---
+
+#### 🧭 Phase 2: Navigation Fixes
+
+3. **Fix Broken Navigation to Detection Hub**
+
+   * Ensure clicking on **“Detection Hub”** from *any tab* (Galactic Map, Stellar Archives, Mission Control) routes properly — not to the homepage.
+
+4. **Split “Detection Tool” / “Detection Hub” Toggles**
+
+   * Add two **distinct navigation buttons**:
+
+     * **Detection Hub** → leads to actual detection hub page.
+     * **Mission Control** → leads to mission control page.
+   * Ensure these are styled similarly but lead to different, correct destinations.
+
+5. **Fix "Start New Detection" Button**
+
+   * On **Mission Control**, clicking **Start New Detection** should go to **Detection Hub**, not homepage.
+
+---
+
+#### 🎨 Phase 3: Styling Consistency
+
+6. **Apply Theme Site-Wide**
+
+   * Use consistent **dark black (#000000)** and **navy blue (#0a2a43)** throughout all pages:
+
+     * Nav bar, text, headings, buttons, section backgrounds.
+
+7. **Fix Nav Bar Proportions**
+
+   * Standardize **nav bar height, padding, and alignment** across all pages.
+   * Avoid layout shifting due to inconsistent margins or CSS overrides.
+
+8. **Fix Missing Images in Galactic Map & Stellar Archives**
+
+   * Locate and fix image paths or `<img>` tag issues.
+   * If image sources are invalid or missing, remove those tiles to maintain clean UI.
+
+---
+
+#### 📱 Phase 4: Performance + Responsiveness Polish
+
+9. **Ensure Mobile + Desktop Responsiveness**
+
+   * Use media queries to fix any layout breakage on tablets/mobiles.
+   * Ensure nav bar, buttons, text, and image blocks scale correctly and don’t overflow.
+
+10. **Optimize Image Sizes**
+
+    * Compress large images without quality loss.
+    * Use `loading="lazy"` on non-critical images to improve load time.
+
+11. **Minimize JS & CSS Bloat**
+
+    * Remove unused classes, redundant styles, and scripts not being referenced.
+    * Keep the final build lightweight.
+
+---
+
+### ✅ Final Notes for Replit Execution
+
+* Execute in **the listed order**, one phase at a time.
+* Prioritize **working routes, clean visuals, mobile compatibility, and functional buttons**.
+* Avoid creating unnecessary files or overwriting untouched components.
+* Ensure the final build is simple, fast, consistent, and visually polished.
+
+---

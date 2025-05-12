@@ -25,11 +25,15 @@ function Router() {
   );
 }
 
-// Initializing with dark mode by default
+// Always using dark mode
 function App() {
   useEffect(() => {
-    // Set dark mode by default on initial load
+    // Set dark mode and remove any related classes
+    document.documentElement.classList.remove("light");
     document.documentElement.classList.add("dark");
+    // Remove any theme values from local storage
+    localStorage.removeItem("syndetect-ui-theme");
+    localStorage.removeItem("syndetect-theme");
   }, []);
 
   return (
